@@ -5,13 +5,17 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Emergency Cart Check</title>
     
+    <!-- React & ReactDOM -->
     <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
     <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
     
+    <!-- Babel for JSX -->
     <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
     
+    <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
     
+    <!-- Fonts -->
     <link href="https://fonts.googleapis.com/css2?family=Prompt:wght@300;400;500;700&display=swap" rel="stylesheet">
 
     <style>
@@ -31,15 +35,44 @@
 
     <script type="text/babel">
         // ==============================================
-        //  CONFIG: นำ Web App URL ของ GAS มาวางตรงนี้
+        //  CONFIG: URL ของ Web App จาก Google Apps Script (แก้ไขแล้ว)
         // ==============================================
         const GAS_API_URL = "https://script.google.com/macros/s/AKfycbwNpFNcLm0iU6vTF0DM7UwONFl3NGXmySuR1jXh-mWyZjbtqf_BTkTpjOYs3NXBzRU/exec"; 
-        // ตัวอย่าง: "https://script.google.com/macros/s/AKfycby.../exec"
         // ==============================================
 
         const { useState, useEffect, useMemo } = React;
         
+        // --- Error Boundary Component (กันหน้าขาว) ---
+        class ErrorBoundary extends React.Component {
+            constructor(props) {
+                super(props);
+                this.state = { hasError: false, error: null };
+            }
+            static getDerivedStateFromError(error) {
+                return { hasError: true, error };
+            }
+            componentDidCatch(error, errorInfo) {
+                console.error("React Error:", error, errorInfo);
+            }
+            render() {
+                if (this.state.hasError) {
+                    return (
+                        <div className="p-8 text-center">
+                            <h1 className="text-2xl font-bold text-red-600 mb-4">เกิดข้อผิดพลาด (System Error)</h1>
+                            <p className="text-gray-600 mb-4">ระบบไม่สามารถแสดงผลได้ตามปกติ</p>
+                            <div className="bg-gray-100 p-4 rounded text-left overflow-auto text-xs font-mono text-red-800 border border-red-200">
+                                {this.state.error && this.state.error.toString()}
+                            </div>
+                            <button onClick={() => window.location.reload()} className="mt-6 bg-teal-600 text-white px-6 py-2 rounded-lg">รีโหลดหน้าเว็บ</button>
+                        </div>
+                    );
+                }
+                return this.props.children; 
+            }
+        }
+
         // --- ICONS (SVG Components) ---
+        // แก้ไข: เพิ่ม Fragment (<>...</>) คลุมไอคอนที่มีหลาย Elements
         const Icon = ({ path, className = "w-6 h-6", color = "currentColor" }) => (
             <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}>
                 {path}
@@ -50,21 +83,23 @@
             Plus: <path d="M12 5v14M5 12h14" />,
             History: <path d="M3 3v5h5M3.05 13A9 9 0 1 0 6 5.3L3 8" />,
             CheckCircle: <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14M22 4L12 14.01l-3-3" />,
-            XCircle: <circle cx="12" cy="12" r="10" /><path d="M15 9l-6 6M9 9l6 6" />,
-            Calendar: <rect x="3" y="4" width="18" height="18" rx="2" ry="2" /><line x1="16" y1="2" x2="16" y2="6" /><line x1="8" y1="2" x2="8" y2="6" /><line x1="3" y1="10" x2="21" y2="10" />,
-            Save: <path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z" /><polyline points="17 21 17 13 7 13 7 21" /><polyline points="7 3 7 8 15 8" />,
+            XCircle: <><circle cx="12" cy="12" r="10" /><path d="M15 9l-6 6M9 9l6 6" /></>,
+            Calendar: <><rect x="3" y="4" width="18" height="18" rx="2" ry="2" /><line x1="16" y1="2" x2="16" y2="6" /><line x1="8" y1="2" x2="8" y2="6" /><line x1="3" y1="10" x2="21" y2="10" /></>,
+            Save: <><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z" /><polyline points="17 21 17 13 7 13 7 21" /><polyline points="7 3 7 8 15 8" /></>,
             AlertTriangle: <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0zM12 9v4M12 17h.01" />,
             ChevronLeft: <polyline points="15 18 9 12 15 6" />,
-            RotateCcw: <path d="M1 4v6h6" /><path d="M3.51 15a9 9 0 1 0 2.13-9.36L1 10" />,
-            FileText: <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" /><polyline points="14 2 14 8 20 8" /><line x1="16" y1="13" x2="8" y2="13" /><line x1="16" y1="17" x2="8" y2="17" /><polyline points="10 9 9 9 8 9" />
+            RotateCcw: <><path d="M1 4v6h6" /><path d="M3.51 15a9 9 0 1 0 2.13-9.36L1 10" /></>,
+            FileText: <><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" /><polyline points="14 2 14 8 20 8" /><line x1="16" y1="13" x2="8" y2="13" /><line x1="16" y1="17" x2="8" y2="17" /><polyline points="10 9 9 9 8 9" /></>
         };
 
         const SimpleIcon = ({ name, size=24, className="" }) => (
-            <Icon path={Icons[name]} className={`${className}`} />
+            <Icon path={Icons[name] || Icons.FileText} className={`${className}`} />
         );
 
         // --- DATA DEFS ---
         const ITEM_TYPES = { QTY_STATUS: 'qty_status', QTY_EXP_STATUS: 'qty_exp_status', CHECKBOX: 'checkbox' };
+        
+        // ข้อมูลตั้งต้น
         const INITIAL_ITEMS = [
             { id: 'cardiac_board', name: 'Cardiac board', required: 1, type: ITEM_TYPES.QTY_STATUS, category: 'Equipment' },
             { id: 'cpr_box', name: 'กล่องยา CPR', required: 1, type: ITEM_TYPES.QTY_EXP_STATUS, category: 'Drugs' },
@@ -147,7 +182,13 @@
                     // Fetch Records
                     const resRec = await fetch(GAS_API_URL + '?action=read');
                     const dataRec = await resRec.json();
-                    if(dataRec.status === 'success') setRecords(dataRec.data);
+                    if(dataRec.status === 'success') {
+                         const cleanRecords = (dataRec.data || []).map(rec => {
+                            if(!rec.items) return rec;
+                            return rec;
+                         });
+                         setRecords(cleanRecords);
+                    }
 
                     // Fetch Last Stock Date
                     const resStock = await fetch(GAS_API_URL + '?action=getLastStockCheck');
@@ -157,15 +198,17 @@
                     }
                 } catch (error) {
                     console.error("Connection Error", error);
-                    alert("ไม่สามารถเชื่อมต่อฐานข้อมูลได้ กรุณาตรวจสอบอินเทอร์เน็ต");
+                    // ไม่ Alert รัวๆ แต่ Log ไว้
                 }
                 setIsLoading(false);
             };
 
             const formatDate = (dateStr) => {
                 if(!dateStr) return "-";
-                const d = new Date(dateStr);
-                return d.toLocaleDateString('th-TH', { year: 'numeric', month: 'short', day: 'numeric' });
+                try {
+                    const d = new Date(dateStr);
+                    return d.toLocaleDateString('th-TH', { year: 'numeric', month: 'short', day: 'numeric' });
+                } catch(e) { return "-"; }
             };
 
             const getDaysDiff = (targetDate) => {
@@ -182,8 +225,16 @@
                 const today = new Date().toISOString().split('T')[0];
                 let initialData = { date: today, shift: 'เช้า', checker: '', items: {}, isReCheckStock: false };
                 
-                if (prevData) {
-                    initialData = { ...initialData, items: JSON.parse(JSON.stringify(prevData.items)) };
+                if (prevData && prevData.items) {
+                    const safeItems = {};
+                    INITIAL_ITEMS.forEach(item => {
+                        if (prevData.items[item.id]) {
+                            safeItems[item.id] = JSON.parse(JSON.stringify(prevData.items[item.id]));
+                        } else {
+                             safeItems[item.id] = { qty: item.required || 0, exp: '', status: 'ready', note: '', checked: item.type === ITEM_TYPES.CHECKBOX };
+                        }
+                    });
+                    initialData = { ...initialData, items: safeItems };
                 } else {
                     INITIAL_ITEMS.forEach(item => {
                         initialData.items[item.id] = { qty: item.required || 0, exp: '', status: 'ready', note: '', checked: item.type === ITEM_TYPES.CHECKBOX };
@@ -196,7 +247,6 @@
                 setShowTypeModal(false);
                 if (type === 'new') {
                     initForm();
-                    // Check Stock Logic
                     if(lastStockCheck) {
                         const daysSince = Math.floor((new Date() - lastStockCheck) / (1000*60*60*24));
                         if(daysSince >= 14) setShowStockAlert({ overdue: daysSince - 14 });
@@ -216,10 +266,14 @@
 
             const checkExpirations = (items) => {
                 const alerts = [];
+                if (!items) return alerts;
+
                 Object.entries(items).forEach(([key, val]) => {
-                    if (val.exp) {
+                    if (val && val.exp) {
                         const days = getDaysDiff(val.exp);
                         const itemDef = INITIAL_ITEMS.find(i => i.id === key);
+                        if (!itemDef) return; 
+
                         if (days < 0) alerts.push({ name: itemDef.name, status: 'expired', days });
                         else if (days <= 7) alerts.push({ name: itemDef.name, status: 'warning', days });
                     }
@@ -229,10 +283,14 @@
 
             useEffect(() => {
                 if (view === 'form' && Object.keys(formData.items || {}).length > 0) {
-                    const expAlerts = checkExpirations(formData.items);
-                    if (expAlerts.length > 0) {
-                        setExpiryList(expAlerts);
-                        setShowExpiryAlert(true);
+                    try {
+                        const expAlerts = checkExpirations(formData.items);
+                        if (expAlerts.length > 0) {
+                            setExpiryList(expAlerts);
+                            setShowExpiryAlert(true);
+                        }
+                    } catch(e) {
+                        console.error("Error checking expiration:", e);
                     }
                 }
             }, [view]);
@@ -260,6 +318,8 @@
                 const broken = [];
                 Object.entries(formData.items).forEach(([key, val]) => {
                     const def = INITIAL_ITEMS.find(i => i.id === key);
+                    if (!def) return; 
+                    
                     if (def.type === ITEM_TYPES.CHECKBOX && !val.checked) missing.push(def.name);
                     if ((def.type === ITEM_TYPES.QTY_STATUS || def.type === ITEM_TYPES.QTY_EXP_STATUS) && val.status === 'not_ready') broken.push(`${def.name} (${val.note})`);
                 });
@@ -267,19 +327,17 @@
 
                 // Send to GAS
                 try {
-                    // Send as text/plain to avoid preflight complications in some browsers with GAS
                     await fetch(GAS_API_URL, {
                         method: 'POST',
-                        mode: 'no-cors', // Important for simple posting to GAS
+                        mode: 'no-cors',
                         headers: { 'Content-Type': 'text/plain' },
                         body: JSON.stringify(payload)
                     });
                     
-                    // Since no-cors returns opaque response, we assume success or wait a bit then refresh
                     setTimeout(() => {
                         setIsLoading(false);
                         setView('summary');
-                        fetchData(); // Reload background data
+                        fetchData(); 
                     }, 1500);
 
                 } catch (error) {
@@ -380,26 +438,28 @@
                                                                 </div>
                                                                 {item.type === ITEM_TYPES.CHECKBOX ? (
                                                                     <input type="checkbox" className="w-5 h-5 accent-teal-600" checked={formData.items[item.id]?.checked || false} onChange={(e) => {
-                                                                        const n = {...formData.items}; n[item.id].checked = e.target.checked; setFormData({...formData, items: n});
+                                                                        const n = {...formData.items}; 
+                                                                        if(!n[item.id]) n[item.id] = {}; 
+                                                                        n[item.id].checked = e.target.checked; setFormData({...formData, items: n});
                                                                     }}/>
                                                                 ) : (
                                                                     <div className="flex gap-1">
-                                                                        <button onClick={() => {const n = {...formData.items}; n[item.id].status = 'ready'; setFormData({...formData, items: n});}} className={`px-3 py-1 rounded-lg text-xs border ${formData.items[item.id]?.status === 'ready' ? 'bg-green-600 text-white border-green-600' : 'bg-white text-gray-500'}`}>พร้อม</button>
-                                                                        <button onClick={() => {const n = {...formData.items}; n[item.id].status = 'not_ready'; setFormData({...formData, items: n});}} className={`px-3 py-1 rounded-lg text-xs border ${formData.items[item.id]?.status === 'not_ready' ? 'bg-red-500 text-white border-red-500' : 'bg-white text-gray-500'}`}>ไม่พร้อม</button>
+                                                                        <button onClick={() => {const n = {...formData.items}; if(!n[item.id]) n[item.id]={}; n[item.id].status = 'ready'; setFormData({...formData, items: n});}} className={`px-3 py-1 rounded-lg text-xs border ${formData.items[item.id]?.status === 'ready' ? 'bg-green-600 text-white border-green-600' : 'bg-white text-gray-500'}`}>พร้อม</button>
+                                                                        <button onClick={() => {const n = {...formData.items}; if(!n[item.id]) n[item.id]={}; n[item.id].status = 'not_ready'; setFormData({...formData, items: n});}} className={`px-3 py-1 rounded-lg text-xs border ${formData.items[item.id]?.status === 'not_ready' ? 'bg-red-500 text-white border-red-500' : 'bg-white text-gray-500'}`}>ไม่พร้อม</button>
                                                                     </div>
                                                                 )}
                                                             </div>
                                                             {/* Dynamic Inputs */}
                                                             <div className="grid grid-cols-2 gap-2 mt-2">
                                                                 {(item.type.includes('qty')) && (
-                                                                    <input type="number" placeholder="จำนวน" className="bg-white border rounded px-2 py-1 text-sm w-full" value={formData.items[item.id]?.qty || ''} onChange={e => {const n = {...formData.items}; n[item.id].qty = e.target.value; setFormData({...formData, items: n});}}/>
+                                                                    <input type="number" placeholder="จำนวน" className="bg-white border rounded px-2 py-1 text-sm w-full" value={formData.items[item.id]?.qty || ''} onChange={e => {const n = {...formData.items}; if(!n[item.id]) n[item.id]={}; n[item.id].qty = e.target.value; setFormData({...formData, items: n});}}/>
                                                                 )}
                                                                 {item.type.includes('exp') && (
-                                                                    <input type="date" className={`bg-white border rounded px-2 py-1 text-sm w-full ${getDaysDiff(formData.items[item.id]?.exp) < 0 ? 'border-red-500 text-red-500' : ''}`} value={formData.items[item.id]?.exp || ''} onChange={e => {const n = {...formData.items}; n[item.id].exp = e.target.value; setFormData({...formData, items: n});}}/>
+                                                                    <input type="date" className={`bg-white border rounded px-2 py-1 text-sm w-full ${getDaysDiff(formData.items[item.id]?.exp) < 0 ? 'border-red-500 text-red-500' : ''}`} value={formData.items[item.id]?.exp || ''} onChange={e => {const n = {...formData.items}; if(!n[item.id]) n[item.id]={}; n[item.id].exp = e.target.value; setFormData({...formData, items: n});}}/>
                                                                 )}
                                                             </div>
                                                             {formData.items[item.id]?.status === 'not_ready' && (
-                                                                <input type="text" placeholder="ระบุสาเหตุ" className="mt-2 w-full border-b border-red-200 bg-red-50 px-2 py-1 text-sm text-red-700" value={formData.items[item.id]?.note || ''} onChange={e => {const n = {...formData.items}; n[item.id].note = e.target.value; setFormData({...formData, items: n});}}/>
+                                                                <input type="text" placeholder="ระบุสาเหตุ" className="mt-2 w-full border-b border-red-200 bg-red-50 px-2 py-1 text-sm text-red-700" value={formData.items[item.id]?.note || ''} onChange={e => {const n = {...formData.items}; if(!n[item.id]) n[item.id]={}; n[item.id].note = e.target.value; setFormData({...formData, items: n});}}/>
                                                             )}
                                                         </div>
                                                     ))}
@@ -410,13 +470,13 @@
                                     
                                     <div className="p-4 bg-teal-50 border-t border-teal-100">
                                         <label className="flex items-center gap-3 cursor-pointer">
-                                            <input type="checkbox" className="w-5 h-5 accent-teal-600" checked={formData.isReCheckStock} onChange={e => setFormData({...formData, isReCheckStock: e.target.checked})}/>
+                                            <input type="checkbox" className="w-5 h-5 accent-teal-600" checked={formData.isReCheckStock || false} onChange={e => setFormData({...formData, isReCheckStock: e.target.checked})}/>
                                             <span className="text-teal-800 font-bold">บันทึกว่าเป็น ReCheck Stock</span>
                                         </label>
                                     </div>
                                     <div className="p-4 bg-gray-50 border-t border-gray-200">
                                         <label className="block text-sm font-bold text-gray-700 mb-1">ผู้ตรวจสอบ</label>
-                                        <input type="text" placeholder="ลงชื่อ" className="w-full bg-white border border-gray-300 rounded-lg p-3" value={formData.checker} onChange={e => setFormData({...formData, checker: e.target.value})}/>
+                                        <input type="text" placeholder="ลงชื่อ" className="w-full bg-white border border-gray-300 rounded-lg p-3" value={formData.checker || ''} onChange={e => setFormData({...formData, checker: e.target.value})}/>
                                     </div>
                                 </div>
                                 <button onClick={handleSave} className="w-full bg-teal-600 text-white font-bold py-4 rounded-xl shadow-lg hover:bg-teal-700 transition-colors flex items-center justify-center gap-2 mb-8"><SimpleIcon name="Save"/> บันทึกข้อมูล</button>
@@ -481,7 +541,11 @@
         }
 
         const root = ReactDOM.createRoot(document.getElementById('root'));
-        root.render(<App />);
+        root.render(
+            <ErrorBoundary>
+                <App />
+            </ErrorBoundary>
+        );
     </script>
 </body>
 </html>
