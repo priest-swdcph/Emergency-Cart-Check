@@ -47,7 +47,7 @@
 
         const { useState, useEffect, useMemo } = React;
         
-        // --- HELPER FUNCTIONS (Global) ---
+        // --- HELPER FUNCTIONS ---
         const formatDate = (dateStr) => {
             if(!dateStr) return "-";
             try {
@@ -107,26 +107,20 @@
         };
         
         const INITIAL_ITEMS = [
-            // --- ชั้นบน ---
             { id: 'cardiac_board', name: 'Cardiac board', required: 1, type: ITEM_TYPES.QTY_STATUS, category: 'ชั้นบน' },
             { id: 'cpr_box', name: 'กล่องยา CPR', required: 1, type: ITEM_TYPES.QTY_EXP_STATUS, category: 'ชั้นบน' },
-            { id: 'acs_box', name: 'กล่องยา ACS', required: 1, type: ITEM_TYPES.QTY_EXP_STATUS, category: 'ชั้นบน' },
-            { id: 'laryngoscope', name: 'Laryngoscope', required: 1, type: ITEM_TYPES.QTY_STATUS, category: 'ชั้นบน' },
-            { id: 'flashlight', name: 'ไฟฉาย', required: 1, type: ITEM_TYPES.QTY_STATUS, category: 'ชั้นบน' },
-
             // --- ลิ้นชักชั้นที่ 1 ---
             { id: 'mask', name: 'Mask', required: 3, type: ITEM_TYPES.QTY_EXP_STATUS, category: 'ลิ้นชักชั้นที่ 1' },
+            { id: 'airway_7', name: 'Airway NO.7', type: ITEM_TYPES.QTY_EXP_STATUS, category: 'ลิ้นชักชั้นที่ 1' },
             { id: 'airway_8', name: 'Airway NO.8', type: ITEM_TYPES.QTY_EXP_STATUS, category: 'ลิ้นชักชั้นที่ 1' },
             { id: 'airway_9', name: 'Airway NO.9', type: ITEM_TYPES.QTY_EXP_STATUS, category: 'ลิ้นชักชั้นที่ 1' },
-            { id: 'airway_10', name: 'Airway NO.10', required: 2, type: ITEM_TYPES.QTY_EXP_STATUS, category: 'ลิ้นชักชั้นที่ 1' },
+            { id: 'airway_10', name: 'Airway NO.10', type: ITEM_TYPES.QTY_EXP_STATUS, category: 'ลิ้นชักชั้นที่ 1' },
             
             { id: 'syringe_5', name: 'Syringe 5 CC', type: ITEM_TYPES.CHECK_HAVE, category: 'ลิ้นชักชั้นที่ 1' },
             { id: 'syringe_10', name: 'Syringe 10 CC', type: ITEM_TYPES.CHECK_HAVE, category: 'ลิ้นชักชั้นที่ 1' },
             { id: 'needle_18', name: 'Needle NO.18', type: ITEM_TYPES.CHECK_HAVE, category: 'ลิ้นชักชั้นที่ 1' },
             { id: 'needle_23', name: 'Needle NO.23', type: ITEM_TYPES.CHECK_HAVE, category: 'ลิ้นชักชั้นที่ 1' },
             { id: 'ky_jelly', name: 'KY Jelly', type: ITEM_TYPES.CHECK_HAVE, category: 'ลิ้นชักชั้นที่ 1' },
-
-            // --- ลิ้นชักชั้นที่ 2 ---
             { id: 'guide_wire', name: 'Guide wire', required: 5, type: ITEM_TYPES.QTY_EXP_STATUS, category: 'ลิ้นชักชั้นที่ 2' },
             { id: 'ett_5', name: 'ETT NO. 5', required: 2, type: ITEM_TYPES.QTY_EXP_STATUS, category: 'ลิ้นชักชั้นที่ 2' },
             { id: 'ett_5_5', name: 'ETT NO. 5.5', required: 2, type: ITEM_TYPES.QTY_EXP_STATUS, category: 'ลิ้นชักชั้นที่ 2' },
@@ -137,17 +131,11 @@
             { id: 'ett_8', name: 'ETT NO. 8', required: 2, type: ITEM_TYPES.QTY_EXP_STATUS, category: 'ลิ้นชักชั้นที่ 2' },
             { id: 'suction_14', name: 'Suction NO.14', required: 5, type: ITEM_TYPES.QTY_EXP_STATUS, category: 'ลิ้นชักชั้นที่ 2' },
             { id: 'suction_16', name: 'Suction NO.16', required: 5, type: ITEM_TYPES.QTY_EXP_STATUS, category: 'ลิ้นชักชั้นที่ 2' },
-
-            // --- ลิ้นชักชั้นที่ 3 ---
             { id: 'plaster', name: 'พลาสเตอร์ติด Tube', type: ITEM_TYPES.CHECK_HAVE, category: 'ลิ้นชักชั้นที่ 3' },
             { id: 'sterile_gloves', name: 'ถุงมือ Sterile', type: ITEM_TYPES.CHECK_HAVE, category: 'ลิ้นชักชั้นที่ 3' },
             { id: 'gauze', name: 'Gauze', type: ITEM_TYPES.CHECK_HAVE, category: 'ลิ้นชักชั้นที่ 3' },
             { id: 'tongue_depressor', name: 'ไม้กดลิ้น', type: ITEM_TYPES.CHECK_HAVE, category: 'ลิ้นชักชั้นที่ 3' },
-
-            // --- ตู้ล่างขวา ---
             { id: 'ambubag', name: 'Adult ambubag', required: 1, type: ITEM_TYPES.QTY_EXP_STATUS, category: 'ตู้ล่างขวา' },
-            
-            // --- General ---
             { id: 'general_readiness', name: 'ความพร้อมทั่วไปรถ Emergency', type: ITEM_TYPES.STATUS_ONLY, category: 'General' },
         ];
 
@@ -301,12 +289,21 @@
                     const resRec = await fetch(GAS_API_URL + '?action=read');
                     const dataRec = await resRec.json();
                     if(dataRec.status === 'success') {
-                         // Fix: ตรวจสอบและแปลง otherItems จาก string เป็น array ถ้าจำเป็น
                          const cleanRecords = (dataRec.data || []).map(r => {
-                             if (r.otherItems && typeof r.otherItems === 'string') {
-                                 try { r.otherItems = JSON.parse(r.otherItems); } catch(e) { r.otherItems = []; }
+                             // FIX: Unpack Other Items from 'items' if piggybacked
+                             if (r.items && typeof r.items === 'string') {
+                                 try { r.items = JSON.parse(r.items); } catch(e) { r.items = {}; }
                              }
-                             if (!Array.isArray(r.otherItems)) r.otherItems = [];
+                             if (r.items && r.items['__other_items__']) {
+                                 r.otherItems = r.items['__other_items__'].data || [];
+                                 delete r.items['__other_items__']; // Clean up
+                             } else {
+                                 // Fallback
+                                 if (r.otherItems && typeof r.otherItems === 'string') {
+                                     try { r.otherItems = JSON.parse(r.otherItems); } catch(e) { r.otherItems = []; }
+                                 }
+                                 if (!Array.isArray(r.otherItems)) r.otherItems = [];
+                             }
                              return r;
                          });
                          setRecords(cleanRecords);
@@ -346,10 +343,10 @@
                 const today = new Date().toISOString().split('T')[0];
                 let initialData = { date: today, shift: 'เช้า', checker: '', items: {}, otherItems: [], isReCheckStock: false, isFixMode: false, fixItemIds: [] };
                 
-                if (prevData && prevData.items && !isNew) {
+                if (prevData && (prevData.items || prevData.otherItems) && !isNew) {
                     const safeItems = {};
                     INITIAL_ITEMS.forEach(item => {
-                        if (prevData.items[item.id]) {
+                        if (prevData.items && prevData.items[item.id]) {
                             safeItems[item.id] = JSON.parse(JSON.stringify(prevData.items[item.id]));
                         } else {
                             safeItems[item.id] = { qty: '', exp: '', status: null, note: '', checked: null };
@@ -357,12 +354,10 @@
                     });
                     initialData = { ...initialData, items: safeItems };
                     
-                    // Copy other items
                     if (prevData.otherItems && Array.isArray(prevData.otherItems) && prevData.otherItems.length > 0) {
                         initialData.otherItems = prevData.otherItems.map(item => ({...item}));
                     }
                     
-                    // Handle Fix Mode Flags if passed in prevData
                     if (prevData.isFixMode) initialData.isFixMode = true;
                     if (prevData.fixItemIds) initialData.fixItemIds = prevData.fixItemIds;
 
@@ -395,14 +390,12 @@
                 }
             };
 
-            // NEW: ฟังก์ชันสำหรับปุ่ม "แก้ไขตอนนี้" (ดึงเฉพาะรายการที่มีปัญหา)
             const handleFixNow = () => {
                 if (records.length > 0) {
                     const latest = records[0];
                     const fixIds = [];
-                    const fixOtherItems = [];
+                    let fixOtherItems = [];
 
-                    // 1. Scan Main Items for issues
                     if (latest.items) {
                         Object.entries(latest.items).forEach(([key, val]) => {
                             const def = INITIAL_ITEMS.find(i => i.id === key);
@@ -410,44 +403,36 @@
 
                             let isProblem = false;
                             
-                            // Check Status/Checked
                             if (def.type === ITEM_TYPES.CHECK_HAVE) {
                                 if (!val.checked) isProblem = true;
                             } else {
                                 if (val.status === 'not_ready') isProblem = true;
                             }
 
-                            // Check Expiry
                             if (val.exp && getDaysDiff(val.exp) < 0) isProblem = true;
 
                             if (isProblem) fixIds.push(key);
                         });
                     }
 
-                    // 2. Scan Other Items for issues
                     if (latest.otherItems && Array.isArray(latest.otherItems)) {
-                        latest.otherItems.forEach(item => {
+                        fixOtherItems = latest.otherItems.filter(item => {
                             const isNotReady = item.status === 'not_ready';
                             const isExpired = item.exp && getDaysDiff(item.exp) < 0;
-                            if (isNotReady || isExpired) {
-                                fixOtherItems.push({...item});
-                            }
-                        });
+                            return isNotReady || isExpired;
+                        }).map(item => ({...item}));
                     }
 
-                    // Always allow general_readiness to be visible to change overall status
                     if (!fixIds.includes('general_readiness')) fixIds.push('general_readiness');
 
-                    // Prepare special object to init form
                     const problemData = {
-                        ...latest,
-                        otherItems: fixOtherItems, // Only problematic other items
+                        items: latest.items, 
+                        otherItems: fixOtherItems, 
                         isFixMode: true,
                         fixItemIds: fixIds
                     };
 
                     initForm(problemData, false); 
-                    
                     setView('form'); 
                     window.scrollTo(0, 0);
                 } else {
@@ -458,9 +443,7 @@
             const onSaveClick = () => {
                 if (!formData.checker) return alert("กรุณาระบุชื่อผู้ตรวจสอบ");
                 
-                // Validate only Visible Items in Fix Mode
                 for (let item of INITIAL_ITEMS) {
-                    // Skip hidden items in fix mode
                     if (formData.isFixMode && !formData.fixItemIds.includes(item.id)) continue;
 
                     const val = formData.items[item.id];
@@ -497,9 +480,19 @@
                 const isGeneralReady = generalItem && generalItem.status === 'ready';
                 const generalReadyStatus = isGeneralReady ? 'พร้อมใช้' : 'ไม่พร้อมใช้';
                 
+                // FIX: Piggyback other items into main items to save it
+                const itemsToSend = { ...formData.items };
+                if (formData.otherItems.length > 0) {
+                    itemsToSend['__other_items__'] = { 
+                        status: 'ready', // Dummy status
+                        data: formData.otherItems 
+                    };
+                }
+
                 const payload = {
                     id: Date.now(),
                     ...formData,
+                    items: itemsToSend, // Send modified items
                     generalReady: generalReadyStatus
                 };
 
@@ -571,7 +564,7 @@
                             <img src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRYfBIvo5I6imKO2PO2Q685aje7a48lvI5rrQ&s" alt="Medical Bag" className="w-12 h-12 rounded-xl object-cover shadow-lg shadow-red-100" />
                             <div className="flex-1 min-w-0">
                                 <h1 className="text-lg font-bold text-slate-800 leading-tight">Emergency Cart Smart Check</h1>
-                                <p className="text-slate-500 text-xs">ตรวจสอบความพร้อมใช้รถเข็นอุปกรณืช่วยชีวิตฉุกเฉิน หอผู้ป่วยสงฆ์อาพาธ</p>
+                                <p className="text-slate-500 text-xs">ตรวจสอบความพร้อมใช้รถเข็นอุปกรณ์ช่วยชีวิตฉุกเฉิน หอผู้ป่วยสงฆ์อาพาธ</p>
                             </div>
                         </div>
                     </header>
@@ -594,7 +587,6 @@
                                                             <SimpleIcon name="AlertTriangle" className="w-4 h-4"/> 
                                                             รายการที่ต้องแก้ไข ({latestIssues.length})
                                                         </div>
-                                                        {/* ปุ่มแก้ไขตอนนี้ */}
                                                         <button 
                                                             onClick={handleFixNow}
                                                             className="text-xs bg-red-600 text-white px-3 py-1.5 rounded-lg hover:bg-red-700 transition-colors shadow-sm flex items-center gap-1"
@@ -610,7 +602,7 @@
                                     
                                     <div className="inline-flex items-center gap-2 bg-slate-50 px-4 py-2 rounded-xl text-sm text-slate-600 mb-8 border border-slate-100">
                                         <SimpleIcon name="RotateCcw" className="w-4 h-4 text-slate-400"/>
-                                        <span>กำหนด ReCheck Stock ครั้งถัดไป:วันที่ <span className="font-semibold text-slate-800">{lastStockCheck ? formatDate(new Date(lastStockCheck.getTime() + 14 * 24 * 60 * 60 * 1000)) : '-'}</span></span>
+                                        <span>กำหนด ReCheck Stock ครั้งถัดไป: วันที่ <span className="font-semibold text-slate-800">{lastStockCheck ? formatDate(new Date(lastStockCheck.getTime() + 14 * 24 * 60 * 60 * 1000)) : '-'}</span></span>
                                     </div>
 
                                     <button onClick={() => setShowTypeModal(true)} className="w-full bg-slate-900 hover:bg-slate-800 text-white py-4 rounded-2xl shadow-xl shadow-slate-200 flex items-center justify-center gap-3 text-lg font-semibold transition-all active:scale-[0.98]">
@@ -646,12 +638,11 @@
                                     </div>
                                     {CATEGORY_ORDER.map(cat => {
                                         const items = INITIAL_ITEMS.filter(i => i.category === cat);
-                                        // กรองรายการก่อนแสดงผลตาม Fix Mode
                                         const visibleItems = formData.isFixMode 
                                             ? items.filter(i => formData.fixItemIds.includes(i.id))
                                             : items;
 
-                                        if(visibleItems.length === 0) return null; // ซ่อนหมวดหมู่ถ้าไม่มีรายการ
+                                        if(visibleItems.length === 0) return null;
 
                                         return (
                                             <div key={cat} className="border-t border-slate-100 first:border-t-0">
@@ -700,31 +691,36 @@
                                             </div>
                                         );
                                     })}
-                                    <div className="border-t border-slate-100">
-                                        <div className="bg-slate-50 px-6 py-3 text-xs font-bold text-slate-500 uppercase tracking-wider flex items-center justify-between">
-                                            <div className="flex items-center gap-2"><SimpleIcon name="Plus" className="w-4 h-4"/> รายการอื่นๆ (ถ้ามี)</div>
-                                            <button onClick={addOtherItem} className="text-teal-600 hover:text-teal-700 flex items-center gap-1 text-xs bg-white px-2 py-1 rounded shadow-sm border border-teal-100"><SimpleIcon name="Plus" className="w-3 h-3"/> เพิ่ม</button>
-                                        </div>
-                                        <div className="divide-y divide-slate-50">
-                                            {formData.otherItems.map((item, idx) => (
-                                                <div key={idx} className="p-6 hover:bg-slate-50 relative group">
-                                                    <button onClick={() => removeOtherItem(idx)} className="absolute top-4 right-4 text-slate-300 hover:text-red-500 p-1"><SimpleIcon name="Trash" className="w-4 h-4"/></button>
-                                                    <div className="mb-3 pr-8"><input type="text" placeholder="ชื่อรายการ" className="w-full font-semibold text-slate-800 text-base bg-transparent border-b border-transparent hover:border-slate-200 focus:border-teal-500 focus:outline-none placeholder-slate-300" value={item.name} onChange={e => updateOtherItem(idx, 'name', e.target.value)}/></div>
-                                                    <div className="flex flex-col sm:flex-row gap-4 mb-3">
-                                                        <div className="flex-1 grid grid-cols-2 gap-3">
-                                                            <input type="number" placeholder="จำนวน" className="bg-slate-50 border rounded-xl px-3 py-2 text-sm w-full focus:ring-2 focus:ring-teal-500 outline-none" value={item.qty} onChange={e => updateOtherItem(idx, 'qty', e.target.value)}/>
-                                                            <div><label className="block text-[10px] text-slate-400 mb-1">วันหมดอายุ (ถ้ามี)</label><input type="date" className={`bg-slate-50 border rounded-xl px-3 py-2 text-sm w-full focus:ring-2 focus:ring-teal-500 outline-none ${getDaysDiff(item.exp) < 0 ? 'border-red-500 text-red-500' : 'border-slate-200'}`} value={item.exp} onChange={e => updateOtherItem(idx, 'exp', e.target.value)}/></div>
+                                    
+                                    {/* Render Other Items Section - Show all if NOT fix mode OR show if there are items */}
+                                    {(!formData.isFixMode || formData.otherItems.length > 0) && (
+                                        <div className="border-t border-slate-100">
+                                            <div className="bg-slate-50 px-6 py-3 text-xs font-bold text-slate-500 uppercase tracking-wider flex items-center justify-between">
+                                                <div className="flex items-center gap-2"><SimpleIcon name="Plus" className="w-4 h-4"/> รายการอื่นๆ (ถ้ามี)</div>
+                                                <button onClick={addOtherItem} className="text-teal-600 hover:text-teal-700 flex items-center gap-1 text-xs bg-white px-2 py-1 rounded shadow-sm border border-teal-100"><SimpleIcon name="Plus" className="w-3 h-3"/> เพิ่ม</button>
+                                            </div>
+                                            <div className="divide-y divide-slate-50">
+                                                {formData.otherItems.map((item, idx) => (
+                                                    <div key={idx} className="p-6 hover:bg-slate-50 relative group">
+                                                        <button onClick={() => removeOtherItem(idx)} className="absolute top-4 right-4 text-slate-300 hover:text-red-500 p-1"><SimpleIcon name="Trash" className="w-4 h-4"/></button>
+                                                        <div className="mb-3 pr-8"><input type="text" placeholder="ชื่อรายการ" className="w-full font-semibold text-slate-800 text-base bg-transparent border-b border-transparent hover:border-slate-200 focus:border-teal-500 focus:outline-none placeholder-slate-300" value={item.name} onChange={e => updateOtherItem(idx, 'name', e.target.value)}/></div>
+                                                        <div className="flex flex-col sm:flex-row gap-4 mb-3">
+                                                            <div className="flex-1 grid grid-cols-2 gap-3">
+                                                                <input type="number" placeholder="จำนวน" className="bg-slate-50 border rounded-xl px-3 py-2 text-sm w-full focus:ring-2 focus:ring-teal-500 outline-none" value={item.qty} onChange={e => updateOtherItem(idx, 'qty', e.target.value)}/>
+                                                                <div><label className="block text-[10px] text-slate-400 mb-1">วันหมดอายุ (ถ้ามี)</label><input type="date" className={`bg-slate-50 border rounded-xl px-3 py-2 text-sm w-full focus:ring-2 focus:ring-teal-500 outline-none ${getDaysDiff(item.exp) < 0 ? 'border-red-500 text-red-500' : 'border-slate-200'}`} value={item.exp} onChange={e => updateOtherItem(idx, 'exp', e.target.value)}/></div>
+                                                            </div>
+                                                            <div className="shrink-0 flex p-1 bg-slate-100 rounded-xl h-fit">
+                                                                <button onClick={() => updateOtherItem(idx, 'status', 'ready')} className={`px-3 py-2 rounded-lg text-xs font-bold transition-all ${item.status === 'ready' ? 'bg-white text-emerald-600 shadow-sm' : 'text-slate-400 hover:text-slate-600'}`}>พร้อม</button>
+                                                                <button onClick={() => updateOtherItem(idx, 'status', 'not_ready')} className={`px-3 py-2 rounded-lg text-xs font-bold transition-all ${item.status === 'not_ready' ? 'bg-white text-red-500 shadow-sm' : 'text-slate-400 hover:text-slate-600'}`}>ไม่พร้อม</button>
+                                                            </div>
                                                         </div>
-                                                        <div className="shrink-0 flex p-1 bg-slate-100 rounded-xl h-fit">
-                                                            <button onClick={() => updateOtherItem(idx, 'status', 'ready')} className={`px-3 py-2 rounded-lg text-xs font-bold transition-all ${item.status === 'ready' ? 'bg-white text-emerald-600 shadow-sm' : 'text-slate-400 hover:text-slate-600'}`}>พร้อม</button>
-                                                            <button onClick={() => updateOtherItem(idx, 'status', 'not_ready')} className={`px-3 py-2 rounded-lg text-xs font-bold transition-all ${item.status === 'not_ready' ? 'bg-white text-red-500 shadow-sm' : 'text-slate-400 hover:text-slate-600'}`}>ไม่พร้อม</button>
-                                                        </div>
+                                                        {item.status === 'not_ready' && (<input type="text" placeholder="ระบุสาเหตุ..." className="w-full border-b-2 border-red-100 bg-red-50/30 px-2 py-2 text-sm text-red-700 placeholder-red-300 focus:outline-none focus:border-red-300 rounded-t-lg" value={item.note} onChange={e => updateOtherItem(idx, 'note', e.target.value)}/>)}
                                                     </div>
-                                                    {item.status === 'not_ready' && (<input type="text" placeholder="ระบุสาเหตุ..." className="w-full border-b-2 border-red-100 bg-red-50/30 px-2 py-2 text-sm text-red-700 placeholder-red-300 focus:outline-none focus:border-red-300 rounded-t-lg" value={item.note} onChange={e => updateOtherItem(idx, 'note', e.target.value)}/>)}
-                                                </div>
-                                            ))}
+                                                ))}
+                                            </div>
                                         </div>
-                                    </div>
+                                    )}
+
                                     <div className="p-6 bg-teal-50/30 border-t border-teal-100">
                                         <label className="flex items-center gap-4 cursor-pointer p-4 bg-white border border-teal-100 rounded-2xl hover:border-teal-300 transition-colors shadow-sm">
                                             <input type="checkbox" className="w-5 h-5 accent-teal-600 rounded-md" checked={formData.isReCheckStock || false} onChange={e => setFormData({...formData, isReCheckStock: e.target.checked})}/>
