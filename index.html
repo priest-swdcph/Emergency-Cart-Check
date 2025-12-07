@@ -367,17 +367,16 @@
 
                 setIsLoading(true);
                 
-                // --- LOGIC CHANGE START ---
                 // ใช้สถานะของ "ความพร้อมทั่วไปรถ Emergency" (general_readiness) เป็นตัวตัดสินหลัก
                 const generalItem = formData.items['general_readiness'];
-                const generalReadyStatus = (generalItem && generalItem.status === 'ready') ? 'พร้อมใช้' : 'ไม่พร้อมใช้';
+                const isGeneralReady = generalItem && generalItem.status === 'ready';
+                const generalReadyStatus = isGeneralReady ? 'พร้อมใช้' : 'ไม่พร้อมใช้';
                 
                 const payload = {
                     id: Date.now(),
                     ...formData,
                     generalReady: generalReadyStatus // ส่งค่าตามหัวข้อ General
                 };
-                // --- LOGIC CHANGE END ---
 
                 const missing = [];
                 const broken = [];
@@ -385,12 +384,14 @@
                     const def = INITIAL_ITEMS.find(i => i.id === key);
                     if (!def) return; 
                     if (def.type === ITEM_TYPES.CHECK_HAVE && !val.checked) missing.push(def.name);
-                    // เก็บรายการที่ไม่พร้อม (รวมถึง General Readiness เองด้วย ถ้ามันไม่พร้อม)
+                    
                     if ((def.type === ITEM_TYPES.QTY_STATUS || def.type === ITEM_TYPES.QTY_EXP_STATUS || def.type === ITEM_TYPES.STATUS_ONLY) && val.status === 'not_ready') {
                          broken.push(`${def.name} (${val.note || 'ไม่ระบุสาเหตุ'})`);
                     }
                 });
-                setSummaryData({ missing, broken });
+                
+                // Update summary state properly with the calculated status
+                setSummaryData({ missing, broken, status: generalReadyStatus });
 
                 try {
                     await fetch(GAS_API_URL, {
@@ -627,12 +628,15 @@
                         {/* SUMMARY */}
                         {view === 'summary' && (
                             <div className="animate-scale-up text-center pt-20 px-4 min-h-[80vh] flex flex-col items-center justify-center">
-                                <div className={`w-24 h-24 rounded-full flex items-center justify-center mx-auto mb-6 shadow-sm animate-fade-in ${formData.generalReady === 'พร้อมใช้' ? 'bg-emerald-100 text-emerald-600' : 'bg-red-100 text-red-600'}`}>
-                                    {formData.generalReady === 'พร้อมใช้' ? <SimpleIcon name="CheckCircle" className="w-12 h-12"/> : <SimpleIcon name="XCircle" className="w-12 h-12"/>}
+                                {/* แสดงไอคอนตามสถานะจริง */}
+                                <div className={`w-24 h-24 rounded-full flex items-center justify-center mx-auto mb-6 shadow-sm animate-fade-in ${summaryData?.status === 'พร้อมใช้' ? 'bg-emerald-100 text-emerald-600' : 'bg-red-100 text-red-600'}`}>
+                                    {summaryData?.status === 'พร้อมใช้' ? <SimpleIcon name="CheckCircle" className="w-12 h-12"/> : <SimpleIcon name="XCircle" className="w-12 h-12"/>}
                                 </div>
+                                
                                 <h2 className="text-3xl font-bold text-slate-800 mb-2">บันทึกเรียบร้อย!</h2>
-                                <p className={`text-lg font-bold mb-8 ${formData.generalReady === 'พร้อมใช้' ? 'text-emerald-600' : 'text-red-600'}`}>
-                                    สถานะ: {formData.generalReady}
+                                {/* แสดงสถานะรถจาก summaryData */}
+                                <p className={`text-lg font-bold mb-8 ${summaryData?.status === 'พร้อมใช้' ? 'text-emerald-600' : 'text-red-600'}`}>
+                                    สถานะรถ: {summaryData?.status || '-'}
                                 </p>
                                 
                                 {(summaryData?.missing?.length > 0 || summaryData?.broken?.length > 0) && (
@@ -655,8 +659,8 @@
                         <div className="grid gap-4">
                             <button onClick={() => selectCheckType('new')} className="p-5 bg-teal-50 rounded-2xl text-left hover:bg-teal-100 border border-teal-100 transition-colors group relative overflow-hidden">
                                 <div className="absolute right-0 bottom-0 opacity-10 -mr-4 -mb-4"><SimpleIcon name="Plus" className="w-24 h-24 text-teal-600"/></div>
-                                <div className="font-bold text-teal-900 text-lg group-hover:text-teal-700 relative z-10">ตรวจสอบใหม่</div>
-                                <div className="text-teal-600 text-sm mt-1 relative z-10 font-medium">สำหรับRe-Stock</div>
+                                <div className="font-bold text-teal-900 text-lg group-hover:text-teal-700 relative z-10">ตรวจสอบใหม่ (ว่างเปล่า)</div>
+                                <div className="text-teal-600 text-sm mt-1 relative z-10 font-medium">สำหรับเริ่มเวรใหม่ กรอกใหม่ทั้งหมด</div>
                             </button>
                             <button onClick={() => selectCheckType('copy')} className="p-5 bg-white rounded-2xl text-left hover:bg-slate-50 border border-slate-200 transition-colors group shadow-sm relative overflow-hidden">
                                 <div className="font-bold text-slate-900 text-lg group-hover:text-slate-700">ดึงรายการล่าสุด</div>
