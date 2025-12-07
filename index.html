@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Emergency Cart Check</title>
+    <title>Emergency Cart Smart Check</title>
     
     <!-- FAVICON -->
     <link rel="icon" type="image/png" href="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRYfBIvo5I6imKO2PO2Q685aje7a48lvI5rrQ&s">
@@ -92,7 +92,9 @@
             ChevronDown: <polyline points="6 9 12 15 18 9" />,
             FileText: <><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" /><polyline points="14 2 14 8 20 8" /><line x1="16" y1="13" x2="8" y2="13" /><line x1="16" y1="17" x2="8" y2="17" /><polyline points="10 9 9 9 8 9" /></>,
             Layers: <path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5" />,
-            Trash: <><polyline points="3 6 5 6 21 6" /><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2" /></>
+            Trash: <><polyline points="3 6 5 6 21 6" /><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2" /></>,
+            Edit: <><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7" /><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z" /></>,
+            Wrench: <path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z" />
         };
         const SimpleIcon = ({ name, className }) => <Icon path={Icons[name] || Icons.FileText} className={className} />;
 
@@ -152,29 +154,24 @@
         const CATEGORY_ORDER = ['ชั้นบน', 'ลิ้นชักชั้นที่ 1', 'ลิ้นชักชั้นที่ 2', 'ลิ้นชักชั้นที่ 3', 'ตู้ล่างขวา', 'General'];
 
         // --- GLOBAL LOGIC ---
-        // ฟังก์ชันคำนวณสิ่งผิดปกติ (ใช้ร่วมกันทั้งหน้า Dashboard และ History)
         const getAbnormalities = (rec) => {
             const list = [];
             if(!rec) return list;
 
-            // 1. Main Items
             if(rec.items) {
                 Object.entries(rec.items).forEach(([key, val]) => {
                     const def = INITIAL_ITEMS.find(i => i.id === key);
                     if(!def || key === 'general_readiness') return;
 
-                    // Status / Check
                     if (def.type === ITEM_TYPES.CHECK_HAVE) {
                         if (!val.checked) list.push({ name: def.name, issue: 'ไม่มี', note: val.note });
                     } else {
                         if (val.status === 'not_ready') list.push({ name: def.name, issue: 'ไม่พร้อม', note: val.note });
                     }
 
-                    // Expiry
                     if (val.exp) {
                         const days = getDaysDiff(val.exp);
                         if (days < 0) {
-                            // เช็คไม่ให้ซ้ำกับ 'ไม่พร้อม'
                             const exists = list.find(a => a.name === def.name && a.issue === 'ไม่พร้อม');
                             if (!exists) list.push({ name: def.name, issue: 'หมดอายุ', note: formatDate(val.exp) });
                         }
@@ -182,7 +179,6 @@
                 });
             }
 
-            // 2. Other Items
             if(rec.otherItems && Array.isArray(rec.otherItems)) {
                 rec.otherItems.forEach(item => {
                     if (item.status === 'not_ready') {
@@ -220,7 +216,6 @@
             return <span className="px-2.5 py-1 bg-red-50 text-red-700 text-xs font-semibold rounded-full border border-red-200 flex items-center gap-1.5 w-fit whitespace-nowrap"><div className="w-1.5 h-1.5 rounded-full bg-red-500"></div> ไม่พร้อม</span>;
         };
 
-        // Issues List Component (สำหรับแสดงใน Dashboard และ History)
         const IssuesList = ({ items }) => {
             if (!items || items.length === 0) return null;
             return (
@@ -231,7 +226,7 @@
                             <div>
                                 <span className="font-semibold text-slate-700">{item.name}</span>
                                 <span className={`ml-1 font-bold ${item.issue === 'หมดอายุ' ? 'text-orange-600' : 'text-red-500'}`}>({item.issue})</span>
-                                {item.note && item.note !== '-' && <span className="block text-[10px] text-slate-400">หมยเหตุ: {item.note}</span>}
+                                {item.note && item.note !== '-' && <span className="block text-[10px] text-slate-400">หมายเหตุ: {item.note}</span>}
                             </div>
                         </div>
                     ))}
@@ -264,7 +259,6 @@
                             </div>
                         </div>
                         
-                        {/* แสดงรายการผิดปกติทันทีโดยไม่ต้องกด Dropdown (ถ้ามี) */}
                         {abnormalities.length > 0 && (
                             <div className="mt-3 pl-[4rem]">
                                 <div className="text-xs text-red-500 font-bold mb-1 flex items-center gap-1">
@@ -284,20 +278,21 @@
             const [records, setRecords] = useState([]);
             const [formData, setFormData] = useState({});
             const [lastStockCheck, setLastStockCheck] = useState(null);
+            
             const [isLoading, setIsLoading] = useState(false);
             
             const [showTypeModal, setShowTypeModal] = useState(false);
             const [showStockAlert, setShowStockAlert] = useState(false);
             const [showCopyWarning, setShowCopyWarning] = useState(false);
             const [showExpiryAlert, setShowExpiryAlert] = useState(false);
-            
-            // New: Modal ยืนยันการบันทึก (แก้ปัญหา alert block)
             const [showSaveConfirmModal, setShowSaveConfirmModal] = useState(false);
-            const [expiryList, setExpiryList] = useState([]); // List for warning
+            const [expiryList, setExpiryList] = useState([]);
             
             const [summaryData, setSummaryData] = useState(null);
 
-            useEffect(() => { fetchData(); }, []);
+            useEffect(() => { 
+                fetchData(); 
+            }, []);
 
             const fetchData = async () => {
                 if(GAS_API_URL.includes("YOUR_GAS")) return;
@@ -306,7 +301,15 @@
                     const resRec = await fetch(GAS_API_URL + '?action=read');
                     const dataRec = await resRec.json();
                     if(dataRec.status === 'success') {
-                         setRecords((dataRec.data || []));
+                         // Fix: ตรวจสอบและแปลง otherItems จาก string เป็น array ถ้าจำเป็น
+                         const cleanRecords = (dataRec.data || []).map(r => {
+                             if (r.otherItems && typeof r.otherItems === 'string') {
+                                 try { r.otherItems = JSON.parse(r.otherItems); } catch(e) { r.otherItems = []; }
+                             }
+                             if (!Array.isArray(r.otherItems)) r.otherItems = [];
+                             return r;
+                         });
+                         setRecords(cleanRecords);
                     }
                     const resStock = await fetch(GAS_API_URL + '?action=getLastStockCheck');
                     const dataStock = await resStock.json();
@@ -339,10 +342,9 @@
                 return alerts;
             };
 
-            // Logic Helpers
             const initForm = (prevData = null, isNew = false) => {
                 const today = new Date().toISOString().split('T')[0];
-                let initialData = { date: today, shift: 'เช้า', checker: '', items: {}, otherItems: [], isReCheckStock: false };
+                let initialData = { date: today, shift: 'เช้า', checker: '', items: {}, otherItems: [], isReCheckStock: false, isFixMode: false, fixItemIds: [] };
                 
                 if (prevData && prevData.items && !isNew) {
                     const safeItems = {};
@@ -354,9 +356,16 @@
                         }
                     });
                     initialData = { ...initialData, items: safeItems };
-                    if (prevData.otherItems && Array.isArray(prevData.otherItems)) {
-                        initialData.otherItems = JSON.parse(JSON.stringify(prevData.otherItems));
+                    
+                    // Copy other items
+                    if (prevData.otherItems && Array.isArray(prevData.otherItems) && prevData.otherItems.length > 0) {
+                        initialData.otherItems = prevData.otherItems.map(item => ({...item}));
                     }
+                    
+                    // Handle Fix Mode Flags if passed in prevData
+                    if (prevData.isFixMode) initialData.isFixMode = true;
+                    if (prevData.fixItemIds) initialData.fixItemIds = prevData.fixItemIds;
+
                 } else {
                     INITIAL_ITEMS.forEach(item => {
                         initialData.items[item.id] = { qty: '', exp: '', status: null, note: '', checked: null };
@@ -386,12 +395,74 @@
                 }
             };
 
-            // 1. กดปุ่มบันทึก -> ตรวจสอบข้อมูล
+            // NEW: ฟังก์ชันสำหรับปุ่ม "แก้ไขตอนนี้" (ดึงเฉพาะรายการที่มีปัญหา)
+            const handleFixNow = () => {
+                if (records.length > 0) {
+                    const latest = records[0];
+                    const fixIds = [];
+                    const fixOtherItems = [];
+
+                    // 1. Scan Main Items for issues
+                    if (latest.items) {
+                        Object.entries(latest.items).forEach(([key, val]) => {
+                            const def = INITIAL_ITEMS.find(i => i.id === key);
+                            if (!def) return;
+
+                            let isProblem = false;
+                            
+                            // Check Status/Checked
+                            if (def.type === ITEM_TYPES.CHECK_HAVE) {
+                                if (!val.checked) isProblem = true;
+                            } else {
+                                if (val.status === 'not_ready') isProblem = true;
+                            }
+
+                            // Check Expiry
+                            if (val.exp && getDaysDiff(val.exp) < 0) isProblem = true;
+
+                            if (isProblem) fixIds.push(key);
+                        });
+                    }
+
+                    // 2. Scan Other Items for issues
+                    if (latest.otherItems && Array.isArray(latest.otherItems)) {
+                        latest.otherItems.forEach(item => {
+                            const isNotReady = item.status === 'not_ready';
+                            const isExpired = item.exp && getDaysDiff(item.exp) < 0;
+                            if (isNotReady || isExpired) {
+                                fixOtherItems.push({...item});
+                            }
+                        });
+                    }
+
+                    // Always allow general_readiness to be visible to change overall status
+                    if (!fixIds.includes('general_readiness')) fixIds.push('general_readiness');
+
+                    // Prepare special object to init form
+                    const problemData = {
+                        ...latest,
+                        otherItems: fixOtherItems, // Only problematic other items
+                        isFixMode: true,
+                        fixItemIds: fixIds
+                    };
+
+                    initForm(problemData, false); 
+                    
+                    setView('form'); 
+                    window.scrollTo(0, 0);
+                } else {
+                    alert("ไม่พบประวัติเพื่อแก้ไข");
+                }
+            };
+
             const onSaveClick = () => {
                 if (!formData.checker) return alert("กรุณาระบุชื่อผู้ตรวจสอบ");
                 
-                // Validation Loop
+                // Validate only Visible Items in Fix Mode
                 for (let item of INITIAL_ITEMS) {
+                    // Skip hidden items in fix mode
+                    if (formData.isFixMode && !formData.fixItemIds.includes(item.id)) continue;
+
                     const val = formData.items[item.id];
                     if (item.type === ITEM_TYPES.CHECK_HAVE) {
                         if (val?.checked === null || val?.checked === undefined) return alert(`กรุณาระบุ "มี/ไม่มี" ของรายการ: ${item.name}`);
@@ -409,19 +480,15 @@
                     if (!item.status) return alert(`${item.name}: กรุณาระบุสถานะ`);
                 }
 
-                // Check Expiry
                 const expAlerts = checkExpirations(formData.items, formData.otherItems);
                 if (expAlerts.some(a => a.status === 'expired')) {
-                    // ถ้ามีหมดอายุ -> เปิด Modal ยืนยัน (แทน confirm())
                     setExpiryList(expAlerts);
                     setShowSaveConfirmModal(true);
                 } else {
-                    // ถ้าไม่มี -> บันทึกเลย
                     submitData();
                 }
             };
 
-            // 2. ฟังก์ชันส่งข้อมูลจริง
             const submitData = async () => {
                 setShowSaveConfirmModal(false);
                 setIsLoading(true);
@@ -438,18 +505,14 @@
 
                 const missing = [];
                 const broken = [];
-                
-                // Main Items
                 Object.entries(formData.items).forEach(([key, val]) => {
                     const def = INITIAL_ITEMS.find(i => i.id === key);
                     if (!def) return; 
                     if (def.type === ITEM_TYPES.CHECK_HAVE && !val.checked) missing.push(def.name);
-                    
                     if ((def.type === ITEM_TYPES.QTY_STATUS || def.type === ITEM_TYPES.QTY_EXP_STATUS || def.type === ITEM_TYPES.STATUS_ONLY) && val.status === 'not_ready') {
                          broken.push(`${def.name} (${val.note || 'ไม่ระบุสาเหตุ'})`);
                     }
                 });
-                // Other Items
                 formData.otherItems.forEach(item => {
                     if (item.status === 'not_ready') broken.push(`${item.name} (${item.note || 'ไม่ระบุสาเหตุ'})`);
                 });
@@ -474,7 +537,6 @@
                 }
             };
 
-            // Form Helpers
             const updateItem = (id, field, value) => {
                 setFormData(prev => ({ ...prev, items: { ...prev.items, [id]: { ...prev.items[id], [field]: value } } }));
             };
@@ -499,7 +561,6 @@
                 </div>
             );
 
-            // Dashboard Issues
             const latestRecord = records[0];
             const latestIssues = latestRecord ? getAbnormalities(latestRecord) : [];
 
@@ -509,8 +570,8 @@
                         <div className="px-6 py-4 flex items-center gap-4">
                             <img src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRYfBIvo5I6imKO2PO2Q685aje7a48lvI5rrQ&s" alt="Medical Bag" className="w-12 h-12 rounded-xl object-cover shadow-lg shadow-red-100" />
                             <div className="flex-1 min-w-0">
-                                <h1 className="text-lg font-bold text-slate-800 leading-tight">Emergency Cart</h1>
-                                <p className="text-slate-500 text-xs">หอผู้ป่วยสงฆ์อาพาธ</p>
+                                <h1 className="text-lg font-bold text-slate-800 leading-tight">Emergency Cart Smart Check</h1>
+                                <p className="text-slate-500 text-xs">ตรวจสอบความพร้อมใช้รถเข็นอุปกรณืช่วยชีวิตฉุกเฉิน หอผู้ป่วยสงฆ์อาพาธ</p>
                             </div>
                         </div>
                     </header>
@@ -526,11 +587,21 @@
                                             <div className={`text-5xl font-bold mb-4 tracking-tight ${records[0].generalReady === 'พร้อมใช้' ? 'text-emerald-600' : 'text-red-500'}`}>
                                                 {records[0].generalReady}
                                             </div>
-                                            
-                                            {/* แสดงรายการผิดปกติทันทีใน Dashboard */}
                                             {latestIssues.length > 0 && (
                                                 <div className="mb-6 text-left bg-red-50 p-4 rounded-xl border border-red-100">
-                                                    <div className="text-red-600 font-bold text-sm mb-2 flex items-center gap-2"><SimpleIcon name="AlertTriangle" className="w-4 h-4"/> รายการที่ต้องแก้ไข ({latestIssues.length})</div>
+                                                    <div className="flex justify-between items-start mb-2">
+                                                        <div className="text-red-600 font-bold text-sm flex items-center gap-2">
+                                                            <SimpleIcon name="AlertTriangle" className="w-4 h-4"/> 
+                                                            รายการที่ต้องแก้ไข ({latestIssues.length})
+                                                        </div>
+                                                        {/* ปุ่มแก้ไขตอนนี้ */}
+                                                        <button 
+                                                            onClick={handleFixNow}
+                                                            className="text-xs bg-red-600 text-white px-3 py-1.5 rounded-lg hover:bg-red-700 transition-colors shadow-sm flex items-center gap-1"
+                                                        >
+                                                            <SimpleIcon name="Wrench" className="w-3 h-3"/> แก้ไขตอนนี้
+                                                        </button>
+                                                    </div>
                                                     <IssuesList items={latestIssues} />
                                                 </div>
                                             )}
@@ -539,7 +610,7 @@
                                     
                                     <div className="inline-flex items-center gap-2 bg-slate-50 px-4 py-2 rounded-xl text-sm text-slate-600 mb-8 border border-slate-100">
                                         <SimpleIcon name="RotateCcw" className="w-4 h-4 text-slate-400"/>
-                                        <span>กำหนด ReCheck Stock ครั้งถัดไป วันที่: <span className="font-semibold text-slate-800">{lastStockCheck ? formatDate(new Date(lastStockCheck.getTime() + 14 * 24 * 60 * 60 * 1000)) : '-'}</span></span>
+                                        <span>กำหนด ReCheck Stock ครั้งถัดไป:วันที่ <span className="font-semibold text-slate-800">{lastStockCheck ? formatDate(new Date(lastStockCheck.getTime() + 14 * 24 * 60 * 60 * 1000)) : '-'}</span></span>
                                     </div>
 
                                     <button onClick={() => setShowTypeModal(true)} className="w-full bg-slate-900 hover:bg-slate-800 text-white py-4 rounded-2xl shadow-xl shadow-slate-200 flex items-center justify-center gap-3 text-lg font-semibold transition-all active:scale-[0.98]">
@@ -561,34 +632,27 @@
                             </div>
                         )}
 
-                        {/* FORM (ตัดทอนโค้ดแสดงเฉพาะส่วนที่จำเป็น) */}
+                        {/* FORM */}
                         {view === 'form' && (
                             <div className="animate-slide-up pb-20">
-                                {/* ... ส่วนหัวแบบฟอร์มเหมือนเดิม ... */}
                                 <div className="flex items-center justify-between mb-6">
-                                    <button onClick={() => setView('dashboard')} className="text-slate-500 hover:text-slate-800 flex items-center gap-2 text-sm font-semibold transition-colors bg-white px-3 py-2 rounded-xl border border-slate-200 shadow-sm">
-                                        <SimpleIcon name="ChevronLeft" className="w-4 h-4"/> กลับ
-                                    </button>
+                                    <button onClick={() => setView('dashboard')} className="text-slate-500 hover:text-slate-800 flex items-center gap-2 text-sm font-semibold transition-colors bg-white px-3 py-2 rounded-xl border border-slate-200 shadow-sm"><SimpleIcon name="ChevronLeft" className="w-4 h-4"/> กลับ</button>
                                     <div className="text-sm text-slate-400 font-medium">แบบฟอร์มตรวจสอบ</div>
                                 </div>
-
                                 <div className="bg-white rounded-3xl shadow-sm border border-slate-200 overflow-hidden mb-6">
                                     <div className="p-6 grid grid-cols-2 gap-6 bg-slate-50/50 border-b border-slate-100">
-                                        <div>
-                                            <label className="block text-xs font-bold text-slate-400 uppercase mb-2">วันที่</label>
-                                            <input type="date" className="w-full bg-white border border-slate-200 rounded-xl px-3 py-2.5 text-sm focus:ring-2 focus:ring-teal-500 outline-none transition-shadow" value={formData.date} onChange={e => setFormData({...formData, date: e.target.value})}/>
-                                        </div>
-                                        <div>
-                                            <label className="block text-xs font-bold text-slate-400 uppercase mb-2">เวร</label>
-                                            <select className="w-full bg-white border border-slate-200 rounded-xl px-3 py-2.5 text-sm focus:ring-2 focus:ring-teal-500 outline-none transition-shadow appearance-none" value={formData.shift} onChange={e => setFormData({...formData, shift: e.target.value})}>
-                                                <option>ดึก</option><option>เช้า</option><option>บ่าย</option>
-                                            </select>
-                                        </div>
+                                        <div><label className="block text-xs font-bold text-slate-400 uppercase mb-2">วันที่</label><input type="date" className="w-full bg-white border border-slate-200 rounded-xl px-3 py-2.5 text-sm focus:ring-2 focus:ring-teal-500 outline-none transition-shadow" value={formData.date} onChange={e => setFormData({...formData, date: e.target.value})}/></div>
+                                        <div><label className="block text-xs font-bold text-slate-400 uppercase mb-2">เวร</label><select className="w-full bg-white border border-slate-200 rounded-xl px-3 py-2.5 text-sm focus:ring-2 focus:ring-teal-500 outline-none transition-shadow appearance-none" value={formData.shift} onChange={e => setFormData({...formData, shift: e.target.value})}><option>ดึก</option><option>เช้า</option><option>บ่าย</option></select></div>
                                     </div>
-                                    
                                     {CATEGORY_ORDER.map(cat => {
                                         const items = INITIAL_ITEMS.filter(i => i.category === cat);
-                                        if(items.length === 0) return null;
+                                        // กรองรายการก่อนแสดงผลตาม Fix Mode
+                                        const visibleItems = formData.isFixMode 
+                                            ? items.filter(i => formData.fixItemIds.includes(i.id))
+                                            : items;
+
+                                        if(visibleItems.length === 0) return null; // ซ่อนหมวดหมู่ถ้าไม่มีรายการ
+
                                         return (
                                             <div key={cat} className="border-t border-slate-100 first:border-t-0">
                                                 <div className="bg-slate-50 px-6 py-3 text-xs font-bold text-slate-500 uppercase tracking-wider sticky top-16 z-10 backdrop-blur-sm bg-slate-50/90 border-b border-slate-100 flex items-center gap-2">
@@ -596,7 +660,7 @@
                                                     {cat === 'General' ? 'สรุปผล' : cat}
                                                 </div>
                                                 <div className="divide-y divide-slate-50">
-                                                    {items.map(item => (
+                                                    {visibleItems.map(item => (
                                                         <div key={item.id} className="p-6 hover:bg-slate-50 transition-colors group">
                                                             <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-4 mb-3">
                                                                 <div className="flex-1">
@@ -636,8 +700,6 @@
                                             </div>
                                         );
                                     })}
-
-                                    {/* Other Items */}
                                     <div className="border-t border-slate-100">
                                         <div className="bg-slate-50 px-6 py-3 text-xs font-bold text-slate-500 uppercase tracking-wider flex items-center justify-between">
                                             <div className="flex items-center gap-2"><SimpleIcon name="Plus" className="w-4 h-4"/> รายการอื่นๆ (ถ้ามี)</div>
@@ -663,7 +725,6 @@
                                             ))}
                                         </div>
                                     </div>
-                                    
                                     <div className="p-6 bg-teal-50/30 border-t border-teal-100">
                                         <label className="flex items-center gap-4 cursor-pointer p-4 bg-white border border-teal-100 rounded-2xl hover:border-teal-300 transition-colors shadow-sm">
                                             <input type="checkbox" className="w-5 h-5 accent-teal-600 rounded-md" checked={formData.isReCheckStock || false} onChange={e => setFormData({...formData, isReCheckStock: e.target.checked})}/>
@@ -675,15 +736,11 @@
                                         <input type="text" placeholder="พิมพ์ชื่อ-นามสกุลของคุณ" className="w-full bg-white border border-slate-300 rounded-xl p-3.5 text-sm focus:ring-2 focus:ring-slate-800 outline-none shadow-sm transition-all" value={formData.checker || ''} onChange={e => setFormData({...formData, checker: e.target.value})}/>
                                     </div>
                                 </div>
-                                <div className="mt-6 w-full flex justify-center">
-                                     <button onClick={onSaveClick} className="w-full max-w-2xl bg-slate-900 hover:bg-slate-800 text-white font-bold py-4 rounded-2xl shadow-xl shadow-slate-200 flex items-center justify-center gap-2 transition-all active:scale-[0.98]">
-                                        <SimpleIcon name="Save" className="w-5 h-5"/> บันทึกข้อมูล
-                                    </button>
-                                </div>
+                                <div className="mt-6 w-full flex justify-center"><button onClick={onSaveClick} className="w-full max-w-2xl bg-slate-900 hover:bg-slate-800 text-white font-bold py-4 rounded-2xl shadow-xl shadow-slate-200 flex items-center justify-center gap-2 transition-all active:scale-[0.98]"><SimpleIcon name="Save" className="w-5 h-5"/> บันทึกข้อมูล</button></div>
                             </div>
                         )}
 
-                        {/* SUMMARY VIEW */}
+                        {/* SUMMARY VIEW (same as before) */}
                         {view === 'summary' && (
                             <div className="animate-scale-up text-center pt-20 px-4 min-h-[80vh] flex flex-col items-center justify-center">
                                 <div className={`w-24 h-24 rounded-full flex items-center justify-center mx-auto mb-6 shadow-sm animate-fade-in ${summaryData?.status === 'พร้อมใช้' ? 'bg-emerald-100 text-emerald-600' : 'bg-red-100 text-red-600'}`}>
@@ -712,7 +769,7 @@
                         <div className="grid gap-4">
                             <button onClick={() => selectCheckType('new')} className="p-5 bg-teal-50 rounded-2xl text-left hover:bg-teal-100 border border-teal-100 transition-colors group relative overflow-hidden">
                                 <div className="absolute right-0 bottom-0 opacity-10 -mr-4 -mb-4"><SimpleIcon name="Plus" className="w-24 h-24 text-teal-600"/></div>
-                                <div className="font-bold text-teal-900 text-lg group-hover:text-teal-700 relative z-10">ตรวจสอบใหม่ (ว่างเปล่า)</div>
+                                <div className="font-bold text-teal-900 text-lg group-hover:text-teal-700 relative z-10">ตรวจสอบใหม่</div>
                                 <div className="text-teal-600 text-sm mt-1 relative z-10 font-medium">สำหรับ Re-Check Stock กรอกใหม่ทั้งหมด</div>
                             </button>
                             <button onClick={() => selectCheckType('copy')} className="p-5 bg-white rounded-2xl text-left hover:bg-slate-50 border border-slate-200 transition-colors group shadow-sm relative overflow-hidden">
@@ -722,36 +779,22 @@
                         </div>
                     </Modal>
 
-                    {/* CONFIRM SAVE MODAL (ใหม่: ใช้แทน confirm() เพื่อแก้ปัญหาโดนบล็อก) */}
                     <Modal isOpen={showSaveConfirmModal} title="⚠️ ยืนยันการบันทึก" onClose={() => setShowSaveConfirmModal(false)}>
                         <div className="text-center">
                             <div className="text-orange-500 mb-4 flex justify-center"><div className="p-4 bg-orange-50 rounded-full"><SimpleIcon name="AlertTriangle" className="w-8 h-8"/></div></div>
                             <h3 className="font-bold text-lg mb-2 text-slate-800">พบรายการยา/เวชภัณฑ์หมดอายุ</h3>
-                            <div className="bg-orange-50 p-3 rounded-xl border border-orange-100 mb-4 text-left max-h-40 overflow-y-auto">
-                                {expiryList.map((item, idx) => (
-                                    <div key={idx} className="text-sm text-orange-800 border-b border-orange-200/50 last:border-0 py-1">
-                                        • {item.name} (หมดอายุ)
-                                    </div>
-                                ))}
-                            </div>
+                            <div className="bg-orange-50 p-3 rounded-xl border border-orange-100 mb-4 text-left max-h-40 overflow-y-auto">{expiryList.map((item, idx) => (<div key={idx} className="text-sm text-orange-800 border-b border-orange-200/50 last:border-0 py-1">• {item.name} (หมดอายุ)</div>))}</div>
                             <p className="text-slate-500 mb-6 text-sm">ต้องการบันทึกข้อมูลหรือไม่? <br/>(ระบบจะแจ้งเตือนให้เวรต่อไปทราบ)</p>
-                            <div className="flex gap-3">
-                                <button onClick={submitData} className="flex-1 bg-red-600 text-white py-3 rounded-xl font-bold shadow-lg hover:bg-red-700">ยืนยันบันทึก</button>
-                                <button onClick={() => setShowSaveConfirmModal(false)} className="flex-1 bg-slate-100 text-slate-700 py-3 rounded-xl font-bold hover:bg-slate-200">กลับไปแก้ไข</button>
-                            </div>
+                            <div className="flex gap-3"><button onClick={submitData} className="flex-1 bg-red-600 text-white py-3 rounded-xl font-bold shadow-lg hover:bg-red-700">ยืนยันบันทึก</button><button onClick={() => setShowSaveConfirmModal(false)} className="flex-1 bg-slate-100 text-slate-700 py-3 rounded-xl font-bold hover:bg-slate-200">กลับไปแก้ไข</button></div>
                         </div>
                     </Modal>
 
-                    {/* Other Alerts */}
                     <Modal isOpen={showStockAlert} title="แจ้งเตือน Stock" onClose={() => setShowStockAlert(false)}>
                         <div className="text-center py-4">
                             <div className="text-orange-500 mb-4 flex justify-center"><div className="p-4 bg-orange-50 rounded-full"><SimpleIcon name="AlertTriangle" className="w-8 h-8"/></div></div>
                             <h3 className="font-bold text-xl mb-2 text-slate-800">ครบกำหนดเช็คสต๊อก</h3>
                             <p className="text-slate-500 mb-8 text-sm leading-relaxed">ไม่ได้ทำการ ReCheck Stock มานานกว่า <span className="font-bold text-orange-600">{showStockAlert?.overdue}</span> วันแล้ว</p>
-                            <div className="flex gap-3">
-                                <button onClick={() => {setFormData(p => ({...p, isReCheckStock: true})); setShowStockAlert(false);}} className="flex-1 bg-slate-900 text-white py-3 rounded-xl font-bold shadow-lg shadow-slate-200">เช็คตอนนี้</button>
-                                <button onClick={() => {setFormData(p => ({...p, isReCheckStock: false})); setShowStockAlert(false);}} className="flex-1 bg-white border border-slate-200 text-slate-600 py-3 rounded-xl font-bold">ไว้ทีหลัง</button>
-                            </div>
+                            <div className="flex gap-3"><button onClick={() => {setFormData(p => ({...p, isReCheckStock: true})); setShowStockAlert(false);}} className="flex-1 bg-slate-900 text-white py-3 rounded-xl font-bold shadow-lg shadow-slate-200">เช็คตอนนี้</button><button onClick={() => {setFormData(p => ({...p, isReCheckStock: false})); setShowStockAlert(false);}} className="flex-1 bg-white border border-slate-200 text-slate-600 py-3 rounded-xl font-bold">ไว้ทีหลัง</button></div>
                         </div>
                     </Modal>
 
