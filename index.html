@@ -26,6 +26,7 @@
         .animate-fade-in { animation: fadeIn 0.3s ease-in-out; }
         .animate-slide-up { animation: slideUp 0.4s ease-out; }
         .animate-spin-slow { animation: spin 2s linear infinite; }
+        .transition-max-height { transition: max-height 0.3s ease-in-out; }
         @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
         @keyframes slideUp { from { transform: translateY(20px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
         @keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
@@ -67,10 +68,28 @@
 
         // --- Error Boundary ---
         class ErrorBoundary extends React.Component {
-            constructor(props) { super(props); this.state = { hasError: false }; }
-            static getDerivedStateFromError(error) { return { hasError: true }; }
+            constructor(props) { 
+                super(props); 
+                this.state = { hasError: false }; 
+            }
+            static getDerivedStateFromError(error) { 
+                return { hasError: true }; 
+            }
+            componentDidCatch(error, errorInfo) {
+                console.error("ErrorBoundary caught an error", error, errorInfo);
+            }
             render() {
-                if (this.state.hasError) return <div className="p-8 text-center text-red-600">System Error. Please Reload.</div>;
+                if (this.state.hasError) {
+                    return (
+                        <div className="min-h-screen flex flex-col items-center justify-center bg-red-50 text-red-800 p-6 text-center">
+                            <h1 className="text-2xl font-bold mb-2">เกิดข้อผิดพลาด (System Error)</h1>
+                            <p className="mb-4">ระบบขัดข้อง กรุณารีโหลดหน้าเว็บใหม่อีกครั้ง</p>
+                            <button onClick={() => window.location.reload()} className="px-6 py-2 bg-red-600 text-white rounded-lg shadow hover:bg-red-700 transition-colors">
+                                รีโหลดหน้าเว็บ
+                            </button>
+                        </div>
+                    );
+                }
                 return this.props.children; 
             }
         }
@@ -107,8 +126,13 @@
         };
         
         const INITIAL_ITEMS = [
+            // --- ชั้นบน ---
             { id: 'cardiac_board', name: 'Cardiac board', required: 1, type: ITEM_TYPES.QTY_STATUS, category: 'ชั้นบน' },
             { id: 'cpr_box', name: 'กล่องยา CPR', required: 1, type: ITEM_TYPES.QTY_EXP_STATUS, category: 'ชั้นบน' },
+            { id: 'acs_box', name: 'กล่องยา ACS', required: 1, type: ITEM_TYPES.QTY_EXP_STATUS, category: 'ชั้นบน' },
+            { id: 'laryngoscope', name: 'Laryngoscope', required: 1, type: ITEM_TYPES.QTY_STATUS, category: 'ชั้นบน' },
+            { id: 'flashlight', name: 'ไฟฉาย', required: 1, type: ITEM_TYPES.QTY_STATUS, category: 'ชั้นบน' },
+
             // --- ลิ้นชักชั้นที่ 1 ---
             { id: 'mask', name: 'Mask', required: 3, type: ITEM_TYPES.QTY_EXP_STATUS, category: 'ลิ้นชักชั้นที่ 1' },
             { id: 'airway_7', name: 'Airway NO.7', type: ITEM_TYPES.QTY_EXP_STATUS, category: 'ลิ้นชักชั้นที่ 1' },
@@ -121,6 +145,8 @@
             { id: 'needle_18', name: 'Needle NO.18', type: ITEM_TYPES.CHECK_HAVE, category: 'ลิ้นชักชั้นที่ 1' },
             { id: 'needle_23', name: 'Needle NO.23', type: ITEM_TYPES.CHECK_HAVE, category: 'ลิ้นชักชั้นที่ 1' },
             { id: 'ky_jelly', name: 'KY Jelly', type: ITEM_TYPES.CHECK_HAVE, category: 'ลิ้นชักชั้นที่ 1' },
+
+            // --- ลิ้นชักชั้นที่ 2 ---
             { id: 'guide_wire', name: 'Guide wire', required: 5, type: ITEM_TYPES.QTY_EXP_STATUS, category: 'ลิ้นชักชั้นที่ 2' },
             { id: 'ett_5', name: 'ETT NO. 5', required: 2, type: ITEM_TYPES.QTY_EXP_STATUS, category: 'ลิ้นชักชั้นที่ 2' },
             { id: 'ett_5_5', name: 'ETT NO. 5.5', required: 2, type: ITEM_TYPES.QTY_EXP_STATUS, category: 'ลิ้นชักชั้นที่ 2' },
@@ -131,17 +157,24 @@
             { id: 'ett_8', name: 'ETT NO. 8', required: 2, type: ITEM_TYPES.QTY_EXP_STATUS, category: 'ลิ้นชักชั้นที่ 2' },
             { id: 'suction_14', name: 'Suction NO.14', required: 5, type: ITEM_TYPES.QTY_EXP_STATUS, category: 'ลิ้นชักชั้นที่ 2' },
             { id: 'suction_16', name: 'Suction NO.16', required: 5, type: ITEM_TYPES.QTY_EXP_STATUS, category: 'ลิ้นชักชั้นที่ 2' },
+
+            // --- ลิ้นชักชั้นที่ 3 ---
             { id: 'plaster', name: 'พลาสเตอร์ติด Tube', type: ITEM_TYPES.CHECK_HAVE, category: 'ลิ้นชักชั้นที่ 3' },
             { id: 'sterile_gloves', name: 'ถุงมือ Sterile', type: ITEM_TYPES.CHECK_HAVE, category: 'ลิ้นชักชั้นที่ 3' },
             { id: 'gauze', name: 'Gauze', type: ITEM_TYPES.CHECK_HAVE, category: 'ลิ้นชักชั้นที่ 3' },
             { id: 'tongue_depressor', name: 'ไม้กดลิ้น', type: ITEM_TYPES.CHECK_HAVE, category: 'ลิ้นชักชั้นที่ 3' },
+
+            // --- ตู้ล่างขวา ---
             { id: 'ambubag', name: 'Adult ambubag', required: 1, type: ITEM_TYPES.QTY_EXP_STATUS, category: 'ตู้ล่างขวา' },
+            
+            // --- General ---
             { id: 'general_readiness', name: 'ความพร้อมทั่วไปรถ Emergency', type: ITEM_TYPES.STATUS_ONLY, category: 'General' },
         ];
 
         const CATEGORY_ORDER = ['ชั้นบน', 'ลิ้นชักชั้นที่ 1', 'ลิ้นชักชั้นที่ 2', 'ลิ้นชักชั้นที่ 3', 'ตู้ล่างขวา', 'General'];
 
         // --- GLOBAL LOGIC ---
+        // ฟังก์ชันคำนวณสิ่งผิดปกติ (คืนชีพกลับมาแล้ว!)
         const getAbnormalities = (rec) => {
             const list = [];
             if(!rec) return list;
@@ -184,6 +217,118 @@
         };
 
         // --- COMPONENTS ---
+        // NEW: Component สำหรับแสดงแต่ละหมวดหมู่ (Floor) แบบ Dropdown
+        const CategorySection = ({ category, items, formData, updateItem, ITEM_TYPES }) => {
+            const [isOpen, setIsOpen] = useState(true);
+
+            if (!items || items.length === 0) return null;
+
+            return (
+                <div className="border-t border-slate-100 first:border-t-0">
+                    <div 
+                        onClick={() => setIsOpen(!isOpen)}
+                        className="bg-slate-50 px-6 py-3 text-xs font-bold text-slate-500 uppercase tracking-wider sticky top-16 z-10 backdrop-blur-sm bg-slate-50/90 border-b border-slate-100 flex items-center justify-between cursor-pointer hover:bg-slate-100 transition-colors"
+                    >
+                        <div className="flex items-center gap-2">
+                            {category === 'General' ? <SimpleIcon name="CheckCircle" className="w-4 h-4"/> : <SimpleIcon name="Layers" className="w-4 h-4"/>}
+                            {category === 'General' ? 'สรุปผล' : category}
+                        </div>
+                        <div className={`transition-transform duration-200 text-slate-400 ${isOpen ? 'rotate-180' : ''}`}>
+                            <SimpleIcon name="ChevronDown" className="w-4 h-4"/>
+                        </div>
+                    </div>
+                    
+                    {isOpen && (
+                        <div className="divide-y divide-slate-50 animate-fade-in">
+                            {items.map(item => (
+                                <div key={item.id} className="p-6 hover:bg-slate-50 transition-colors group">
+                                    <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-4 mb-3">
+                                        <div className="flex-1">
+                                            <div className="font-semibold text-slate-800 text-base">{item.name}</div>
+                                            {item.required && <div className="text-xs text-slate-400 font-medium mt-1">จำนวนที่ควรมี: {item.required}</div>}
+                                        </div>
+                                        <div className="shrink-0">
+                                            {item.type === ITEM_TYPES.CHECK_HAVE ? (
+                                                <div className="flex p-1 bg-slate-100 rounded-xl">
+                                                    <button onClick={() => updateItem(item.id, 'checked', true)} className={`px-4 py-2 rounded-lg text-xs font-bold transition-all ${formData.items[item.id]?.checked === true ? 'bg-white text-emerald-600 shadow-sm' : 'text-slate-400 hover:text-slate-600'}`}>มี</button>
+                                                    <button onClick={() => updateItem(item.id, 'checked', false)} className={`px-4 py-2 rounded-lg text-xs font-bold transition-all ${formData.items[item.id]?.checked === false ? 'bg-white text-red-500 shadow-sm' : 'text-slate-400 hover:text-slate-600'}`}>ไม่มี</button>
+                                                </div>
+                                            ) : (
+                                                <div className="flex p-1 bg-slate-100 rounded-xl">
+                                                    <button onClick={() => updateItem(item.id, 'status', 'ready')} className={`px-4 py-2 rounded-lg text-xs font-bold transition-all ${formData.items[item.id]?.status === 'ready' ? 'bg-white text-emerald-600 shadow-sm' : 'text-slate-400 hover:text-slate-600'}`}>พร้อม</button>
+                                                    <button onClick={() => updateItem(item.id, 'status', 'not_ready')} className={`px-4 py-2 rounded-lg text-xs font-bold transition-all ${formData.items[item.id]?.status === 'not_ready' ? 'bg-white text-red-500 shadow-sm' : 'text-slate-400 hover:text-slate-600'}`}>ไม่พร้อม</button>
+                                                </div>
+                                            )}
+                                        </div>
+                                    </div>
+                                    {item.type !== ITEM_TYPES.STATUS_ONLY && item.type !== ITEM_TYPES.CHECK_HAVE && (
+                                        <div className="grid grid-cols-2 gap-4 mt-3">
+                                            {(item.type.includes('qty')) && (
+                                                <div><input type="number" placeholder="ระบุจำนวน" className={`bg-slate-50 border rounded-xl px-3 py-2 text-sm w-full focus:ring-2 focus:ring-teal-500 outline-none transition-all ${!formData.items[item.id]?.qty ? 'border-orange-200 bg-orange-50' : 'border-slate-200'}`} value={formData.items[item.id]?.qty || ''} onChange={e => updateItem(item.id, 'qty', e.target.value)}/></div>
+                                            )}
+                                            {item.type.includes('exp') && (
+                                                <div><label className="block text-[10px] text-slate-400 mb-1">วันหมดอายุ (ถ้ามี)</label><input type="date" className={`bg-slate-50 border rounded-xl px-3 py-2 text-sm w-full focus:ring-2 focus:ring-teal-500 outline-none transition-all ${getDaysDiff(formData.items[item.id]?.exp) < 0 ? 'border-red-500 text-red-500 bg-red-50' : 'border-slate-200'}`} value={formData.items[item.id]?.exp || ''} onChange={e => updateItem(item.id, 'exp', e.target.value)}/></div>
+                                            )}
+                                        </div>
+                                    )}
+                                    {(formData.items[item.id]?.status === 'not_ready' || formData.items[item.id]?.checked === false) && (
+                                        <div className="mt-3 animate-fade-in"><input type="text" placeholder="ระบุสาเหตุที่ชำรุด/ขาด/ไม่พร้อม..." className="w-full border-b-2 border-red-100 bg-red-50/30 px-2 py-2 text-sm text-red-700 placeholder-red-300 focus:outline-none focus:border-red-300 transition-colors rounded-t-lg" value={formData.items[item.id]?.note || ''} onChange={e => updateItem(item.id, 'note', e.target.value)}/></div>
+                                    )}
+                                </div>
+                            ))}
+                        </div>
+                    )}
+                </div>
+            );
+        };
+
+        const OtherItemsSection = ({ otherItems, addOtherItem, removeOtherItem, updateOtherItem }) => {
+            const [isOpen, setIsOpen] = useState(true);
+            const hasItems = otherItems && otherItems.length > 0;
+
+            return (
+                <div className="border-t border-slate-100">
+                    <div 
+                        className="bg-slate-50 px-6 py-3 text-xs font-bold text-slate-500 uppercase tracking-wider flex items-center justify-between cursor-pointer hover:bg-slate-100"
+                        onClick={() => setIsOpen(!isOpen)}
+                    >
+                        <div className="flex items-center gap-2">
+                            <SimpleIcon name="Plus" className="w-4 h-4"/> 
+                            รายการอื่นๆ (ถ้ามี)
+                            <div className={`ml-2 transition-transform duration-200 text-slate-400 ${isOpen ? 'rotate-180' : ''}`}>
+                                <SimpleIcon name="ChevronDown" className="w-4 h-4"/>
+                            </div>
+                        </div>
+                        <button onClick={(e) => { e.stopPropagation(); addOtherItem(); }} className="text-teal-600 hover:text-teal-700 flex items-center gap-1 text-xs bg-white px-2 py-1 rounded shadow-sm border border-teal-100 hover:bg-teal-50 transition-colors"><SimpleIcon name="Plus" className="w-3 h-3"/> เพิ่ม</button>
+                    </div>
+                    
+                    {isOpen && (
+                        <div className="divide-y divide-slate-50 animate-fade-in">
+                            {hasItems ? otherItems.map((item, idx) => (
+                                <div key={idx} className="p-6 hover:bg-slate-50 relative group">
+                                    <button onClick={() => removeOtherItem(idx)} className="absolute top-4 right-4 text-slate-300 hover:text-red-500 p-1"><SimpleIcon name="Trash" className="w-4 h-4"/></button>
+                                    <div className="mb-3 pr-8"><input type="text" placeholder="ชื่อรายการ" className="w-full font-semibold text-slate-800 text-base bg-transparent border-b border-transparent hover:border-slate-200 focus:border-teal-500 focus:outline-none placeholder-slate-300" value={item.name} onChange={e => updateOtherItem(idx, 'name', e.target.value)}/></div>
+                                    <div className="flex flex-col sm:flex-row gap-4 mb-3">
+                                        <div className="flex-1 grid grid-cols-2 gap-3">
+                                            <input type="number" placeholder="จำนวน" className="bg-slate-50 border rounded-xl px-3 py-2 text-sm w-full focus:ring-2 focus:ring-teal-500 outline-none" value={item.qty} onChange={e => updateOtherItem(idx, 'qty', e.target.value)}/>
+                                            <div><label className="block text-[10px] text-slate-400 mb-1">วันหมดอายุ (ถ้ามี)</label><input type="date" className={`bg-slate-50 border rounded-xl px-3 py-2 text-sm w-full focus:ring-2 focus:ring-teal-500 outline-none ${getDaysDiff(item.exp) < 0 ? 'border-red-500 text-red-500' : 'border-slate-200'}`} value={item.exp} onChange={e => updateOtherItem(idx, 'exp', e.target.value)}/></div>
+                                        </div>
+                                        <div className="shrink-0 flex p-1 bg-slate-100 rounded-xl h-fit">
+                                            <button onClick={() => updateOtherItem(idx, 'status', 'ready')} className={`px-3 py-2 rounded-lg text-xs font-bold transition-all ${item.status === 'ready' ? 'bg-white text-emerald-600 shadow-sm' : 'text-slate-400 hover:text-slate-600'}`}>พร้อม</button>
+                                            <button onClick={() => updateOtherItem(idx, 'status', 'not_ready')} className={`px-3 py-2 rounded-lg text-xs font-bold transition-all ${item.status === 'not_ready' ? 'bg-white text-red-500 shadow-sm' : 'text-slate-400 hover:text-slate-600'}`}>ไม่พร้อม</button>
+                                        </div>
+                                    </div>
+                                    {item.status === 'not_ready' && (<input type="text" placeholder="ระบุสาเหตุ..." className="w-full border-b-2 border-red-100 bg-red-50/30 px-2 py-2 text-sm text-red-700 placeholder-red-300 focus:outline-none focus:border-red-300 rounded-t-lg" value={item.note} onChange={e => updateOtherItem(idx, 'note', e.target.value)}/>)}
+                                </div>
+                            )) : (
+                                <div className="p-6 text-center text-sm text-slate-400 italic bg-slate-50/30">ไม่มีรายการเพิ่มเติม</div>
+                            )}
+                        </div>
+                    )}
+                </div>
+            );
+        };
+
         const Modal = ({ isOpen, title, children, onClose }) => {
             if (!isOpen) return null;
             return (
@@ -480,11 +625,10 @@
                 const isGeneralReady = generalItem && generalItem.status === 'ready';
                 const generalReadyStatus = isGeneralReady ? 'พร้อมใช้' : 'ไม่พร้อมใช้';
                 
-                // FIX: Piggyback other items into main items to save it
                 const itemsToSend = { ...formData.items };
                 if (formData.otherItems.length > 0) {
                     itemsToSend['__other_items__'] = { 
-                        status: 'ready', // Dummy status
+                        status: 'ready', 
                         data: formData.otherItems 
                     };
                 }
@@ -492,7 +636,7 @@
                 const payload = {
                     id: Date.now(),
                     ...formData,
-                    items: itemsToSend, // Send modified items
+                    items: itemsToSend, 
                     generalReady: generalReadyStatus
                 };
 
@@ -602,7 +746,7 @@
                                     
                                     <div className="inline-flex items-center gap-2 bg-slate-50 px-4 py-2 rounded-xl text-sm text-slate-600 mb-8 border border-slate-100">
                                         <SimpleIcon name="RotateCcw" className="w-4 h-4 text-slate-400"/>
-                                        <span>กำหนด ReCheck Stock ครั้งถัดไป: วันที่ <span className="font-semibold text-slate-800">{lastStockCheck ? formatDate(new Date(lastStockCheck.getTime() + 14 * 24 * 60 * 60 * 1000)) : '-'}</span></span>
+                                        <span>ครบกำหนด ReCheck Stock ครั้งถัดไป: วันที่<span className="font-semibold text-slate-800">{lastStockCheck ? formatDate(new Date(lastStockCheck.getTime() + 14 * 24 * 60 * 60 * 1000)) : '-'}</span></span>
                                     </div>
 
                                     <button onClick={() => setShowTypeModal(true)} className="w-full bg-slate-900 hover:bg-slate-800 text-white py-4 rounded-2xl shadow-xl shadow-slate-200 flex items-center justify-center gap-3 text-lg font-semibold transition-all active:scale-[0.98]">
@@ -645,80 +789,24 @@
                                         if(visibleItems.length === 0) return null;
 
                                         return (
-                                            <div key={cat} className="border-t border-slate-100 first:border-t-0">
-                                                <div className="bg-slate-50 px-6 py-3 text-xs font-bold text-slate-500 uppercase tracking-wider sticky top-16 z-10 backdrop-blur-sm bg-slate-50/90 border-b border-slate-100 flex items-center gap-2">
-                                                    {cat === 'General' ? <SimpleIcon name="CheckCircle" className="w-4 h-4"/> : <SimpleIcon name="Layers" className="w-4 h-4"/>}
-                                                    {cat === 'General' ? 'สรุปผล' : cat}
-                                                </div>
-                                                <div className="divide-y divide-slate-50">
-                                                    {visibleItems.map(item => (
-                                                        <div key={item.id} className="p-6 hover:bg-slate-50 transition-colors group">
-                                                            <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-4 mb-3">
-                                                                <div className="flex-1">
-                                                                    <div className="font-semibold text-slate-800 text-base">{item.name}</div>
-                                                                    {item.required && <div className="text-xs text-slate-400 font-medium mt-1">จำนวนที่ควรมี: {item.required}</div>}
-                                                                </div>
-                                                                <div className="shrink-0">
-                                                                    {item.type === ITEM_TYPES.CHECK_HAVE ? (
-                                                                        <div className="flex p-1 bg-slate-100 rounded-xl">
-                                                                            <button onClick={() => updateItem(item.id, 'checked', true)} className={`px-4 py-2 rounded-lg text-xs font-bold transition-all ${formData.items[item.id]?.checked === true ? 'bg-white text-emerald-600 shadow-sm' : 'text-slate-400 hover:text-slate-600'}`}>มี</button>
-                                                                            <button onClick={() => updateItem(item.id, 'checked', false)} className={`px-4 py-2 rounded-lg text-xs font-bold transition-all ${formData.items[item.id]?.checked === false ? 'bg-white text-red-500 shadow-sm' : 'text-slate-400 hover:text-slate-600'}`}>ไม่มี</button>
-                                                                        </div>
-                                                                    ) : (
-                                                                        <div className="flex p-1 bg-slate-100 rounded-xl">
-                                                                            <button onClick={() => updateItem(item.id, 'status', 'ready')} className={`px-4 py-2 rounded-lg text-xs font-bold transition-all ${formData.items[item.id]?.status === 'ready' ? 'bg-white text-emerald-600 shadow-sm' : 'text-slate-400 hover:text-slate-600'}`}>พร้อม</button>
-                                                                            <button onClick={() => updateItem(item.id, 'status', 'not_ready')} className={`px-4 py-2 rounded-lg text-xs font-bold transition-all ${formData.items[item.id]?.status === 'not_ready' ? 'bg-white text-red-500 shadow-sm' : 'text-slate-400 hover:text-slate-600'}`}>ไม่พร้อม</button>
-                                                                        </div>
-                                                                    )}
-                                                                </div>
-                                                            </div>
-                                                            {item.type !== ITEM_TYPES.STATUS_ONLY && item.type !== ITEM_TYPES.CHECK_HAVE && (
-                                                                <div className="grid grid-cols-2 gap-4 mt-3">
-                                                                    {(item.type.includes('qty')) && (
-                                                                        <div><input type="number" placeholder="ระบุจำนวน" className={`bg-slate-50 border rounded-xl px-3 py-2 text-sm w-full focus:ring-2 focus:ring-teal-500 outline-none transition-all ${!formData.items[item.id]?.qty ? 'border-orange-200 bg-orange-50' : 'border-slate-200'}`} value={formData.items[item.id]?.qty || ''} onChange={e => updateItem(item.id, 'qty', e.target.value)}/></div>
-                                                                    )}
-                                                                    {item.type.includes('exp') && (
-                                                                        <div><label className="block text-[10px] text-slate-400 mb-1">วันหมดอายุ (ถ้ามี)</label><input type="date" className={`bg-slate-50 border rounded-xl px-3 py-2 text-sm w-full focus:ring-2 focus:ring-teal-500 outline-none transition-all ${getDaysDiff(formData.items[item.id]?.exp) < 0 ? 'border-red-500 text-red-500 bg-red-50' : 'border-slate-200'}`} value={formData.items[item.id]?.exp || ''} onChange={e => updateItem(item.id, 'exp', e.target.value)}/></div>
-                                                                    )}
-                                                                </div>
-                                                            )}
-                                                            {(formData.items[item.id]?.status === 'not_ready' || formData.items[item.id]?.checked === false) && (
-                                                                <div className="mt-3 animate-fade-in"><input type="text" placeholder="ระบุสาเหตุที่ชำรุด/ขาด/ไม่พร้อม..." className="w-full border-b-2 border-red-100 bg-red-50/30 px-2 py-2 text-sm text-red-700 placeholder-red-300 focus:outline-none focus:border-red-300 transition-colors rounded-t-lg" value={formData.items[item.id]?.note || ''} onChange={e => updateItem(item.id, 'note', e.target.value)}/></div>
-                                                            )}
-                                                        </div>
-                                                    ))}
-                                                </div>
-                                            </div>
+                                            <CategorySection 
+                                                key={cat}
+                                                category={cat} 
+                                                items={visibleItems} 
+                                                formData={formData} 
+                                                updateItem={updateItem} 
+                                                ITEM_TYPES={ITEM_TYPES} 
+                                            />
                                         );
                                     })}
                                     
-                                    {/* Render Other Items Section - Show all if NOT fix mode OR show if there are items */}
                                     {(!formData.isFixMode || formData.otherItems.length > 0) && (
-                                        <div className="border-t border-slate-100">
-                                            <div className="bg-slate-50 px-6 py-3 text-xs font-bold text-slate-500 uppercase tracking-wider flex items-center justify-between">
-                                                <div className="flex items-center gap-2"><SimpleIcon name="Plus" className="w-4 h-4"/> รายการอื่นๆ (ถ้ามี)</div>
-                                                <button onClick={addOtherItem} className="text-teal-600 hover:text-teal-700 flex items-center gap-1 text-xs bg-white px-2 py-1 rounded shadow-sm border border-teal-100"><SimpleIcon name="Plus" className="w-3 h-3"/> เพิ่ม</button>
-                                            </div>
-                                            <div className="divide-y divide-slate-50">
-                                                {formData.otherItems.map((item, idx) => (
-                                                    <div key={idx} className="p-6 hover:bg-slate-50 relative group">
-                                                        <button onClick={() => removeOtherItem(idx)} className="absolute top-4 right-4 text-slate-300 hover:text-red-500 p-1"><SimpleIcon name="Trash" className="w-4 h-4"/></button>
-                                                        <div className="mb-3 pr-8"><input type="text" placeholder="ชื่อรายการ" className="w-full font-semibold text-slate-800 text-base bg-transparent border-b border-transparent hover:border-slate-200 focus:border-teal-500 focus:outline-none placeholder-slate-300" value={item.name} onChange={e => updateOtherItem(idx, 'name', e.target.value)}/></div>
-                                                        <div className="flex flex-col sm:flex-row gap-4 mb-3">
-                                                            <div className="flex-1 grid grid-cols-2 gap-3">
-                                                                <input type="number" placeholder="จำนวน" className="bg-slate-50 border rounded-xl px-3 py-2 text-sm w-full focus:ring-2 focus:ring-teal-500 outline-none" value={item.qty} onChange={e => updateOtherItem(idx, 'qty', e.target.value)}/>
-                                                                <div><label className="block text-[10px] text-slate-400 mb-1">วันหมดอายุ (ถ้ามี)</label><input type="date" className={`bg-slate-50 border rounded-xl px-3 py-2 text-sm w-full focus:ring-2 focus:ring-teal-500 outline-none ${getDaysDiff(item.exp) < 0 ? 'border-red-500 text-red-500' : 'border-slate-200'}`} value={item.exp} onChange={e => updateOtherItem(idx, 'exp', e.target.value)}/></div>
-                                                            </div>
-                                                            <div className="shrink-0 flex p-1 bg-slate-100 rounded-xl h-fit">
-                                                                <button onClick={() => updateOtherItem(idx, 'status', 'ready')} className={`px-3 py-2 rounded-lg text-xs font-bold transition-all ${item.status === 'ready' ? 'bg-white text-emerald-600 shadow-sm' : 'text-slate-400 hover:text-slate-600'}`}>พร้อม</button>
-                                                                <button onClick={() => updateOtherItem(idx, 'status', 'not_ready')} className={`px-3 py-2 rounded-lg text-xs font-bold transition-all ${item.status === 'not_ready' ? 'bg-white text-red-500 shadow-sm' : 'text-slate-400 hover:text-slate-600'}`}>ไม่พร้อม</button>
-                                                            </div>
-                                                        </div>
-                                                        {item.status === 'not_ready' && (<input type="text" placeholder="ระบุสาเหตุ..." className="w-full border-b-2 border-red-100 bg-red-50/30 px-2 py-2 text-sm text-red-700 placeholder-red-300 focus:outline-none focus:border-red-300 rounded-t-lg" value={item.note} onChange={e => updateOtherItem(idx, 'note', e.target.value)}/>)}
-                                                    </div>
-                                                ))}
-                                            </div>
-                                        </div>
+                                        <OtherItemsSection 
+                                            otherItems={formData.otherItems} 
+                                            addOtherItem={addOtherItem} 
+                                            removeOtherItem={removeOtherItem} 
+                                            updateOtherItem={updateOtherItem} 
+                                        />
                                     )}
 
                                     <div className="p-6 bg-teal-50/30 border-t border-teal-100">
@@ -736,7 +824,7 @@
                             </div>
                         )}
 
-                        {/* SUMMARY VIEW (same as before) */}
+                        {/* SUMMARY VIEW */}
                         {view === 'summary' && (
                             <div className="animate-scale-up text-center pt-20 px-4 min-h-[80vh] flex flex-col items-center justify-center">
                                 <div className={`w-24 h-24 rounded-full flex items-center justify-center mx-auto mb-6 shadow-sm animate-fade-in ${summaryData?.status === 'พร้อมใช้' ? 'bg-emerald-100 text-emerald-600' : 'bg-red-100 text-red-600'}`}>
