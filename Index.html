@@ -1,0 +1,487 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Emergency Cart Check</title>
+    
+    <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+    <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+    
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+    
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <link href="https://fonts.googleapis.com/css2?family=Prompt:wght@300;400;500;700&display=swap" rel="stylesheet">
+
+    <style>
+        body { font-family: 'Prompt', sans-serif; }
+        .animate-fade-in { animation: fadeIn 0.3s ease-in-out; }
+        .animate-slide-up { animation: slideUp 0.4s ease-out; }
+        .animate-spin-slow { animation: spin 2s linear infinite; }
+        
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+        @keyframes slideUp { from { transform: translateY(20px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+        @keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
+    </style>
+</head>
+<body class="bg-gray-50 text-gray-800">
+
+    <div id="root"></div>
+
+    <script type="text/babel">
+        // ==============================================
+        //  CONFIG: นำ Web App URL ของ GAS มาวางตรงนี้
+        // ==============================================
+        const GAS_API_URL = "https://script.google.com/macros/s/AKfycbwNpFNcLm0iU6vTF0DM7UwONFl3NGXmySuR1jXh-mWyZjbtqf_BTkTpjOYs3NXBzRU/exec"; 
+        // ตัวอย่าง: "https://script.google.com/macros/s/AKfycby.../exec"
+        // ==============================================
+
+        const { useState, useEffect, useMemo } = React;
+        
+        // --- ICONS (SVG Components) ---
+        const Icon = ({ path, className = "w-6 h-6", color = "currentColor" }) => (
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}>
+                {path}
+            </svg>
+        );
+        
+        const Icons = {
+            Plus: <path d="M12 5v14M5 12h14" />,
+            History: <path d="M3 3v5h5M3.05 13A9 9 0 1 0 6 5.3L3 8" />,
+            CheckCircle: <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14M22 4L12 14.01l-3-3" />,
+            XCircle: <circle cx="12" cy="12" r="10" /><path d="M15 9l-6 6M9 9l6 6" />,
+            Calendar: <rect x="3" y="4" width="18" height="18" rx="2" ry="2" /><line x1="16" y1="2" x2="16" y2="6" /><line x1="8" y1="2" x2="8" y2="6" /><line x1="3" y1="10" x2="21" y2="10" />,
+            Save: <path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z" /><polyline points="17 21 17 13 7 13 7 21" /><polyline points="7 3 7 8 15 8" />,
+            AlertTriangle: <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0zM12 9v4M12 17h.01" />,
+            ChevronLeft: <polyline points="15 18 9 12 15 6" />,
+            RotateCcw: <path d="M1 4v6h6" /><path d="M3.51 15a9 9 0 1 0 2.13-9.36L1 10" />,
+            FileText: <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" /><polyline points="14 2 14 8 20 8" /><line x1="16" y1="13" x2="8" y2="13" /><line x1="16" y1="17" x2="8" y2="17" /><polyline points="10 9 9 9 8 9" />
+        };
+
+        const SimpleIcon = ({ name, size=24, className="" }) => (
+            <Icon path={Icons[name]} className={`${className}`} />
+        );
+
+        // --- DATA DEFS ---
+        const ITEM_TYPES = { QTY_STATUS: 'qty_status', QTY_EXP_STATUS: 'qty_exp_status', CHECKBOX: 'checkbox' };
+        const INITIAL_ITEMS = [
+            { id: 'cardiac_board', name: 'Cardiac board', required: 1, type: ITEM_TYPES.QTY_STATUS, category: 'Equipment' },
+            { id: 'cpr_box', name: 'กล่องยา CPR', required: 1, type: ITEM_TYPES.QTY_EXP_STATUS, category: 'Drugs' },
+            { id: 'laryngoscope', name: 'Laryngoscope', required: 1, type: ITEM_TYPES.QTY_STATUS, category: 'Equipment' },
+            { id: 'flashlight', name: 'ไฟฉาย', required: 1, type: ITEM_TYPES.QTY_STATUS, category: 'Equipment' },
+            { id: 'mask', name: 'Mask', required: 3, type: ITEM_TYPES.QTY_EXP_STATUS, category: 'Airway' },
+            { id: 'airway_8', name: 'Airway NO.8', type: ITEM_TYPES.QTY_EXP_STATUS, category: 'Airway' },
+            { id: 'airway_9', name: 'Airway NO.9', type: ITEM_TYPES.QTY_EXP_STATUS, category: 'Airway' },
+            { id: 'syringe_5', name: 'Syringe 5 CC', type: ITEM_TYPES.CHECKBOX, category: 'Supplies' },
+            { id: 'syringe_10', name: 'Syringe 10 CC', type: ITEM_TYPES.CHECKBOX, category: 'Supplies' },
+            { id: 'needle_18', name: 'Needle NO.18', type: ITEM_TYPES.CHECKBOX, category: 'Supplies' },
+            { id: 'needle_23', name: 'Needle NO.23', type: ITEM_TYPES.CHECKBOX, category: 'Supplies' },
+            { id: 'oxy_line', name: 'สายออกซิเจน', type: ITEM_TYPES.CHECKBOX, category: 'Airway' },
+            { id: 'ky_jelly', name: 'KY Jelly', type: ITEM_TYPES.CHECKBOX, category: 'Supplies' },
+            { id: 'guide_wire', name: 'Guide wire', required: 5, type: ITEM_TYPES.QTY_EXP_STATUS, category: 'Airway' },
+            { id: 'ett_5', name: 'ETT NO. 5', required: 2, type: ITEM_TYPES.QTY_EXP_STATUS, category: 'Airway' },
+            { id: 'ett_5_5', name: 'ETT NO. 5.5', required: 2, type: ITEM_TYPES.QTY_EXP_STATUS, category: 'Airway' },
+            { id: 'ett_6', name: 'ETT NO. 6', required: 2, type: ITEM_TYPES.QTY_EXP_STATUS, category: 'Airway' },
+            { id: 'ett_6_5', name: 'ETT NO. 6.5', required: 2, type: ITEM_TYPES.QTY_EXP_STATUS, category: 'Airway' },
+            { id: 'ett_7', name: 'ETT NO. 7', required: 2, type: ITEM_TYPES.QTY_EXP_STATUS, category: 'Airway' },
+            { id: 'ett_7_5', name: 'ETT NO. 7.5', required: 2, type: ITEM_TYPES.QTY_EXP_STATUS, category: 'Airway' },
+            { id: 'ett_8', name: 'ETT NO. 8', required: 2, type: ITEM_TYPES.QTY_EXP_STATUS, category: 'Airway' },
+            { id: 'suction_14', name: 'Suction NO.14', required: 5, type: ITEM_TYPES.QTY_EXP_STATUS, category: 'Airway' },
+            { id: 'suction_16', name: 'Suction NO.16', required: 5, type: ITEM_TYPES.QTY_EXP_STATUS, category: 'Airway' },
+            { id: 'ambubag', name: 'Adult ambubag', required: 1, type: ITEM_TYPES.QTY_EXP_STATUS, category: 'Airway' },
+            { id: 'plaster', name: 'พลาสเตอร์ติด Tube', type: ITEM_TYPES.CHECKBOX, category: 'Supplies' },
+            { id: 'sterile_gloves', name: 'ถุงมือ Sterile', type: ITEM_TYPES.CHECKBOX, category: 'Supplies' },
+            { id: 'gauze', name: 'Gauze', type: ITEM_TYPES.CHECKBOX, category: 'Supplies' },
+            { id: 'tongue_depressor', name: 'ไม้กดลิ้น', type: ITEM_TYPES.CHECKBOX, category: 'Supplies' },
+            { id: 'general_readiness', name: 'ความพร้อมทั่วไปรถ Emergency', type: ITEM_TYPES.QTY_STATUS, category: 'General' },
+        ];
+
+        // --- COMPONENTS ---
+        const Modal = ({ isOpen, title, children, onClose }) => {
+            if (!isOpen) return null;
+            return (
+                <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50 p-4 backdrop-blur-sm animate-fade-in">
+                    <div className="bg-white rounded-2xl shadow-xl w-full max-w-md overflow-hidden animate-slide-up">
+                        <div className="bg-teal-600 px-6 py-4 flex justify-between items-center">
+                            <h3 className="text-lg font-bold text-white flex items-center gap-2">{title}</h3>
+                            <button onClick={onClose} className="text-white hover:bg-teal-700 rounded-full p-1"><SimpleIcon name="XCircle" className="w-6 h-6 stroke-2"/></button>
+                        </div>
+                        <div className="p-6 max-h-[70vh] overflow-y-auto">{children}</div>
+                    </div>
+                </div>
+            );
+        };
+
+        const StatusBadge = ({ status }) => {
+            if (status === 'ready' || status === true) return <span className="px-2 py-1 bg-green-100 text-green-700 text-xs rounded-full border border-green-200 flex items-center gap-1 w-fit"><SimpleIcon name="CheckCircle" className="w-3 h-3"/> พร้อมใช้</span>;
+            if (status === 'not_ready' || status === false) return <span className="px-2 py-1 bg-red-100 text-red-700 text-xs rounded-full border border-red-200 flex items-center gap-1 w-fit"><SimpleIcon name="XCircle" className="w-3 h-3"/> ไม่พร้อม</span>;
+            return <span className="px-2 py-1 bg-gray-100 text-gray-500 text-xs rounded-full">รอตรวจสอบ</span>;
+        };
+
+        // --- MAIN APP ---
+        function App() {
+            const [view, setView] = useState('dashboard');
+            const [records, setRecords] = useState([]);
+            const [formData, setFormData] = useState({});
+            const [lastStockCheck, setLastStockCheck] = useState(null);
+            const [isLoading, setIsLoading] = useState(false);
+            
+            // Modals
+            const [showTypeModal, setShowTypeModal] = useState(false);
+            const [showStockAlert, setShowStockAlert] = useState(false);
+            const [showCopyWarning, setShowCopyWarning] = useState(false);
+            const [showExpiryAlert, setShowExpiryAlert] = useState(false);
+            const [expiryList, setExpiryList] = useState([]);
+            const [summaryData, setSummaryData] = useState(null);
+
+            // Fetch Data on Load
+            useEffect(() => {
+                fetchData();
+            }, []);
+
+            const fetchData = async () => {
+                if(GAS_API_URL.includes("YOUR_GAS")) return;
+                setIsLoading(true);
+                try {
+                    // Fetch Records
+                    const resRec = await fetch(GAS_API_URL + '?action=read');
+                    const dataRec = await resRec.json();
+                    if(dataRec.status === 'success') setRecords(dataRec.data);
+
+                    // Fetch Last Stock Date
+                    const resStock = await fetch(GAS_API_URL + '?action=getLastStockCheck');
+                    const dataStock = await resStock.json();
+                    if(dataStock.status === 'success' && dataStock.date) {
+                        setLastStockCheck(new Date(dataStock.date));
+                    }
+                } catch (error) {
+                    console.error("Connection Error", error);
+                    alert("ไม่สามารถเชื่อมต่อฐานข้อมูลได้ กรุณาตรวจสอบอินเทอร์เน็ต");
+                }
+                setIsLoading(false);
+            };
+
+            const formatDate = (dateStr) => {
+                if(!dateStr) return "-";
+                const d = new Date(dateStr);
+                return d.toLocaleDateString('th-TH', { year: 'numeric', month: 'short', day: 'numeric' });
+            };
+
+            const getDaysDiff = (targetDate) => {
+                if (!targetDate) return 999;
+                const today = new Date();
+                today.setHours(0,0,0,0);
+                const target = new Date(targetDate);
+                target.setHours(0,0,0,0);
+                return Math.ceil((target - today) / (1000 * 60 * 60 * 24));
+            };
+
+            // Logic Helpers
+            const initForm = (prevData = null) => {
+                const today = new Date().toISOString().split('T')[0];
+                let initialData = { date: today, shift: 'เช้า', checker: '', items: {}, isReCheckStock: false };
+                
+                if (prevData) {
+                    initialData = { ...initialData, items: JSON.parse(JSON.stringify(prevData.items)) };
+                } else {
+                    INITIAL_ITEMS.forEach(item => {
+                        initialData.items[item.id] = { qty: item.required || 0, exp: '', status: 'ready', note: '', checked: item.type === ITEM_TYPES.CHECKBOX };
+                    });
+                }
+                setFormData(initialData);
+            };
+
+            const selectCheckType = (type) => {
+                setShowTypeModal(false);
+                if (type === 'new') {
+                    initForm();
+                    // Check Stock Logic
+                    if(lastStockCheck) {
+                        const daysSince = Math.floor((new Date() - lastStockCheck) / (1000*60*60*24));
+                        if(daysSince >= 14) setShowStockAlert({ overdue: daysSince - 14 });
+                    }
+                    setView('form');
+                } else {
+                    if (records.length > 0) {
+                        initForm(records[0]);
+                        setShowCopyWarning(true);
+                    } else {
+                        alert("ไม่พบประวัติการบันทึกก่อนหน้า");
+                        initForm();
+                        setView('form');
+                    }
+                }
+            };
+
+            const checkExpirations = (items) => {
+                const alerts = [];
+                Object.entries(items).forEach(([key, val]) => {
+                    if (val.exp) {
+                        const days = getDaysDiff(val.exp);
+                        const itemDef = INITIAL_ITEMS.find(i => i.id === key);
+                        if (days < 0) alerts.push({ name: itemDef.name, status: 'expired', days });
+                        else if (days <= 7) alerts.push({ name: itemDef.name, status: 'warning', days });
+                    }
+                });
+                return alerts;
+            };
+
+            useEffect(() => {
+                if (view === 'form' && Object.keys(formData.items || {}).length > 0) {
+                    const expAlerts = checkExpirations(formData.items);
+                    if (expAlerts.length > 0) {
+                        setExpiryList(expAlerts);
+                        setShowExpiryAlert(true);
+                    }
+                }
+            }, [view]);
+
+            const handleSave = async () => {
+                if (!formData.checker) return alert("กรุณาระบุชื่อผู้ตรวจสอบ");
+                const expAlerts = checkExpirations(formData.items);
+                if (expAlerts.some(a => a.status === 'expired')) {
+                    setExpiryList(expAlerts);
+                    setShowExpiryAlert(true);
+                    return alert("ไม่สามารถบันทึกได้ เนื่องจากมีรายการหมดอายุ");
+                }
+
+                setIsLoading(true);
+                
+                const isReadyOverall = Object.values(formData.items).every(i => (i.status === 'ready' || i.status === true || (i.checked === true)));
+                const payload = {
+                    id: Date.now(),
+                    ...formData,
+                    generalReady: isReadyOverall ? 'พร้อมใช้' : 'ไม่พร้อมใช้'
+                };
+
+                // Prepare Summary
+                const missing = [];
+                const broken = [];
+                Object.entries(formData.items).forEach(([key, val]) => {
+                    const def = INITIAL_ITEMS.find(i => i.id === key);
+                    if (def.type === ITEM_TYPES.CHECKBOX && !val.checked) missing.push(def.name);
+                    if ((def.type === ITEM_TYPES.QTY_STATUS || def.type === ITEM_TYPES.QTY_EXP_STATUS) && val.status === 'not_ready') broken.push(`${def.name} (${val.note})`);
+                });
+                setSummaryData({ missing, broken });
+
+                // Send to GAS
+                try {
+                    // Send as text/plain to avoid preflight complications in some browsers with GAS
+                    await fetch(GAS_API_URL, {
+                        method: 'POST',
+                        mode: 'no-cors', // Important for simple posting to GAS
+                        headers: { 'Content-Type': 'text/plain' },
+                        body: JSON.stringify(payload)
+                    });
+                    
+                    // Since no-cors returns opaque response, we assume success or wait a bit then refresh
+                    setTimeout(() => {
+                        setIsLoading(false);
+                        setView('summary');
+                        fetchData(); // Reload background data
+                    }, 1500);
+
+                } catch (error) {
+                    alert("เกิดข้อผิดพลาดในการบันทึก: " + error);
+                    setIsLoading(false);
+                }
+            };
+
+            // --- RENDERING ---
+            if (isLoading) return (
+                <div className="min-h-screen bg-slate-50 flex flex-col items-center justify-center">
+                    <div className="w-16 h-16 border-4 border-teal-200 border-t-teal-600 rounded-full animate-spin-slow"></div>
+                    <p className="mt-4 text-teal-800 animate-pulse">กำลังโหลดข้อมูล...</p>
+                </div>
+            );
+
+            return (
+                <div className="pb-20">
+                    <header className="bg-gradient-to-r from-teal-600 to-emerald-600 text-white p-4 shadow-lg sticky top-0 z-40">
+                        <div className="container mx-auto flex items-center gap-4 max-w-3xl">
+                            <div className="w-12 h-12 bg-white rounded-full flex items-center justify-center overflow-hidden shadow-md">
+                                <img src="http://192.168.1.15/intranet/login/images/logo_swd.png" onError={(e) => {e.target.onerror = null; e.target.src = "https://cdn-icons-png.flaticon.com/512/2966/2966327.png"}} alt="Logo" className="w-10 h-10 object-contain"/>
+                            </div>
+                            <div>
+                                <h1 className="text-xl font-bold leading-tight">Emergency Cart Check</h1>
+                                <p className="text-teal-100 text-xs">หอผู้ป่วยสงฆ์อาพาธ</p>
+                            </div>
+                        </div>
+                    </header>
+
+                    <main className="container mx-auto p-4 max-w-3xl">
+                        {/* DASHBOARD */}
+                        {view === 'dashboard' && (
+                            <div className="space-y-6 animate-fade-in">
+                                <div className="bg-white rounded-2xl p-6 shadow-sm border border-teal-100 text-center">
+                                    <h2 className="text-gray-600 mb-4">สถานะล่าสุด</h2>
+                                    {records.length > 0 ? (
+                                        <div className={`text-3xl font-bold mb-2 ${records[0].generalReady === 'พร้อมใช้' ? 'text-green-600' : 'text-red-500'}`}>
+                                            {records[0].generalReady}
+                                        </div>
+                                    ) : <div className="text-gray-400 mb-2">ยังไม่มีข้อมูล</div>}
+                                    <p className="text-sm text-gray-500 mb-6">ReCheck Stock ครั้งถัดไป: <span className="text-teal-600 font-bold">{lastStockCheck ? formatDate(new Date(lastStockCheck.getTime() + 14 * 24 * 60 * 60 * 1000)) : '-'}</span></p>
+                                    <button onClick={() => setShowTypeModal(true)} className="w-full bg-teal-600 hover:bg-teal-700 text-white py-3 rounded-xl shadow-lg shadow-teal-200 flex items-center justify-center gap-2 text-lg transition-transform active:scale-95"><SimpleIcon name="Plus"/> เพิ่มรายการตรวจสอบ</button>
+                                </div>
+
+                                <div>
+                                    <h3 className="text-lg font-bold text-gray-700 mb-3 flex items-center gap-2"><SimpleIcon name="History" size={20}/> ประวัติการบันทึก</h3>
+                                    <div className="space-y-3">
+                                        {records.map((rec) => (
+                                            <div key={rec.id} className="bg-white p-4 rounded-xl shadow-sm border border-gray-100 flex justify-between items-center hover:bg-teal-50 transition-colors cursor-pointer group">
+                                                <div>
+                                                    <div className="flex items-center gap-2 mb-1">
+                                                        <SimpleIcon name="Calendar" className="w-4 h-4 text-gray-400"/>
+                                                        <span className="font-bold text-gray-700">{formatDate(rec.date)}</span>
+                                                        <span className="text-xs bg-gray-100 text-gray-500 px-2 rounded-md">เวร{rec.shift}</span>
+                                                    </div>
+                                                    <div className="text-sm text-gray-500">โดย: {rec.checker}</div>
+                                                </div>
+                                                <StatusBadge status={rec.generalReady === 'พร้อมใช้'} />
+                                            </div>
+                                        ))}
+                                    </div>
+                                </div>
+                            </div>
+                        )}
+
+                        {/* FORM */}
+                        {view === 'form' && (
+                            <div className="animate-slide-up">
+                                <button onClick={() => setView('dashboard')} className="mb-4 text-gray-500 flex items-center gap-1 hover:text-teal-600"><SimpleIcon name="ChevronLeft" className="w-5 h-5"/> กลับหน้าหลัก</button>
+                                <div className="bg-white rounded-xl shadow-lg overflow-hidden mb-8">
+                                    <div className="p-4 grid grid-cols-2 gap-4 bg-teal-50 border-b border-teal-100">
+                                        <div>
+                                            <label className="block text-xs text-gray-500 mb-1">วันที่</label>
+                                            <input type="date" className="w-full bg-white border border-gray-200 rounded-lg p-2" value={formData.date} onChange={e => setFormData({...formData, date: e.target.value})}/>
+                                        </div>
+                                        <div>
+                                            <label className="block text-xs text-gray-500 mb-1">เวร</label>
+                                            <select className="w-full bg-white border border-gray-200 rounded-lg p-2" value={formData.shift} onChange={e => setFormData({...formData, shift: e.target.value})}>
+                                                <option>ดึก</option><option>เช้า</option><option>บ่าย</option>
+                                            </select>
+                                        </div>
+                                    </div>
+                                    
+                                    {['Equipment', 'Drugs', 'Airway', 'Supplies', 'General'].map(cat => {
+                                        const items = INITIAL_ITEMS.filter(i => i.category === cat);
+                                        if(items.length === 0) return null;
+                                        return (
+                                            <div key={cat} className="border-t border-gray-100">
+                                                <div className="bg-gray-50 px-4 py-2 text-xs font-bold text-gray-500 uppercase">{cat === 'General' ? 'สรุปผล' : cat}</div>
+                                                <div className="divide-y divide-gray-100">
+                                                    {items.map(item => (
+                                                        <div key={item.id} className="p-4 hover:bg-gray-50">
+                                                            <div className="flex justify-between items-start mb-2">
+                                                                <div>
+                                                                    <div className="font-medium text-gray-800">{item.name}</div>
+                                                                    {item.required && <div className="text-xs text-gray-400">ควรมี: {item.required}</div>}
+                                                                </div>
+                                                                {item.type === ITEM_TYPES.CHECKBOX ? (
+                                                                    <input type="checkbox" className="w-5 h-5 accent-teal-600" checked={formData.items[item.id]?.checked || false} onChange={(e) => {
+                                                                        const n = {...formData.items}; n[item.id].checked = e.target.checked; setFormData({...formData, items: n});
+                                                                    }}/>
+                                                                ) : (
+                                                                    <div className="flex gap-1">
+                                                                        <button onClick={() => {const n = {...formData.items}; n[item.id].status = 'ready'; setFormData({...formData, items: n});}} className={`px-3 py-1 rounded-lg text-xs border ${formData.items[item.id]?.status === 'ready' ? 'bg-green-600 text-white border-green-600' : 'bg-white text-gray-500'}`}>พร้อม</button>
+                                                                        <button onClick={() => {const n = {...formData.items}; n[item.id].status = 'not_ready'; setFormData({...formData, items: n});}} className={`px-3 py-1 rounded-lg text-xs border ${formData.items[item.id]?.status === 'not_ready' ? 'bg-red-500 text-white border-red-500' : 'bg-white text-gray-500'}`}>ไม่พร้อม</button>
+                                                                    </div>
+                                                                )}
+                                                            </div>
+                                                            {/* Dynamic Inputs */}
+                                                            <div className="grid grid-cols-2 gap-2 mt-2">
+                                                                {(item.type.includes('qty')) && (
+                                                                    <input type="number" placeholder="จำนวน" className="bg-white border rounded px-2 py-1 text-sm w-full" value={formData.items[item.id]?.qty || ''} onChange={e => {const n = {...formData.items}; n[item.id].qty = e.target.value; setFormData({...formData, items: n});}}/>
+                                                                )}
+                                                                {item.type.includes('exp') && (
+                                                                    <input type="date" className={`bg-white border rounded px-2 py-1 text-sm w-full ${getDaysDiff(formData.items[item.id]?.exp) < 0 ? 'border-red-500 text-red-500' : ''}`} value={formData.items[item.id]?.exp || ''} onChange={e => {const n = {...formData.items}; n[item.id].exp = e.target.value; setFormData({...formData, items: n});}}/>
+                                                                )}
+                                                            </div>
+                                                            {formData.items[item.id]?.status === 'not_ready' && (
+                                                                <input type="text" placeholder="ระบุสาเหตุ" className="mt-2 w-full border-b border-red-200 bg-red-50 px-2 py-1 text-sm text-red-700" value={formData.items[item.id]?.note || ''} onChange={e => {const n = {...formData.items}; n[item.id].note = e.target.value; setFormData({...formData, items: n});}}/>
+                                                            )}
+                                                        </div>
+                                                    ))}
+                                                </div>
+                                            </div>
+                                        );
+                                    })}
+                                    
+                                    <div className="p-4 bg-teal-50 border-t border-teal-100">
+                                        <label className="flex items-center gap-3 cursor-pointer">
+                                            <input type="checkbox" className="w-5 h-5 accent-teal-600" checked={formData.isReCheckStock} onChange={e => setFormData({...formData, isReCheckStock: e.target.checked})}/>
+                                            <span className="text-teal-800 font-bold">บันทึกว่าเป็น ReCheck Stock</span>
+                                        </label>
+                                    </div>
+                                    <div className="p-4 bg-gray-50 border-t border-gray-200">
+                                        <label className="block text-sm font-bold text-gray-700 mb-1">ผู้ตรวจสอบ</label>
+                                        <input type="text" placeholder="ลงชื่อ" className="w-full bg-white border border-gray-300 rounded-lg p-3" value={formData.checker} onChange={e => setFormData({...formData, checker: e.target.value})}/>
+                                    </div>
+                                </div>
+                                <button onClick={handleSave} className="w-full bg-teal-600 text-white font-bold py-4 rounded-xl shadow-lg hover:bg-teal-700 transition-colors flex items-center justify-center gap-2 mb-8"><SimpleIcon name="Save"/> บันทึกข้อมูล</button>
+                            </div>
+                        )}
+
+                        {/* SUMMARY */}
+                        {view === 'summary' && (
+                            <div className="animate-scale-up text-center pt-10">
+                                <div className="w-24 h-24 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-6"><SimpleIcon name="CheckCircle" className="w-12 h-12 text-green-600"/></div>
+                                <h2 className="text-2xl font-bold text-gray-800 mb-2">บันทึกข้อมูลสำเร็จ!</h2>
+                                {(summaryData?.missing?.length > 0 || summaryData?.broken?.length > 0) && (
+                                    <div className="bg-white text-left rounded-xl shadow-sm border border-gray-200 p-6 mb-8 max-w-md mx-auto">
+                                        <h3 className="font-bold text-gray-700 mb-4 border-b pb-2">พบสิ่งผิดปกติ</h3>
+                                        {summaryData.missing.map((m, i) => <div key={i} className="text-red-500 text-sm">• ขาด: {m}</div>)}
+                                        {summaryData.broken.map((m, i) => <div key={i} className="text-orange-500 text-sm">• ไม่พร้อม: {m}</div>)}
+                                    </div>
+                                )}
+                                <button onClick={() => setView('dashboard')} className="bg-gray-800 text-white px-8 py-3 rounded-xl">กลับหน้าหลัก</button>
+                            </div>
+                        )}
+                    </main>
+
+                    {/* MODALS */}
+                    <Modal isOpen={showTypeModal} title="เลือกรูปแบบ" onClose={() => setShowTypeModal(false)}>
+                        <div className="grid gap-4">
+                            <button onClick={() => selectCheckType('new')} className="p-4 bg-teal-50 rounded-xl text-left hover:bg-teal-100"><div className="font-bold text-teal-900">ReCheck ใหม่ทั้งหมด</div></button>
+                            <button onClick={() => selectCheckType('copy')} className="p-4 bg-gray-50 rounded-xl text-left hover:bg-gray-100"><div className="font-bold text-gray-900">ดึงรายการก่อนหน้า</div></button>
+                        </div>
+                    </Modal>
+
+                    <Modal isOpen={showStockAlert} title="แจ้งเตือน Stock" onClose={() => setShowStockAlert(false)}>
+                        <div className="text-center">
+                            <h3 className="font-bold text-xl mb-2 text-orange-600">เกินกำหนด ReCheck {showStockAlert?.overdue} วัน</h3>
+                            <div className="flex gap-2 mt-4">
+                                <button onClick={() => {setFormData(p => ({...p, isReCheckStock: true})); setShowStockAlert(false);}} className="flex-1 bg-teal-600 text-white py-2 rounded-lg">ทำเดี๋ยวนี้</button>
+                                <button onClick={() => {setFormData(p => ({...p, isReCheckStock: false})); setShowStockAlert(false);}} className="flex-1 bg-gray-200 text-gray-600 py-2 rounded-lg">ข้าม</button>
+                            </div>
+                        </div>
+                    </Modal>
+
+                    <Modal isOpen={showCopyWarning} title="ตรวจสอบด่วน" onClose={() => setShowCopyWarning(false)}>
+                        <ul className="space-y-2 text-sm text-gray-600 bg-yellow-50 p-4 rounded-lg border border-yellow-100">
+                            <li>1. Sticker Visual Control สมบูรณ์</li>
+                            <li>2. ตรวจสอบวันหมดอายุ</li>
+                            <li>3. ความพร้อม Laryngoscope</li>
+                        </ul>
+                        <button onClick={() => {setShowCopyWarning(false); setView('form');}} className="w-full mt-4 bg-teal-600 text-white py-2 rounded-lg">ยืนยัน</button>
+                    </Modal>
+
+                     <Modal isOpen={showExpiryAlert} title="แจ้งเตือนวันหมดอายุ" onClose={() => setShowExpiryAlert(false)}>
+                        <div className="space-y-2">
+                             {expiryList.map((item, idx) => (
+                                <div key={idx} className={`text-sm ${item.status === 'expired' ? 'text-red-600 font-bold' : 'text-yellow-600'}`}>
+                                    {item.name}: {item.status === 'expired' ? 'หมดอายุแล้ว!' : `เหลือ ${item.days} วัน`}
+                                </div>
+                            ))}
+                        </div>
+                    </Modal>
+                </div>
+            );
+        }
+
+        const root = ReactDOM.createRoot(document.getElementById('root'));
+        root.render(<App />);
+    </script>
+</body>
+</html>
