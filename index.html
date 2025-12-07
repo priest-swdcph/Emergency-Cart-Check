@@ -4,6 +4,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Emergency Cart Check</title>
+    
+    <!-- FAVICON: เปลี่ยนไอคอนรูปลูกโลกเป็นรูปกระเป๋าพยาบาล -->
     <link rel="icon" type="image/png" href="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRYfBIvo5I6imKO2PO2Q685aje7a48lvI5rrQ&s">
 
     <!-- React & ReactDOM -->
@@ -517,6 +519,7 @@
                                                                     )}
                                                                     {item.type.includes('exp') && (
                                                                         <div>
+                                                                            <label className="block text-[10px] text-slate-400 mb-1">วันหมดอายุ (ถ้ามี)</label>
                                                                             <input 
                                                                                 type="date" 
                                                                                 className={`bg-slate-50 border rounded-xl px-3 py-2 text-sm w-full focus:ring-2 focus:ring-teal-500 outline-none transition-all ${getDaysDiff(formData.items[item.id]?.exp) < 0 ? 'border-red-500 text-red-500 bg-red-50' : 'border-slate-200'}`} 
@@ -562,7 +565,7 @@
                                         <input type="text" placeholder="พิมพ์ชื่อ-นามสกุลของคุณ" className="w-full bg-white border border-slate-300 rounded-xl p-3.5 text-sm focus:ring-2 focus:ring-slate-800 outline-none shadow-sm transition-all" value={formData.checker || ''} onChange={e => setFormData({...formData, checker: e.target.value})}/>
                                     </div>
                                 </div>
-                                <div className="fixed bottom-0 left-0 w-full bg-white/90 backdrop-blur-md p-4 border-t border-slate-200 z-50 flex justify-center">
+                                <div className="mt-6 w-full flex justify-center">
                                      <button onClick={handleSave} className="w-full max-w-2xl bg-slate-900 hover:bg-slate-800 text-white font-bold py-4 rounded-2xl shadow-xl shadow-slate-200 flex items-center justify-center gap-2 transition-all active:scale-[0.98]">
                                         <SimpleIcon name="Save" className="w-5 h-5"/> บันทึกข้อมูล
                                     </button>
@@ -598,7 +601,7 @@
                             <button onClick={() => selectCheckType('new')} className="p-5 bg-teal-50 rounded-2xl text-left hover:bg-teal-100 border border-teal-100 transition-colors group relative overflow-hidden">
                                 <div className="absolute right-0 bottom-0 opacity-10 -mr-4 -mb-4"><SimpleIcon name="Plus" className="w-24 h-24 text-teal-600"/></div>
                                 <div className="font-bold text-teal-900 text-lg group-hover:text-teal-700 relative z-10">ตรวจสอบใหม่</div>
-                                <div className="text-teal-600 text-sm mt-1 relative z-10 font-medium">สำหรับ Recheck Stock</div>
+                                <div className="text-teal-600 text-sm mt-1 relative z-10 font-medium">สำหรับRe-Check Stock</div>
                             </button>
                             <button onClick={() => selectCheckType('copy')} className="p-5 bg-white rounded-2xl text-left hover:bg-slate-50 border border-slate-200 transition-colors group shadow-sm relative overflow-hidden">
                                 <div className="font-bold text-slate-900 text-lg group-hover:text-slate-700">ดึงรายการล่าสุด</div>
