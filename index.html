@@ -31,12 +31,16 @@
         @keyframes slideUp { from { transform: translateY(20px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
         @keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
         @keyframes scaleUp { from { transform: scale(0.95); opacity: 0; } to { transform: scale(1); opacity: 1; } }
+        
         ::-webkit-scrollbar { width: 6px; }
         ::-webkit-scrollbar-track { background: #f1f5f9; }
         ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 10px; }
         
         /* Calendar Styles */
         .calendar-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 4px; }
+        @media (min-width: 768px) {
+            .calendar-grid { gap: 8px; }
+        }
         .calendar-day { 
             aspect-ratio: 1/1.3; 
             display: flex; 
@@ -58,6 +62,9 @@
             justify-content: center;
             margin-top: 2px;
             position: relative;
+        }
+        @media (min-width: 768px) {
+            .shift-dot { height: 22px; font-size: 10px; }
         }
         .recheck-star {
             position: absolute;
@@ -159,12 +166,12 @@
             if (!isOpen) return null;
             return (
                 <div className="fixed inset-0 z-[70] flex items-center justify-center bg-black/40 p-4 backdrop-blur-sm animate-fade-in">
-                    <div className="bg-white rounded-3xl shadow-2xl w-full max-w-sm overflow-hidden animate-scale-up ring-1 ring-black/5">
+                    <div className="bg-white rounded-3xl shadow-2xl w-full max-w-md overflow-hidden animate-scale-up ring-1 ring-black/5">
                         <div className="bg-white px-6 py-4 flex justify-between items-center border-b border-gray-100">
                             <h3 className="text-lg font-black text-slate-800 flex items-center gap-2">{title}</h3>
                             <button onClick={onClose} className="text-slate-400 hover:text-slate-600 p-1"><SimpleIcon name="XCircle" className="w-6 h-6"/></button>
                         </div>
-                        <div className="p-6 max-h-[75vh] overflow-y-auto">{children}</div>
+                        <div className="p-6 max-h-[85vh] overflow-y-auto">{children}</div>
                     </div>
                 </div>
             );
@@ -207,7 +214,7 @@
                     </div>
                     {isOpen && (
                         <div className="px-4 pb-4 animate-fade-in border-t border-slate-50 pt-3">
-                             <div className="space-y-4">
+                             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                                 {CATEGORY_ORDER.map(cat => {
                                     const itemsInCat = itemsDef.filter(i => i.category === cat);
                                     if(itemsInCat.length === 0) return null;
@@ -308,7 +315,6 @@
                     return d.getDate() === day && r.shift.includes(shiftName);
                 });
                 if (dayRecs.length === 0) return { status: 'none', isRC: false };
-                // ดึงข้อมูลล่าสุดของเวรนั้นๆ หากมีการตรวจซ้ำ
                 const latest = dayRecs.reduce((prev, curr) => (prev.id > curr.id) ? prev : curr);
                 return { 
                     status: latest.generalReady === 'พร้อมใช้' ? 'ready' : 'not_ready',
@@ -318,7 +324,7 @@
 
             const renderShiftIndicator = (day, shiftCode, shiftName) => {
                 const data = getShiftData(day, shiftName);
-                let colorClass = "bg-slate-50 text-slate-300 border-slate-100"; // default: none
+                let colorClass = "bg-slate-50 text-slate-300 border-slate-100";
                 if (data.status === 'ready') colorClass = "bg-emerald-500 text-white border-emerald-600";
                 if (data.status === 'not_ready') colorClass = "bg-red-500 text-white border-red-600";
                 
@@ -341,7 +347,7 @@
                 for (let i = 1; i <= daysCount; i++) {
                     days.push(
                         <div key={i} className="calendar-day bg-white border border-slate-100 hover:bg-slate-50 transition-colors">
-                            <div className="font-black text-slate-800 text-[10px] mb-1">{i}</div>
+                            <div className="font-black text-slate-800 text-[10px] sm:text-xs mb-1">{i}</div>
                             <div className="flex flex-col gap-0.5">
                                 {renderShiftIndicator(i, 'ด', 'ดึก')}
                                 {renderShiftIndicator(i, 'ช', 'เช้า')}
@@ -357,23 +363,23 @@
                 <div className="animate-slide-up pb-10">
                     <div className="flex items-center justify-between mb-6">
                         <button onClick={onBack} className="text-slate-500 hover:text-slate-800 flex items-center gap-2 text-[10px] font-black uppercase bg-white px-4 py-2 rounded-2xl border border-slate-200 shadow-sm transition-all"><SimpleIcon name="ChevronLeft" className="w-3.5 h-3.5"/> กลับ</button>
-                        <div className="text-[10px] text-slate-400 font-black uppercase tracking-widest">รายงานการตรวจสอบรายเวร</div>
+                        <div className="text-[10px] text-slate-400 font-black uppercase tracking-widest hidden sm:block">รายงานการตรวจสอบรายเวร</div>
                     </div>
                     
-                    <div className="bg-white rounded-[2.5rem] p-6 shadow-xl border border-slate-100 mb-6">
+                    <div className="bg-white rounded-[2.5rem] p-4 sm:p-8 shadow-xl border border-slate-100 mb-6">
                         <div className="flex justify-between items-center mb-6 px-2">
                             <button onClick={() => setCurrentDate(new Date(year, month - 1, 1))} className="p-2 hover:bg-slate-50 rounded-full text-slate-400"><SimpleIcon name="ChevronLeft" className="w-5 h-5"/></button>
-                            <h2 className="font-black text-slate-800 text-base">{monthNames[month]} {year + 543}</h2>
+                            <h2 className="font-black text-slate-800 text-base md:text-xl">{monthNames[month]} {year + 543}</h2>
                             <button onClick={() => setCurrentDate(new Date(year, month + 1, 1))} className="p-2 hover:bg-slate-50 rounded-full text-slate-400 rotate-180"><SimpleIcon name="ChevronLeft" className="w-5 h-5"/></button>
                         </div>
                         
                         <div className="calendar-grid text-center mb-3">
-                            {["อา", "จ", "อ", "พ", "พฤ", "ศ", "ส"].map(d => <div key={d} className="text-[9px] font-black text-slate-400 uppercase tracking-widest">{d}</div>)}
+                            {["อา", "จ", "อ", "พ", "พฤ", "ศ", "ส"].map(d => <div key={d} className="text-[9px] sm:text-[11px] font-black text-slate-400 uppercase tracking-widest">{d}</div>)}
                         </div>
                         
                         <div className="calendar-grid">{renderCalendarDays()}</div>
                         
-                        <div className="mt-6 flex flex-wrap gap-x-4 gap-y-2 justify-center text-[9px] font-black text-slate-400 uppercase tracking-widest bg-slate-50/50 p-4 rounded-2xl">
+                        <div className="mt-6 flex flex-wrap gap-x-4 gap-y-2 justify-center text-[9px] sm:text-[10px] font-black text-slate-400 uppercase tracking-widest bg-slate-50/50 p-4 rounded-2xl">
                             <div className="flex items-center gap-1.5"><div className="w-2.5 h-2.5 rounded bg-emerald-500"></div> พร้อมใช้</div>
                             <div className="flex items-center gap-1.5"><div className="w-2.5 h-2.5 rounded bg-red-500"></div> ไม่พร้อม</div>
                             <div className="flex items-center gap-1.5"><div className="w-2.5 h-2.5 rounded bg-white border border-slate-200"></div> ไม่มีข้อมูล</div>
@@ -381,21 +387,20 @@
                         </div>
                     </div>
 
-                    {/* Monthly Summary Bar */}
                     {monthStats && (
-                        <div className="bg-slate-900 rounded-3xl p-6 shadow-2xl animate-slide-up flex flex-col sm:flex-row items-center justify-between gap-4 border border-slate-800">
-                            <div>
-                                <h4 className="text-[10px] font-black text-slate-500 uppercase tracking-[0.2em] mb-1">สรุปคุณภาพความพร้อมใช้ประจำเดือน</h4>
-                                <p className="text-white font-black text-sm">{monthNames[month]} {year + 543}</p>
+                        <div className="bg-slate-900 rounded-[2rem] sm:rounded-[2.5rem] p-6 sm:p-8 shadow-2xl animate-slide-up flex flex-col md:flex-row items-center justify-between gap-6 border border-slate-800">
+                            <div className="text-center md:text-left">
+                                <h4 className="text-[10px] sm:text-[11px] font-black text-slate-500 uppercase tracking-[0.2em] mb-1">สรุปคุณภาพความพร้อมใช้ประจำเดือน</h4>
+                                <p className="text-white font-black text-sm sm:text-lg">{monthNames[month]} {year + 543}</p>
                             </div>
-                            <div className="flex items-end gap-6">
-                                <div className="text-right">
+                            <div className="flex items-center gap-8 sm:gap-12">
+                                <div className="text-center md:text-right">
                                     <div className="text-[10px] font-black text-slate-500 uppercase mb-0.5">รวมการตรวจสอบ</div>
-                                    <div className="text-xl font-black text-white">{monthStats.total} <span className="text-[10px] text-slate-400">ครั้ง</span></div>
+                                    <div className="text-xl sm:text-2xl font-black text-white">{monthStats.total} <span className="text-[10px] text-slate-400">ครั้ง</span></div>
                                 </div>
-                                <div className="text-right">
+                                <div className="text-center md:text-right">
                                     <div className="text-[10px] font-black text-emerald-500 uppercase mb-0.5">อัตราพร้อมใช้</div>
-                                    <div className="text-3xl font-black text-emerald-400 tracking-tighter">{monthStats.percent}%</div>
+                                    <div className="text-3xl sm:text-5xl font-black text-emerald-400 tracking-tighter">{monthStats.percent}%</div>
                                 </div>
                             </div>
                         </div>
@@ -429,36 +434,40 @@
                         <button onClick={onBack} className="text-slate-500 hover:text-slate-800 flex items-center gap-2 text-[10px] font-black uppercase bg-white px-4 py-2 rounded-2xl border border-slate-200 shadow-sm transition-all"><SimpleIcon name="ChevronLeft" className="w-3.5 h-3.5"/> กลับ</button>
                         <div className="text-[10px] text-slate-400 font-black uppercase tracking-widest">ตั้งค่ารายการเวชภัณฑ์</div>
                     </div>
-                    <div className="bg-white rounded-3xl p-6 shadow-xl border border-slate-100 mb-6">
+                    <div className="bg-white rounded-3xl p-6 sm:p-8 shadow-xl border border-slate-100 mb-8">
                         <h3 className="font-black text-slate-800 mb-6 flex items-center gap-2 tracking-tight">
                             {editingId ? <><SimpleIcon name="Edit" className="w-5 h-5 text-orange-500"/> แก้ไขรายการ</> : <><SimpleIcon name="Plus" className="w-5 h-5 text-teal-600"/> เพิ่มรายการใหม่</>}
                         </h3>
-                        <div className="space-y-4">
-                            <select className="w-full bg-slate-50 border border-slate-200 rounded-2xl px-4 py-3 text-sm font-bold focus:ring-2 focus:ring-teal-500 outline-none transition-all" value={formData.category} onChange={e => setFormData({...formData, category: e.target.value})}>
-                                {CATEGORY_ORDER.map(c => <option key={c} value={c}>{c}</option>)}
-                            </select>
-                            <input type="text" placeholder="ชื่อเวชภัณฑ์" className="w-full bg-slate-50 border border-slate-200 rounded-2xl px-4 py-3 text-sm font-bold focus:ring-2 focus:ring-teal-500 outline-none transition-all" value={formData.name} onChange={e => setFormData({...formData, name: e.target.value})} />
-                            <div className="grid grid-cols-2 gap-4">
-                                <select className="w-full bg-slate-50 border border-slate-200 rounded-2xl px-4 py-3 text-sm font-bold focus:ring-2 focus:ring-teal-500 outline-none transition-all" value={formData.type} onChange={e => setFormData({...formData, type: e.target.value})}>
-                                    <option value={ITEM_TYPES.QTY_EXP_STATUS}>จำนวน+EXP</option>
-                                    <option value={ITEM_TYPES.QTY_STATUS}>จำนวน+สถานะ</option>
-                                    <option value={ITEM_TYPES.CHECK_HAVE}>มี/ไม่มี</option>
-                                    <option value={ITEM_TYPES.STATUS_ONLY}>สถานะเท่านั้น</option>
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                            <div className="space-y-4">
+                                <select className="w-full bg-slate-50 border border-slate-200 rounded-2xl px-4 py-3 text-sm font-bold focus:ring-2 focus:ring-teal-500 outline-none transition-all" value={formData.category} onChange={e => setFormData({...formData, category: e.target.value})}>
+                                    {CATEGORY_ORDER.map(c => <option key={c} value={c}>{c}</option>)}
                                 </select>
-                                <input type="number" placeholder="จำนวนควรมี" className="w-full bg-slate-50 border border-slate-200 rounded-2xl px-4 py-3 text-sm font-bold focus:ring-2 focus:ring-teal-500 outline-none transition-all" value={formData.required} onChange={e => setFormData({...formData, required: e.target.value})} />
+                                <input type="text" placeholder="ชื่อเวชภัณฑ์" className="w-full bg-slate-50 border border-slate-200 rounded-2xl px-4 py-3 text-sm font-bold focus:ring-2 focus:ring-teal-500 outline-none transition-all" value={formData.name} onChange={e => setFormData({...formData, name: e.target.value})} />
                             </div>
-                            <div className="flex gap-3">
-                                <button onClick={handleSave} className="flex-1 bg-slate-900 text-white py-4 rounded-2xl font-black text-xs shadow-lg active:scale-95 transition-all">{editingId ? 'อัปเดต' : 'บันทึก'}</button>
-                                {editingId && <button onClick={() => setEditingId(null)} className="flex-1 bg-slate-100 text-slate-500 py-4 rounded-2xl font-black text-xs">ยกเลิก</button>}
+                            <div className="space-y-4">
+                                <div className="grid grid-cols-2 gap-4">
+                                    <select className="w-full bg-slate-50 border border-slate-200 rounded-2xl px-4 py-3 text-sm font-bold focus:ring-2 focus:ring-teal-500 outline-none transition-all" value={formData.type} onChange={e => setFormData({...formData, type: e.target.value})}>
+                                        <option value={ITEM_TYPES.QTY_EXP_STATUS}>จำนวน+EXP</option>
+                                        <option value={ITEM_TYPES.QTY_STATUS}>จำนวน+สถานะ</option>
+                                        <option value={ITEM_TYPES.CHECK_HAVE}>มี/ไม่มี</option>
+                                        <option value={ITEM_TYPES.STATUS_ONLY}>สถานะเท่านั้น</option>
+                                    </select>
+                                    <input type="number" placeholder="จำนวนควรมี" className="w-full bg-slate-50 border border-slate-200 rounded-2xl px-4 py-3 text-sm font-bold focus:ring-2 focus:ring-teal-500 outline-none transition-all" value={formData.required} onChange={e => setFormData({...formData, required: e.target.value})} />
+                                </div>
+                                <div className="flex gap-3">
+                                    <button onClick={handleSave} className="flex-1 bg-slate-900 text-white py-3 rounded-2xl font-black text-xs shadow-lg active:scale-95 transition-all">{editingId ? 'อัปเดต' : 'บันทึก'}</button>
+                                    {editingId && <button onClick={() => setEditingId(null)} className="flex-1 bg-slate-100 text-slate-500 py-3 rounded-2xl font-black text-xs">ยกเลิก</button>}
+                                </div>
                             </div>
                         </div>
                     </div>
-                    <div className="space-y-4">
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                         {CATEGORY_ORDER.map(cat => {
                             const catItems = itemsDef.filter(i => i.category === cat);
                             if (catItems.length === 0) return null;
                             return (
-                                <div key={cat} className="bg-white rounded-3xl shadow-sm border border-slate-100 overflow-hidden">
+                                <div key={cat} className="bg-white rounded-3xl shadow-sm border border-slate-100 overflow-hidden h-fit">
                                     <div className="bg-slate-50 px-5 py-2 text-[10px] font-black text-slate-500 uppercase tracking-widest">{cat}</div>
                                     <div className="divide-y divide-slate-50">
                                         {catItems.map(item => (
@@ -495,9 +504,9 @@
                         <SimpleIcon name="ChevronDown" className={`w-3.5 h-3.5 transition-transform ${isOpen ? 'rotate-180' : ''}`}/>
                     </div>
                     {isOpen && (
-                        <div className="divide-y divide-slate-50">
+                        <div className="grid grid-cols-1 md:grid-cols-2 divide-y md:divide-y-0 md:gap-x-4 px-2 bg-white">
                             {items.map(item => (
-                                <div key={item.id} className="p-5">
+                                <div key={item.id} className="p-5 border-b border-slate-50 md:border-b md:border-slate-100">
                                     <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-3 mb-3">
                                         <div className="flex-1">
                                             <div className="font-bold text-slate-800 text-sm">{item.name}</div>
@@ -520,10 +529,10 @@
                                     {item.type !== ITEM_TYPES.STATUS_ONLY && item.type !== ITEM_TYPES.CHECK_HAVE && (
                                         <div className="grid grid-cols-2 gap-3 mt-2">
                                             {item.type.includes('qty') && (
-                                                <input type="number" placeholder="จำนวน" className="bg-white border border-slate-200 rounded-xl px-3 py-2 text-xs font-bold w-full" value={formData.items[item.id]?.qty || ''} onChange={e => updateItem(item.id, 'qty', e.target.value)}/>
+                                                <input type="number" placeholder="จำนวน" className="bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-xs font-bold w-full focus:ring-2 focus:ring-teal-500 outline-none" value={formData.items[item.id]?.qty || ''} onChange={e => updateItem(item.id, 'qty', e.target.value)}/>
                                             )}
                                             {item.type.includes('exp') && (
-                                                <input type="date" className="bg-white border border-slate-200 rounded-xl px-3 py-2 text-xs font-bold w-full" value={formData.items[item.id]?.exp || ''} onChange={e => updateItem(item.id, 'exp', e.target.value)}/>
+                                                <input type="date" className="bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-xs font-bold w-full focus:ring-2 focus:ring-teal-500 outline-none" value={formData.items[item.id]?.exp || ''} onChange={e => updateItem(item.id, 'exp', e.target.value)}/>
                                             )}
                                         </div>
                                     )}
@@ -544,7 +553,6 @@
             const [lastStockCheck, setLastStockCheck] = useState(null);
             const [isLoading, setIsLoading] = useState(true);
             
-            // Modal States
             const [showTypeModal, setShowTypeModal] = useState(false);
             const [showCopyWarning, setShowCopyWarning] = useState(false);
             const [showSaveSuccessModal, setShowSaveSuccessModal] = useState(false);
@@ -677,17 +685,17 @@
             );
 
             return (
-                <div className="pb-10 max-w-xl mx-auto min-h-screen">
-                    <header className="bg-white/90 backdrop-blur-md sticky top-0 z-50 border-b border-slate-100 shadow-sm">
+                <div className="pb-10 w-full max-w-4xl mx-auto min-h-screen px-2 sm:px-4">
+                    <header className="bg-white/90 backdrop-blur-md sticky top-0 z-50 border-b border-slate-100 shadow-sm rounded-b-3xl mt-2">
                         <div className="px-6 py-4 flex items-center justify-between">
                             <div className="flex items-center gap-3">
-                                <img src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRYfBIvo5I6imKO2PO2Q685aje7a48lvI5rrQ&s" className="w-11 h-11 rounded-2xl shadow-xl shadow-red-100 border border-white" />
+                                <img src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRYfBIvo5I6imKO2PO2Q685aje7a48lvI5rrQ&s" className="w-10 h-10 sm:w-12 sm:h-12 rounded-2xl shadow-xl shadow-red-100 border border-white" />
                                 <div>
-                                    <h1 className="text-sm font-black text-slate-800 tracking-tight leading-tight">Emergency Cart Check</h1>
-                                    <p className="text-[10px] text-slate-400 font-black uppercase tracking-widest mt-0.5">หอสงฆ์อาพาธ</p>
+                                    <h1 className="text-xs sm:text-sm font-black text-slate-800 tracking-tight leading-tight uppercase">Emergency Cart Check</h1>
+                                    <p className="text-[9px] sm:text-[10px] text-slate-400 font-black uppercase tracking-widest mt-0.5">หอสงฆ์อาพาธ</p>
                                 </div>
                             </div>
-                            <div className="flex gap-2.5">
+                            <div className="flex gap-1.5 sm:gap-2.5">
                                 <button onClick={() => setView('dashboard')} className={`p-2 rounded-xl transition-all ${view==='dashboard'?'bg-teal-50 text-teal-600 shadow-inner':'text-slate-400 hover:bg-slate-50'}`} title="หน้าหลัก"><SimpleIcon name="History" className="w-5 h-5"/></button>
                                 <button onClick={() => setView('calendar')} className={`p-2 rounded-xl transition-all ${view==='calendar'?'bg-teal-50 text-teal-600 shadow-inner':'text-slate-400 hover:bg-slate-50'}`} title="ปฏิทิน"><SimpleIcon name="Calendar" className="w-5 h-5"/></button>
                                 <button onClick={() => setView('settings')} className={`p-2 rounded-xl transition-all ${view==='settings'?'bg-teal-50 text-teal-600 shadow-inner':'text-slate-400 hover:bg-slate-50'}`} title="ตั้งค่า"><SimpleIcon name="Settings" className="w-5 h-5"/></button>
@@ -695,40 +703,50 @@
                         </div>
                     </header>
 
-                    <main className="p-4">
+                    <main className="py-6 px-1 sm:px-2">
                         {view === 'dashboard' && (
-                            <div className="space-y-6 animate-fade-in">
-                                <div className="bg-white rounded-[2rem] p-8 shadow-xl shadow-slate-200/50 border border-slate-100 text-center relative overflow-hidden">
-                                    <h2 className="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] mb-4">สถานะรถ Emergency ล่าสุด</h2>
-                                    {records.length > 0 ? (
-                                        <div className={`text-5xl font-black mb-6 tracking-tighter ${records[0].generalReady === 'พร้อมใช้' ? 'text-emerald-600' : 'text-red-500'}`}>
-                                            {records[0].generalReady}
-                                        </div>
-                                    ) : <div className="text-slate-300 text-sm mb-6 italic">ยังไม่มีข้อมูลในระบบ</div>}
+                            <div className="space-y-8 animate-fade-in">
+                                <div className="bg-white rounded-[2.5rem] p-6 sm:p-10 shadow-xl shadow-slate-200/50 border border-slate-100 text-center relative overflow-hidden">
+                                    <h2 className="text-[10px] sm:text-[11px] font-black text-slate-400 uppercase tracking-[0.2em] mb-4">สถานะรถ Emergency ล่าสุด</h2>
                                     
-                                    <div className="bg-teal-50 px-6 py-5 rounded-[2rem] mb-8 border-2 border-teal-100 shadow-inner animate-slide-up group">
-                                        <div className="flex items-center justify-center gap-3 mb-1">
-                                            <SimpleIcon name="RotateCcw" className="w-6 h-6 text-teal-600 animate-pulse"/>
-                                            <span className="text-[11px] font-black text-teal-700 uppercase tracking-widest">กำหนด ReCheck ครั้งถัดไป</span>
+                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-8 items-center">
+                                        <div>
+                                            {records.length > 0 ? (
+                                                <div className={`text-4xl sm:text-6xl font-black tracking-tighter ${records[0].generalReady === 'พร้อมใช้' ? 'text-emerald-600' : 'text-red-500'}`}>
+                                                    {records[0].generalReady}
+                                                </div>
+                                            ) : <div className="text-slate-300 text-sm italic">ยังไม่มีข้อมูลในระบบ</div>}
+                                            <div className="text-[10px] text-slate-300 mt-2 font-black uppercase tracking-widest">อัปเดตล่าสุด: {records.length > 0 ? formatDate(records[0].date) : '-'}</div>
                                         </div>
-                                        <div className="text-2xl font-black text-teal-900 tracking-tight">
-                                            {lastStockCheck ? formatDate(new Date(lastStockCheck.getTime() + 14*24*60*60*1000)) : '-'}
+
+                                        <div className="bg-teal-50 px-6 py-6 rounded-3xl border-2 border-teal-100 shadow-inner group flex flex-col items-center justify-center">
+                                            <div className="flex items-center gap-3 mb-1">
+                                                <SimpleIcon name="RotateCcw" className="w-5 h-5 text-teal-600 animate-pulse"/>
+                                                <span className="text-[10px] sm:text-[11px] font-black text-teal-700 uppercase tracking-widest">กำหนด ReCheck ครั้งถัดไป</span>
+                                            </div>
+                                            <div className="text-2xl sm:text-3xl font-black text-teal-900 tracking-tight">
+                                                {lastStockCheck ? formatDate(new Date(lastStockCheck.getTime() + 14*24*60*60*1000)) : '-'}
+                                            </div>
+                                            <div className="text-[9px] text-teal-500 font-bold uppercase mt-1 opacity-70">ตรวจสอบสต๊อกใหญ่ทุก 14 วัน</div>
                                         </div>
-                                        <div className="text-[9px] text-teal-500 font-bold uppercase mt-1 opacity-70">ทุก 14 วัน (ตรวจสอบสต๊อกใหญ่)</div>
                                     </div>
 
-                                    <button onClick={() => setShowTypeModal(true)} className="w-full bg-slate-900 text-white py-5 rounded-3xl shadow-2xl shadow-slate-300 flex items-center justify-center gap-3 text-lg font-black transition-all active:scale-95 hover:bg-slate-800">
-                                        <SimpleIcon name="Plus" className="w-5 h-5"/> เริ่มตรวจสอบรถ
-                                    </button>
+                                    <div className="mt-10 flex justify-center">
+                                        <button onClick={() => setShowTypeModal(true)} className="w-full sm:w-auto sm:min-w-[300px] bg-slate-900 text-white py-5 px-10 rounded-3xl shadow-2xl shadow-slate-300 flex items-center justify-center gap-3 text-lg font-black transition-all active:scale-95 hover:bg-slate-800">
+                                            <SimpleIcon name="Plus" className="w-5 h-5"/> เริ่มตรวจสอบรถ
+                                        </button>
+                                    </div>
                                 </div>
 
                                 <div>
                                     <h3 className="text-sm font-black text-slate-800 mb-5 flex items-center gap-2 px-2 uppercase tracking-widest">
                                         <div className="w-1.5 h-6 bg-teal-500 rounded-full"></div> รายงานความพร้อมใช้รายเดือน
                                     </h3>
-                                    {Object.entries(groupedRecords).map(([month, recs]) => (
-                                        <MonthGroup key={month} month={month} records={recs} itemsDef={itemsDef} />
-                                    ))}
+                                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 gap-4">
+                                        {Object.entries(groupedRecords).map(([month, recs]) => (
+                                            <MonthGroup key={month} month={month} records={recs} itemsDef={itemsDef} />
+                                        ))}
+                                    </div>
                                 </div>
                             </div>
                         )}
@@ -741,84 +759,89 @@
                             <div className="animate-slide-up pb-10">
                                 <div className="flex items-center justify-between mb-5">
                                     <button onClick={() => setView('dashboard')} className="text-slate-500 flex items-center gap-2 text-[10px] font-black uppercase transition-all bg-white px-4 py-2.5 rounded-2xl border border-slate-200 shadow-sm"><SimpleIcon name="ChevronLeft" className="w-3.5 h-3.5"/> ยกเลิก</button>
-                                    <div className="text-[10px] text-slate-400 font-black uppercase tracking-[0.2em]">แบบฟอร์มบันทึก</div>
+                                    <div className="text-[10px] text-slate-400 font-black uppercase tracking-[0.2em] hidden sm:block">แบบฟอร์มบันทึกข้อมูลแบบละเอียด</div>
                                 </div>
-                                <div className="bg-white rounded-[2.5rem] shadow-xl border border-slate-100 overflow-hidden mb-6">
-                                    <div className="p-6 grid grid-cols-2 gap-5 bg-slate-50/50 border-b border-slate-100">
-                                        <div><label className="block text-[10px] font-black text-slate-400 uppercase mb-1.5 tracking-widest">วันที่ตรวจ</label><input type="date" className="w-full bg-white border border-slate-200 rounded-2xl px-4 py-3 text-xs font-bold outline-none shadow-sm" value={formData.date} onChange={e => setFormData({...formData, date: e.target.value})}/></div>
-                                        <div><label className="block text-[10px] font-black text-slate-400 uppercase mb-1.5 tracking-widest">เวร</label><select className="w-full bg-white border border-slate-200 rounded-2xl px-4 py-3 text-xs font-bold outline-none shadow-sm appearance-none" value={formData.shift} onChange={e => setFormData({...formData, shift: e.target.value})}><option>เช้า</option><option>บ่าย</option><option>ดึก</option></select></div>
+                                <div className="bg-white rounded-[2.5rem] shadow-xl border border-slate-100 overflow-hidden mb-8">
+                                    <div className="p-6 sm:p-8 grid grid-cols-1 sm:grid-cols-2 gap-6 bg-slate-50/50 border-b border-slate-100">
+                                        <div><label className="block text-[10px] font-black text-slate-400 uppercase mb-1.5 tracking-widest">วันที่ตรวจ</label><input type="date" className="w-full bg-white border border-slate-200 rounded-2xl px-4 py-3.5 text-sm font-bold outline-none shadow-sm focus:ring-2 focus:ring-teal-500 transition-all" value={formData.date} onChange={e => setFormData({...formData, date: e.target.value})}/></div>
+                                        <div><label className="block text-[10px] font-black text-slate-400 uppercase mb-1.5 tracking-widest">เวร</label><select className="w-full bg-white border border-slate-200 rounded-2xl px-4 py-3.5 text-sm font-bold outline-none shadow-sm appearance-none cursor-pointer focus:ring-2 focus:ring-teal-500 transition-all" value={formData.shift} onChange={e => setFormData({...formData, shift: e.target.value})}><option>เช้า</option><option>บ่าย</option><option>ดึก</option></select></div>
                                     </div>
                                     {CATEGORY_ORDER.map(cat => <CategorySection key={cat} category={cat} items={itemsDef.filter(i => i.category === cat)} formData={formData} updateItem={updateItem} />)}
-                                    <div className="p-6 bg-blue-50/40 border-t border-blue-100">
-                                        <label className="flex items-center gap-4 cursor-pointer p-5 bg-white border border-blue-100 rounded-3xl shadow-sm transition-all">
-                                            <input type="checkbox" className="w-6 h-6 accent-blue-600 rounded-lg" checked={formData.isRecheckStock || false} 
-                                                onChange={e => {
-                                                    setFormData({...formData, isRecheckStock: e.target.checked});
-                                                    if(e.target.checked) setShowNextCheckModal(true);
-                                                }}/>
-                                            <div>
-                                                <div className="text-slate-800 font-black text-sm tracking-tight flex items-center gap-2">
-                                                    <SimpleIcon name="RotateCcw" className="w-4 h-4 text-blue-600"/>
-                                                    บันทึกว่าเป็น ReCheck Stock
+                                    
+                                    <div className="grid grid-cols-1 md:grid-cols-2 bg-slate-50 divide-y md:divide-y-0 md:divide-x divide-slate-100 border-t border-slate-100">
+                                        <div className="p-6 sm:p-8 flex items-center">
+                                            <label className="flex items-center gap-4 cursor-pointer p-4 bg-white border border-blue-100 rounded-2xl shadow-sm transition-all hover:bg-blue-50 w-full">
+                                                <input type="checkbox" className="w-6 h-6 accent-blue-600 rounded-lg cursor-pointer" checked={formData.isRecheckStock || false} 
+                                                    onChange={e => {
+                                                        setFormData({...formData, isRecheckStock: e.target.checked});
+                                                        if(e.target.checked) setShowNextCheckModal(true);
+                                                    }}/>
+                                                <div>
+                                                    <div className="text-slate-800 font-black text-sm tracking-tight flex items-center gap-2">
+                                                        <SimpleIcon name="RotateCcw" className="w-4 h-4 text-blue-600"/>
+                                                        บันทึกเป็น ReCheck Stock
+                                                    </div>
                                                 </div>
-                                                <div className="text-slate-400 text-[9px] uppercase font-black tracking-widest mt-0.5 opacity-70">ตรวจสอบสต๊อกใหญ่ทุก 14 วัน</div>
-                                            </div>
-                                        </label>
-                                    </div>
-                                    <div className="p-6 bg-slate-50 border-t border-slate-100">
-                                        <label className="block text-[10px] font-black text-slate-400 uppercase mb-2.5 tracking-[0.2em]">ชื่อผู้ตรวจสอบ <span className="text-red-500">*</span></label>
-                                        <input type="text" placeholder="ระบุชื่อ-นามสกุลของคุณ" className="w-full bg-white border border-slate-200 rounded-2xl p-4 text-sm font-black outline-none shadow-md focus:border-teal-500 transition-all" value={formData.checker || ''} onChange={e => setFormData({...formData, checker: e.target.value})}/>
+                                            </label>
+                                        </div>
+                                        <div className="p-6 sm:p-8">
+                                            <label className="block text-[10px] font-black text-slate-400 uppercase mb-2 tracking-[0.2em]">ชื่อผู้ตรวจสอบ <span className="text-red-500">*</span></label>
+                                            <input type="text" placeholder="ระบุชื่อ-นามสกุลของคุณ" className="w-full bg-white border border-slate-200 rounded-2xl p-4 text-sm font-black outline-none shadow-md focus:border-teal-500 focus:ring-2 focus:ring-teal-500 transition-all" value={formData.checker || ''} onChange={e => setFormData({...formData, checker: e.target.value})}/>
+                                        </div>
                                     </div>
                                 </div>
-                                <button onClick={onSaveClick} className="w-full bg-slate-900 text-white font-black py-5 rounded-3xl shadow-2xl flex items-center justify-center gap-3 text-lg transition-all active:scale-95"><SimpleIcon name="Save" className="w-5 h-5"/> บันทึกการตรวจสอบ</button>
+                                
+                                <div className="flex justify-center">
+                                    <button onClick={onSaveClick} className="w-full sm:w-auto sm:min-w-[300px] bg-slate-900 text-white font-black py-5 px-12 rounded-3xl shadow-2xl flex items-center justify-center gap-3 text-lg transition-all active:scale-95 hover:bg-slate-800"><SimpleIcon name="Save" className="w-5 h-5"/> บันทึกการตรวจสอบ</button>
+                                </div>
                             </div>
                         )}
                     </main>
 
                     {/* --- POP-UPS --- */}
                     <Modal isOpen={showTypeModal} title="เริ่มการตรวจสอบ" onClose={() => setShowTypeModal(false)}>
-                        <div className="grid gap-4">
+                        <div className="grid grid-cols-1 gap-4">
                             <button onClick={() => selectCheckType('new')} className="p-6 bg-teal-50 rounded-[2rem] text-left border border-teal-100 transition-all hover:scale-[1.03] active:scale-95 shadow-sm group">
                                 <div className="font-black text-teal-900 text-lg group-hover:text-teal-700 flex items-center gap-2">
-                                    <SimpleIcon name="Plus" className="w-5 h-5"/> ตรวจสอบใหม่
+                                    <SimpleIcon name="Plus" className="w-5 h-5"/> ตรวจสอบใหม่ (New Check)
                                 </div>
                                 <div className="text-teal-600/70 text-[10px] mt-1 font-bold uppercase tracking-widest">ล้างค่าเดิมและกรอกใหม่ทั้งหมด</div>
                             </button>
                             <button onClick={() => selectCheckType('copy')} className="p-6 bg-white rounded-[2rem] text-left border border-slate-200 transition-all hover:scale-[1.03] active:scale-95 shadow-sm group">
                                 <div className="font-black text-slate-900 text-lg group-hover:text-slate-700 flex items-center gap-2">
-                                    <SimpleIcon name="History" className="w-5 h-5"/> ดึงข้อมูลล่าสุด
+                                    <SimpleIcon name="History" className="w-5 h-5"/> ดึงข้อมูลล่าสุด (Copy Latest)
                                 </div>
                                 <div className="text-slate-400 text-[10px] mt-1 font-bold uppercase tracking-widest">คัดลอกรายการเดิมเพื่อแก้ไขเฉพาะจุด</div>
                             </button>
                         </div>
                     </Modal>
 
-                    <Modal isOpen={showCopyWarning} title="🚨 จุดเน้นย้ำ!" onClose={() => setShowCopyWarning(false)}>
-                        <div className="bg-yellow-50 p-5 rounded-3xl border border-yellow-200 mb-7 shadow-inner">
-                            <ul className="space-y-4 text-[11px] font-black text-yellow-900 leading-tight">
-                                <li className="flex gap-3"><div className="bg-yellow-200 w-5 h-5 rounded-full flex items-center justify-center shrink-0">1</div> Sticker Visual Control ต้องสมบูรณ์ ห้ามฉีกขาด</li>
-                                <li className="flex gap-3"><div className="bg-yellow-200 w-5 h-5 rounded-full flex items-center justify-center shrink-0">2</div> ตรวจสอบวันหมดอายุยาและเวชภัณฑ์อย่างละเอียด</li>
-                                <li className="flex gap-3"><div className="bg-yellow-200 w-5 h-5 rounded-full flex items-center justify-center shrink-0">3</div> Laryngoscope ไฟต้องสว่างพร้อมใช้</li>
+                    <Modal isOpen={showCopyWarning} title="🚨 ข้อควรระวังในการ Copy" onClose={() => setShowCopyWarning(false)}>
+                        <div className="bg-yellow-50 p-6 rounded-3xl border border-yellow-200 mb-8 shadow-inner">
+                            <ul className="space-y-4 text-[12px] font-black text-yellow-900 leading-tight">
+                                <li className="flex gap-4"><div className="bg-yellow-200 w-6 h-6 rounded-full flex items-center justify-center shrink-0">1</div> Sticker Visual Control ต้องอยู่ในสภาพสมบูรณ์ ไม่มีการเปิดทิ้งไว้</li>
+                                <li className="flex gap-4"><div className="bg-yellow-200 w-6 h-6 rounded-full flex items-center justify-center shrink-0">2</div> ตรวจสอบวันหมดอายุยา (CPR/ACS Box) ใหม่อีกครั้งเสมอ</li>
+                                <li className="flex gap-4"><div className="bg-yellow-200 w-6 h-6 rounded-full flex items-center justify-center shrink-0">3</div> อุปกรณ์ส่องสว่าง (ไฟฉาย/Laryngoscope) ต้องพร้อมทำงาน</li>
                             </ul>
                         </div>
-                        <button onClick={() => {setShowCopyWarning(false); setView('form');}} className="w-full bg-slate-900 text-white py-4.5 rounded-2xl font-black text-sm shadow-2xl shadow-slate-300 active:scale-95">รับทราบและเริ่มตรวจสอบ</button>
+                        <button onClick={() => {setShowCopyWarning(false); setView('form');}} className="w-full bg-slate-900 text-white py-4 rounded-2xl font-black text-sm shadow-2xl active:scale-95 transition-all">ยืนยันข้อมูลและเริ่มตรวจ</button>
                     </Modal>
 
                     <Modal isOpen={showSaveSuccessModal} title="✅ บันทึกสำเร็จ" onClose={() => {setShowSaveSuccessModal(false); setView('dashboard');}}>
                         <div className="text-center py-5">
-                            <div className="text-emerald-500 mb-5 flex justify-center"><div className="p-5 bg-emerald-50 rounded-full shadow-inner animate-scale-up"><SimpleIcon name="CheckCircle" className="w-12 h-12"/></div></div>
+                            <div className="text-emerald-500 mb-6 flex justify-center"><div className="p-6 bg-emerald-50 rounded-full shadow-inner animate-scale-up"><SimpleIcon name="CheckCircle" className="w-14 h-14"/></div></div>
                             <h3 className="font-black text-2xl mb-2 text-slate-800 tracking-tighter">ส่งข้อมูลเรียบร้อยแล้ว</h3>
-                            <p className="text-slate-400 text-[10px] mb-8 font-black uppercase tracking-[0.2em] bg-slate-50 py-2 rounded-xl border border-slate-100">สถานะรถ: <span className={summaryData?.status === 'พร้อมใช้' ? 'text-emerald-600' : 'text-red-500'}>{summaryData?.status}</span></p>
-                            <button onClick={() => {setShowSaveSuccessModal(false); setView('dashboard');}} className="w-full bg-slate-900 text-white py-4 rounded-2xl font-black text-sm shadow-xl transition-all active:scale-95">ตกลง</button>
+                            <p className="text-slate-400 text-[10px] mb-10 font-black uppercase tracking-[0.2em] bg-slate-50 py-2.5 rounded-xl border border-slate-100 px-4">สถานะรถประจำเวร: <span className={summaryData?.status === 'พร้อมใช้' ? 'text-emerald-600' : 'text-red-500'}>{summaryData?.status}</span></p>
+                            <button onClick={() => {setShowSaveSuccessModal(false); setView('dashboard');}} className="w-full bg-slate-900 text-white py-4.5 rounded-2xl font-black text-sm shadow-xl transition-all active:scale-95">กลับสู่หน้าหลัก</button>
                         </div>
                     </Modal>
 
-                    <Modal isOpen={showNextCheckModal} title="📅 กำหนดครั้งหน้า" onClose={() => setShowNextCheckModal(false)}>
-                        <div className="text-center py-3">
-                            <div className="text-blue-500 mb-5 flex justify-center"><div className="p-5 bg-blue-50 rounded-full shadow-inner"><SimpleIcon name="Calendar" className="w-12 h-12"/></div></div>
-                            <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2">ต้อง Re-Check ครั้งถัดไปในวันที่</p>
-                            <h3 className="font-black text-3xl mb-8 text-blue-600 tracking-tighter drop-shadow-sm">{formatDate(new Date(Date.now() + 14 * 24 * 60 * 60 * 1000))}</h3>
-                            <button onClick={() => setShowNextCheckModal(false)} className="w-full bg-blue-600 text-white py-4 rounded-2xl font-black text-sm shadow-xl shadow-blue-200 active:scale-95">รับทราบ</button>
+                    <Modal isOpen={showNextCheckModal} title="📅 กำหนดการตรวจสอบใหญ่" onClose={() => setShowNextCheckModal(false)}>
+                        <div className="text-center py-4">
+                            <div className="text-blue-500 mb-6 flex justify-center"><div className="p-6 bg-blue-50 rounded-full shadow-inner"><SimpleIcon name="Calendar" className="w-14 h-14"/></div></div>
+                            <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-3">ต้องทำการ Re-Check สต๊อกใหญ่ครั้งถัดไป</p>
+                            <h3 className="font-black text-3xl sm:text-4xl mb-10 text-blue-600 tracking-tighter drop-shadow-sm">{formatDate(new Date(Date.now() + 14 * 24 * 60 * 60 * 1000))}</h3>
+                            <button onClick={() => setShowNextCheckModal(false)} className="w-full bg-blue-600 text-white py-4.5 rounded-2xl font-black text-sm shadow-xl shadow-blue-200 active:scale-95 transition-all">รับทราบ</button>
                         </div>
                     </Modal>
                 </div>
