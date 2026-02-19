@@ -63,22 +63,53 @@
 
         const { useState, useEffect, useMemo } = React;
         
-        // --- HELPERS ---
-        const formatDate = (dateStr) => {
-            if(!dateStr) return "-";
+        // --- HELPERS (ปรับปรุงการดึงวันที่ให้แม่นยำขึ้น) ---
+        const formatDate = (dateInput) => {
+            if(!dateInput) return "-";
             try {
-                const d = new Date(dateStr);
+                let d;
+                if (dateInput instanceof Date) {
+                    d = dateInput;
+                } else {
+                    // ป้องกันปัญหา Timezone โดยการดึงเฉพาะ YYYY-MM-DD
+                    const dateStr = dateInput.split('T')[0];
+                    const parts = dateStr.split('-');
+                    if (parts.length === 3) {
+                        d = new Date(parts[0], parts[1] - 1, parts[2]);
+                    } else {
+                        d = new Date(dateInput);
+                    }
+                }
                 return d.toLocaleDateString('th-TH', { year: 'numeric', month: 'short', day: 'numeric' });
             } catch(e) { return "-"; }
         };
 
-        const getDaysDiff = (targetDate) => {
-            if (!targetDate) return 999;
+        const getDaysDiff = (targetInput) => {
+            if (!targetInput) return 999;
             const today = new Date();
             today.setHours(0,0,0,0);
-            const target = new Date(targetDate);
+            
+            let target;
+            if (targetInput instanceof Date) {
+                target = new Date(targetInput.getFullYear(), targetInput.getMonth(), targetInput.getDate());
+            } else {
+                const parts = targetInput.split('T')[0].split('-');
+                target = new Date(parts[0], parts[1] - 1, parts[2]);
+            }
             target.setHours(0,0,0,0);
             return Math.ceil((target - today) / (1000 * 60 * 60 * 24));
+        };
+
+        const addDaysToDate = (dateInput, days) => {
+            let d;
+            if (dateInput instanceof Date) {
+                d = new Date(dateInput);
+            } else {
+                const parts = dateInput.split('T')[0].split('-');
+                d = new Date(parts[0], parts[1] - 1, parts[2]);
+            }
+            d.setDate(d.getDate() + days);
+            return d;
         };
 
         // --- Error Boundary ---
@@ -469,21 +500,22 @@
                     }
                     const resStock = await fetch(GAS_API_URL + '?action=getLastStockCheck');
                     const dataStock = await resStock.json();
-                    let loadedStockDate = null;
+                    let loadedStockDateStr = null;
                     if(dataStock.status === 'success' && dataStock.date) {
-                        loadedStockDate = new Date(dataStock.date);
-                        setLastStockCheck(loadedStockDate);
+                        // เก็บเป็น string เพื่อความแม่นยำ
+                        loadedStockDateStr = dataStock.date.split('T')[0];
+                        setLastStockCheck(loadedStockDateStr);
                     }
-                    checkInitialAlerts(loadedRecords, loadedStockDate);
+                    checkInitialAlerts(loadedRecords, loadedStockDateStr);
                 } catch (e) {
                     setRecords([{ id: Date.now(), date: new Date().toISOString(), generalReady: 'พร้อมใช้', shift: 'เช้า', checker: 'Demo User', items: {} }]);
                 } finally { setIsLoading(false); }
             };
 
-            const checkInitialAlerts = (recs, stockDate) => {
+            const checkInitialAlerts = (recs, stockDateStr) => {
                 const alerts = [];
-                if(stockDate) {
-                    const nextCheck = new Date(stockDate.getTime() + 14 * 86400000);
+                if(stockDateStr) {
+                    const nextCheck = addDaysToDate(stockDateStr, 14);
                     const diffDays = getDaysDiff(nextCheck);
                     if(diffDays < 0) {
                         alerts.push({ 
@@ -562,8 +594,8 @@
             };
 
             const handleRecheckTick = () => {
-                const today = new Date();
-                const nextDate = new Date(today.getTime() + 14 * 86400000);
+                const todayStr = new Date().toISOString().split('T')[0];
+                const nextDate = addDaysToDate(todayStr, 14);
                 setNotifyModal({
                     isOpen: true,
                     title: "📅 กำหนดการ Re-check Stock",
@@ -626,7 +658,7 @@
                                     </div>
                                     <div className="inline-flex items-center gap-3 bg-slate-50 px-6 py-3 rounded-2xl text-[13px] md:text-sm text-slate-600 mb-10 border border-slate-100 shadow-inner">
                                         <SimpleIcon name="RotateCcw" className="w-4 h-4 text-slate-300" />
-                                        <span>กำหนด ReCheck Stock ครั้งถัดไป: <span className="font-bold text-slate-800 ml-1">{lastStockCheck ? formatDate(new Date(lastStockCheck.getTime() + 14 * 86400000)) : '-'}</span></span>
+                                        <span>กำหนด ReCheck Stock ครั้งถัดไป: <span className="font-bold text-slate-800 ml-1">{lastStockCheck ? formatDate(addDaysToDate(lastStockCheck, 14)) : '-'}</span></span>
                                     </div>
                                     <div className="max-w-md mx-auto">
                                         <button onClick={() => setShowTypeModal(true)} className="w-full bg-[#0F172A] hover:bg-slate-800 text-white py-5 rounded-[24px] shadow-xl flex items-center justify-center gap-3 text-lg font-bold transition-transform active:scale-95">
@@ -738,7 +770,7 @@
                                     </div>
                                 </div>
                                 
-                                <div className="p-4 rounded-2xl font-bold flex items-center justify-between bg-slate-50">
+                                <div className={`p-4 rounded-2xl font-bold flex items-center justify-between bg-slate-50`}>
                                     <div className="flex items-center gap-2">
                                         <SimpleIcon name={selectedRecord.generalReady === 'พร้อมใช้' ? 'CheckCircle' : 'AlertTriangle'} className={selectedRecord.generalReady === 'พร้อมใช้' ? 'text-[#10B981]' : 'text-[#EF4444]'} />
                                         <span className="text-sm">รถ Emergency {selectedRecord.generalReady}</span>
