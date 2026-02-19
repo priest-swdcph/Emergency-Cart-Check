@@ -108,7 +108,8 @@
             Settings: <><circle cx="12" cy="12" r="3" /><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1-2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z" /></>,
             Trash: <><polyline points="3 6 5 6 21 6" /><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2" /></>,
             Edit: <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z" />,
-            Save: <path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2zM17 21v-8H7v8M7 3v5h8" />
+            Save: <path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2zM17 21v-8H7v8M7 3v5h8" />,
+            AlertTriangle: <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0zM12 9v4M12 17h.01" />
         };
 
         const SimpleIcon = ({ name, className = "w-5 h-5", color = "currentColor" }) => (
@@ -260,7 +261,7 @@
             );
         };
 
-        const SubmissionSection = ({ formData, setFormData, onSave }) => {
+        const SubmissionSection = ({ formData, setFormData, onSave, onRecheckStockTick }) => {
             const [showOther, setShowOther] = useState(false);
             const [newOther, setNewOther] = useState("");
 
@@ -313,7 +314,11 @@
                         </div>
 
                         <div className="p-6 bg-emerald-50/30 rounded-[24px] border border-emerald-100/50 flex items-center gap-4">
-                            <input type="checkbox" className="w-6 h-6 rounded-lg accent-emerald-600" checked={formData.isRecheckStock} onChange={e => setFormData({...formData, isRecheckStock: e.target.checked})}/>
+                            <input type="checkbox" className="w-6 h-6 rounded-lg accent-emerald-600" checked={formData.isRecheckStock} 
+                                onChange={e => {
+                                    setFormData({...formData, isRecheckStock: e.target.checked});
+                                    if(e.target.checked) onRecheckStockTick();
+                                }}/>
                             <div>
                                 <div className="font-bold text-slate-800 text-sm">บันทึกว่าเป็น ReCheck Stock</div>
                                 <div className="text-[10px] text-slate-400">สำหรับการตรวจสอบสต็อกใหญ่ทุก 2 สัปดาห์</div>
@@ -349,6 +354,9 @@
             const [showTypeModal, setShowTypeModal] = useState(false);
             const [showCopyWarning, setShowCopyWarning] = useState(false);
 
+            // Notification Modal State
+            const [notifyModal, setNotifyModal] = useState({ isOpen: false, title: '', message: '', type: 'info', list: [] });
+
             useEffect(() => { 
                 fetchData(); 
                 const savedItems = localStorage.getItem('smartcheck_items');
@@ -364,15 +372,71 @@
                 try {
                     const res = await fetch(GAS_API_URL + '?action=read');
                     const json = await res.json();
+                    let loadedRecords = [];
                     if(json.status === 'success') {
-                         setRecords((json.data || []).map(r => ({...r, items: typeof r.items === 'string' ? JSON.parse(r.items) : (r.items || {})})));
+                         loadedRecords = (json.data || []).map(r => ({...r, items: typeof r.items === 'string' ? JSON.parse(r.items) : (r.items || {})}));
+                         setRecords(loadedRecords);
                     }
                     const resStock = await fetch(GAS_API_URL + '?action=getLastStockCheck');
                     const dataStock = await resStock.json();
-                    if(dataStock.status === 'success' && dataStock.date) setLastStockCheck(new Date(dataStock.date));
+                    let loadedStockDate = null;
+                    if(dataStock.status === 'success' && dataStock.date) {
+                        loadedStockDate = new Date(dataStock.date);
+                        setLastStockCheck(loadedStockDate);
+                    }
+
+                    // Perform Alerts logic after fetching
+                    checkInitialAlerts(loadedRecords, loadedStockDate);
                 } catch (e) {
                     setRecords([{ id: Date.now(), date: new Date().toISOString(), generalReady: 'พร้อมใช้', shift: 'เช้า', checker: 'Demo User', items: {} }]);
                 } finally { setIsLoading(false); }
+            };
+
+            const checkInitialAlerts = (recs, stockDate) => {
+                const alerts = [];
+                
+                // 1. Check Overdue Re-check stock
+                if(stockDate) {
+                    const nextCheck = new Date(stockDate.getTime() + 14 * 86400000);
+                    const diffDays = getDaysDiff(nextCheck);
+                    if(diffDays < 0) {
+                        alerts.push({ 
+                            title: "⚠️ เลยกำหนด Re-check Stock", 
+                            message: `เลยกำหนดมาแล้ว ${Math.abs(diffDays)} วัน กรุณาดำเนินการ Re-check Stock โดยด่วน`,
+                            type: 'error'
+                        });
+                    }
+                }
+
+                // 2. Check Expiration from latest record
+                if(recs && recs.length > 0) {
+                    const latest = recs[0];
+                    const expItems = [];
+                    Object.entries(latest.items || {}).forEach(([key, val]) => {
+                        if(val && val.exp) {
+                            const days = getDaysDiff(val.exp);
+                            const itemDef = itemsDef.find(i => i.id === key);
+                            const name = itemDef ? itemDef.name : key;
+                            if(days < 0) expItems.push(`${name}: ❌ หมดอายุแล้ว (${formatDate(val.exp)})`);
+                            else if(days <= 7) expItems.push(`${name}: ⚠️ เหลืออีก ${days} วัน (${formatDate(val.exp)})`);
+                        }
+                    });
+
+                    if(expItems.length > 0) {
+                        alerts.push({
+                            title: "🍎 แจ้งเตือนยาและเวชภัณฑ์",
+                            message: "พบรายการใกล้หมดอายุหรือหมดอายุแล้ว ดังนี้:",
+                            list: expItems,
+                            type: 'warning'
+                        });
+                    }
+                }
+
+                // Show the most critical alert first (can be modified to show all)
+                if(alerts.length > 0) {
+                    const combined = alerts[0]; // Just showing the first one for simplicity or we can chain them
+                    setNotifyModal({ isOpen: true, ...combined });
+                }
             };
 
             const initForm = (prevData = null) => {
@@ -389,7 +453,10 @@
             };
 
             const submitData = async () => {
-                if(!formData.checker) { alert("กรุณาลงชื่อผู้ตรวจสอบ"); return; }
+                if(!formData.checker) { 
+                    setNotifyModal({ isOpen: true, title: 'กรุณากรอกข้อมูล', message: 'กรุณาลงชื่อผู้ตรวจสอบก่อนบันทึก', type: 'warning' });
+                    return; 
+                }
                 setIsLoading(true);
                 localStorage.setItem('last_checker', formData.checker);
                 try {
@@ -398,8 +465,28 @@
                         body: JSON.stringify({ ...formData, id: Date.now() })
                     });
                     if(formData.isRecheckStock) await fetch(GAS_API_URL + '?action=updateLastStockCheck&date=' + formData.date);
-                    setTimeout(() => { setIsLoading(false); setView('dashboard'); fetchData(); }, 1500);
-                } catch (e) { setIsLoading(false); }
+                    
+                    setTimeout(() => { 
+                        setIsLoading(false); 
+                        setView('dashboard'); 
+                        fetchData();
+                        setNotifyModal({ isOpen: true, title: '🍎 สำเร็จ', message: 'บันทึกข้อมูลการตรวจสอบเรียบร้อยแล้ว', type: 'success' });
+                    }, 1500);
+                } catch (e) { 
+                    setIsLoading(false); 
+                    setNotifyModal({ isOpen: true, title: 'เกิดข้อผิดพลาด', message: 'ไม่สามารถบันทึกข้อมูลได้ กรุณาลองใหม่อีกครั้ง', type: 'error' });
+                }
+            };
+
+            const handleRecheckTick = () => {
+                const today = new Date();
+                const nextDate = new Date(today.getTime() + 14 * 86400000);
+                setNotifyModal({
+                    isOpen: true,
+                    title: "📅 กำหนดการ Re-check Stock",
+                    message: `คุณได้เลือกบันทึกเป็น Re-check Stock กำหนดการครั้งถัดไปคือวันที่: ${formatDate(nextDate)}`,
+                    type: 'info'
+                });
             };
 
             const moveItem = (index, direction) => {
@@ -469,7 +556,7 @@
                                     </div>
                                     <div className="inline-flex items-center gap-3 bg-slate-50 px-6 py-3 rounded-2xl text-[13px] md:text-sm text-slate-600 mb-10 border border-slate-100 shadow-inner">
                                         <SimpleIcon name="RotateCcw" className="w-4 h-4 text-slate-300" />
-                                        <span>กำหนด ReCheck Stock ครั้งถัดไป: <span className="font-bold text-slate-800 ml-1">{lastStockCheck ? formatDate(new Date(lastStockCheck.getTime() + 14 * 86400000)) : '12 ก.พ. 2569'}</span></span>
+                                        <span>กำหนด ReCheck Stock ครั้งถัดไป: <span className="font-bold text-slate-800 ml-1">{lastStockCheck ? formatDate(new Date(lastStockCheck.getTime() + 14 * 86400000)) : '-'}</span></span>
                                     </div>
                                     <div className="max-w-md mx-auto">
                                         <button onClick={() => setShowTypeModal(true)} className="w-full bg-[#0F172A] hover:bg-slate-800 text-white py-5 rounded-[24px] shadow-xl flex items-center justify-center gap-3 text-lg font-bold transition-transform active:scale-95">
@@ -562,11 +649,12 @@
                                     </div>
                                     {CATEGORIES.map(cat => cat !== 'General' && itemsDef.some(i=>i.category===cat) && <CategorySection key={cat} category={cat} items={itemsDef.filter(i => i.category === cat)} formData={formData} updateItem={updateItemValue} />)}
                                 </div>
-                                <SubmissionSection formData={formData} setFormData={setFormData} onSave={submitData} />
+                                <SubmissionSection formData={formData} setFormData={setFormData} onSave={submitData} onRecheckStockTick={handleRecheckTick} />
                             </div>
                         )}
                     </main>
 
+                    {/* TYPE SELECTION MODAL */}
                     <Modal isOpen={showTypeModal} title="เริ่มการตรวจสอบ" onClose={() => setShowTypeModal(false)}>
                         <div className="grid gap-4">
                             <button onClick={() => { setShowTypeModal(false); initForm(); setView('form'); }} className="p-6 bg-[#F0FDF4] rounded-[24px] text-left hover:bg-emerald-100 border border-emerald-50 group relative overflow-hidden transition-all">
@@ -581,6 +669,7 @@
                         </div>
                     </Modal>
 
+                    {/* COPY WARNING MODAL */}
                     <Modal isOpen={showCopyWarning} title="จุดเน้นย้ำ!" onClose={() => setShowCopyWarning(false)}>
                         <div className="bg-[#FFFBEB] p-8 rounded-[32px] border border-amber-100 mb-8 space-y-6">
                             {[
@@ -595,6 +684,28 @@
                             ))}
                         </div>
                         <button onClick={() => { setShowCopyWarning(false); setView('form'); }} className="w-full bg-[#0F172A] text-white py-5 rounded-[24px] font-bold shadow-xl active:scale-95 text-lg">รับทราบและดำเนินการต่อ</button>
+                    </Modal>
+
+                    {/* GLOBAL NOTIFICATION MODAL (The requested Alerts) */}
+                    <Modal isOpen={notifyModal.isOpen} title={notifyModal.title} onClose={() => setNotifyModal({...notifyModal, isOpen: false})}>
+                        <div className="space-y-4">
+                            <div className="flex items-start gap-4">
+                                <div className={`p-3 rounded-full shrink-0 ${notifyModal.type === 'error' ? 'bg-red-50 text-red-500' : notifyModal.type === 'warning' ? 'bg-amber-50 text-amber-500' : notifyModal.type === 'success' ? 'bg-emerald-50 text-emerald-500' : 'bg-blue-50 text-blue-500'}`}>
+                                    <SimpleIcon name={notifyModal.type === 'success' ? "CheckCircle" : "AlertTriangle"} className="w-8 h-8" />
+                                </div>
+                                <div>
+                                    <p className="text-slate-600 leading-relaxed">{notifyModal.message}</p>
+                                    {notifyModal.list && notifyModal.list.length > 0 && (
+                                        <div className="mt-4 p-4 bg-slate-50 rounded-2xl border border-slate-100 max-h-48 overflow-y-auto">
+                                            {notifyModal.list.map((li, i) => (
+                                                <div key={i} className="text-xs font-medium text-slate-500 mb-2 last:mb-0">• {li}</div>
+                                            ))}
+                                        </div>
+                                    )}
+                                </div>
+                            </div>
+                            <button onClick={() => setNotifyModal({...notifyModal, isOpen: false})} className="w-full bg-slate-900 text-white py-4 rounded-2xl font-bold mt-2 active:scale-95 transition-transform">ตกลง</button>
+                        </div>
                     </Modal>
                 </div>
             );
