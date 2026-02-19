@@ -32,36 +32,14 @@
         ::-webkit-scrollbar { width: 6px; }
         ::-webkit-scrollbar-track { background: #f1f5f9; }
         ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 10px; }
-        
-        /* Calendar Styles - Updated for Full Cell */
-        .calendar-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 6px; }
-        .calendar-day { 
-            aspect-ratio: 1/1; 
-            display: flex; 
-            flex-direction: column; 
-            align-items: center; 
-            justify-content: center; 
-            border-radius: 12px; 
-            font-size: 1rem; 
-            cursor: pointer; 
-            transition: all 0.2s; 
-            position: relative;
-            box-shadow: 0 1px 2px rgba(0,0,0,0.05);
-        }
-        .calendar-day:hover { transform: translateY(-2px); box-shadow: 0 4px 6px rgba(0,0,0,0.1); }
-        .status-text { font-size: 0.6rem; margin-top: 2px; font-weight: 500; }
     </style>
 </head>
-<body class="bg-[#F0F4F9] text-slate-800 min-h-screen"> 
+<body class="bg-[#F8FAFC] text-slate-800 min-h-screen"> 
 
     <div id="root"></div>
 
     <script type="text/babel">
-        // ==============================================
-        //  CONFIG: URL ของ Web App จาก Google Apps Script
-        // ==============================================
         const GAS_API_URL = "https://script.google.com/macros/s/AKfycbwNpFNcLm0iU6vTF0DM7UwONFl3NGXmySuR1jXh-mWyZjbtqf_BTkTpjOYs3NXBzRU/exec"; 
-        // ==============================================
 
         const { useState, useEffect, useMemo } = React;
         
@@ -95,9 +73,6 @@
         }
 
         // --- ICONS ---
-        const Icon = ({ path, className = "w-6 h-6", color = "currentColor" }) => (
-            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}>{path}</svg>
-        );
         const Icons = {
             Plus: <path d="M12 5v14M5 12h14" />,
             History: <path d="M3 3v5h5M3.05 13A9 9 0 1 0 6 5.3L3 8" />,
@@ -115,12 +90,12 @@
             Edit: <><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7" /><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z" /></>,
             Wrench: <path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z" />,
             Settings: <><circle cx="12" cy="12" r="3" /><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z" /></>,
-            Close: <><line x1="18" y1="6" x2="6" y2="18" /><line x1="6" y1="6" x2="18" y2="18" /></>,
-            ArrowUp: <polyline points="18 15 12 9 6 15" />,
-            ArrowDown: <polyline points="6 9 12 15 18 9" />,
-            Clock: <><circle cx="12" cy="12" r="10" /><polyline points="12 6 12 12 16 14" /></>
+            Close: <><line x1="18" y1="6" x2="6" y2="18" /><line x1="6" y1="6" x2="18" y2="18" /></>
         };
-        const SimpleIcon = ({ name, className }) => <Icon path={Icons[name] || Icons.FileText} className={className} />;
+
+        const SimpleIcon = ({ name, className = "w-5 h-5", color = "currentColor" }) => (
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}>{Icons[name]}</svg>
+        );
 
         // --- DATA DEFS ---
         const ITEM_TYPES = { 
@@ -130,7 +105,6 @@
             STATUS_ONLY: 'status_only' 
         };
         
-        // ข้อมูลตั้งต้น
         const DEFAULT_ITEMS = [
             { id: 'cardiac_board', name: 'Cardiac board', required: 1, type: ITEM_TYPES.QTY_STATUS, category: 'ชั้นบน' },
             { id: 'cpr_box', name: 'กล่องยา CPR', required: 1, type: ITEM_TYPES.QTY_EXP_STATUS, category: 'ชั้นบน' },
@@ -172,38 +146,18 @@
             const list = [];
             if(!rec) return list;
             const currentItemsDef = itemsDef || DEFAULT_ITEMS;
-
             if(rec.items) {
                 Object.entries(rec.items).forEach(([key, val]) => {
                     const def = currentItemsDef.find(i => i.id === key);
                     if(!def || key === 'general_readiness') return;
-
                     if (def.type === ITEM_TYPES.CHECK_HAVE) {
                         if (!val.checked) list.push({ name: def.name, issue: 'ไม่มี', note: val.note });
                     } else {
                         if (val.status === 'not_ready') list.push({ name: def.name, issue: 'ไม่พร้อม', note: val.note });
                     }
-
                     if (val.exp) {
                         const days = getDaysDiff(val.exp);
-                        if (days < 0) {
-                            const exists = list.find(a => a.name === def.name && a.issue === 'ไม่พร้อม');
-                            if (!exists) list.push({ name: def.name, issue: 'หมดอายุ', note: formatDate(val.exp) });
-                        }
-                    }
-                });
-            }
-
-            if(rec.otherItems && Array.isArray(rec.otherItems)) {
-                rec.otherItems.forEach(item => {
-                    if (item.status === 'not_ready') {
-                        list.push({ name: item.name || 'รายการเพิ่มเติม', issue: 'ไม่พร้อม', note: item.note });
-                    }
-                    if (item.exp) {
-                        const days = getDaysDiff(item.exp);
-                        if (days < 0) {
-                            list.push({ name: item.name || 'รายการเพิ่มเติม', issue: 'หมดอายุ', note: formatDate(item.exp) });
-                        }
+                        if (days < 0) list.push({ name: def.name, issue: 'หมดอายุ', note: formatDate(val.exp) });
                     }
                 });
             }
@@ -211,103 +165,74 @@
         };
 
         // --- COMPONENTS ---
-        const ExpirationAlerts = ({ alerts }) => {
-            if (!alerts || alerts.length === 0) return null;
+        const Modal = ({ isOpen, title, children, onClose }) => {
+            if (!isOpen) return null;
             return (
-                <div className="mb-6 space-y-2 animate-fade-in">
-                    {alerts.map((item, idx) => {
-                        let colorClass = "bg-yellow-50 text-yellow-800 border-yellow-200";
-                        let iconColor = "text-yellow-600";
-                        let message = "";
-                        
-                        if (item.status === 'expired') {
-                            colorClass = "bg-red-50 text-red-800 border-red-200";
-                            iconColor = "text-red-600";
-                            message = `${item.name} หมดอายุแล้ว`;
-                        } else if (item.status === 'today') {
-                            colorClass = "bg-orange-50 text-orange-800 border-orange-200";
-                            iconColor = "text-orange-600";
-                            message = `${item.name} หมดอายุวันนี้`;
-                        } else {
-                             message = `${item.name} ใกล้หมดอายุในอีก ${item.days} วัน (วันที่ ${formatDate(item.date)})`;
-                        }
-
-                        return (
-                            <div key={idx} className={`p-3 rounded-xl border flex items-start gap-3 shadow-sm ${colorClass}`}>
-                                <div className={iconColor}>
-                                    <SimpleIcon name={item.status === 'soon' ? 'AlertTriangle' : 'Trash'} className="w-5 h-5 shrink-0 mt-0.5"/>
-                                </div>
-                                <div className="text-sm font-medium">{message}</div>
-                            </div>
-                        );
-                    })}
+                <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4 backdrop-blur-sm animate-fade-in">
+                    <div className="bg-white rounded-[32px] shadow-2xl w-full max-w-[400px] overflow-hidden animate-slide-up">
+                        <div className="px-6 py-5 flex justify-between items-center border-b border-slate-50">
+                            <h3 className="text-xl font-bold text-slate-800">{title}</h3>
+                            <button onClick={onClose} className="text-slate-400 hover:text-slate-600 transition-colors">
+                                <SimpleIcon name="XCircle" className="w-7 h-7" />
+                            </button>
+                        </div>
+                        <div className="p-6">{children}</div>
+                    </div>
                 </div>
             );
         };
-        const groupedRecords = useMemo(() => {
-        const groups = {};
-        records.forEach(rec => {
-            const d = new Date(rec.date);
-            const label = d.toLocaleDateString('th-TH', { month: 'long', year: 'numeric' });
-            if (!groups[label]) groups[label] = [];
-            groups[label].push(rec);
-        });
-        return groups;
-    }, [records]);
 
-    useEffect(() => { 
-        fetchData(); 
-        fetchConfig();
-    }, []);
+        const ExpirationAlerts = ({ alerts }) => {
+            if (!alerts || alerts.length === 0) return null;
+            return (
+                <div className="mt-6 space-y-2 text-left">
+                    <h4 className="text-xs font-bold text-slate-400 uppercase tracking-widest mb-2 px-1">แจ้งเตือนยาและเวชภัณฑ์</h4>
+                    {alerts.map((item, idx) => (
+                        <div key={idx} className={`p-3 rounded-2xl border flex items-center gap-3 ${item.status === 'expired' ? 'bg-red-50 border-red-100 text-red-700' : 'bg-orange-50 border-orange-100 text-orange-700'}`}>
+                            <SimpleIcon name="AlertTriangle" className="w-5 h-5 shrink-0" />
+                            <div className="text-sm font-semibold">{item.name} {item.status === 'expired' ? 'หมดอายุแล้ว' : `ใกล้หมดอายุ (${formatDate(item.date)})`}</div>
+                        </div>
+                    ))}
+                </div>
+            );
+        };
 
         const CategorySection = ({ category, items, formData, updateItem, ITEM_TYPES }) => {
             const [isOpen, setIsOpen] = useState(true);
-            if (!items || items.length === 0) return null;
-
             return (
                 <div className="border-t border-slate-100 first:border-t-0">
-                    <div onClick={() => setIsOpen(!isOpen)} className="bg-slate-50 px-6 py-3 text-xs font-bold text-slate-500 uppercase tracking-wider sticky top-16 z-10 backdrop-blur-sm bg-slate-50/90 border-b border-slate-100 flex items-center justify-between cursor-pointer hover:bg-slate-100 transition-colors">
-                        <div className="flex items-center gap-2">
-                            {category === 'General' ? <SimpleIcon name="CheckCircle" className="w-4 h-4"/> : <SimpleIcon name="Layers" className="w-4 h-4"/>}
-                            {category === 'General' ? 'สรุปผล' : category}
-                        </div>
-                        <div className={`transition-transform duration-200 text-slate-400 ${isOpen ? 'rotate-180' : ''}`}><SimpleIcon name="ChevronDown" className="w-4 h-4"/></div>
+                    <div onClick={() => setIsOpen(!isOpen)} className="bg-slate-50 px-6 py-3 text-xs font-bold text-slate-500 uppercase flex items-center justify-between cursor-pointer">
+                        <span>{category}</span>
+                        <SimpleIcon name="ChevronDown" className={`transition-transform ${isOpen ? 'rotate-180' : ''}`} />
                     </div>
                     {isOpen && (
-                        <div className="divide-y divide-slate-50 animate-fade-in">
+                        <div className="divide-y divide-slate-50">
                             {items.map(item => (
-                                <div key={item.id} className="p-6 hover:bg-slate-50 transition-colors group">
-                                    <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-4 mb-3">
-                                        <div className="flex-1">
-                                            <div className="font-semibold text-slate-800 text-base">{item.name}</div>
-                                            {item.required && <div className="text-xs text-slate-400 font-medium mt-1">จำนวนที่ควรมี: {item.required}</div>}
+                                <div key={item.id} className="p-6">
+                                    <div className="flex justify-between items-start gap-4">
+                                        <div>
+                                            <div className="font-bold text-slate-800">{item.name}</div>
+                                            {item.required && <div className="text-xs text-slate-400 font-medium">ควรมี: {item.required}</div>}
                                         </div>
-                                        <div className="shrink-0">
+                                        <div className="flex p-1 bg-slate-100 rounded-xl">
                                             {item.type === ITEM_TYPES.CHECK_HAVE ? (
-                                                <div className="flex p-1 bg-slate-100 rounded-xl">
-                                                    <button onClick={() => updateItem(item.id, 'checked', true)} className={`px-4 py-2 rounded-lg text-xs font-bold transition-all ${formData.items[item.id]?.checked === true ? 'bg-white text-emerald-600 shadow-sm' : 'text-slate-400 hover:text-slate-600'}`}>มี</button>
-                                                    <button onClick={() => updateItem(item.id, 'checked', false)} className={`px-4 py-2 rounded-lg text-xs font-bold transition-all ${formData.items[item.id]?.checked === false ? 'bg-white text-red-500 shadow-sm' : 'text-slate-400 hover:text-slate-600'}`}>ไม่มี</button>
-                                                </div>
+                                                <>
+                                                    <button onClick={() => updateItem(item.id, 'checked', true)} className={`px-4 py-2 rounded-lg text-xs font-bold transition-all ${formData.items[item.id]?.checked === true ? 'bg-white text-emerald-600 shadow-sm' : 'text-slate-400'}`}>มี</button>
+                                                    <button onClick={() => updateItem(item.id, 'checked', false)} className={`px-4 py-2 rounded-lg text-xs font-bold transition-all ${formData.items[item.id]?.checked === false ? 'bg-white text-red-500 shadow-sm' : 'text-slate-400'}`}>ไม่มี</button>
+                                                </>
                                             ) : (
-                                                <div className="flex p-1 bg-slate-100 rounded-xl">
-                                                    <button onClick={() => updateItem(item.id, 'status', 'ready')} className={`px-4 py-2 rounded-lg text-xs font-bold transition-all ${formData.items[item.id]?.status === 'ready' ? 'bg-white text-emerald-600 shadow-sm' : 'text-slate-400 hover:text-slate-600'}`}>พร้อม</button>
-                                                    <button onClick={() => updateItem(item.id, 'status', 'not_ready')} className={`px-4 py-2 rounded-lg text-xs font-bold transition-all ${formData.items[item.id]?.status === 'not_ready' ? 'bg-white text-red-500 shadow-sm' : 'text-slate-400 hover:text-slate-600'}`}>ไม่พร้อม</button>
-                                                </div>
+                                                <>
+                                                    <button onClick={() => updateItem(item.id, 'status', 'ready')} className={`px-4 py-2 rounded-lg text-xs font-bold transition-all ${formData.items[item.id]?.status === 'ready' ? 'bg-white text-emerald-600 shadow-sm' : 'text-slate-400'}`}>พร้อม</button>
+                                                    <button onClick={() => updateItem(item.id, 'status', 'not_ready')} className={`px-4 py-2 rounded-lg text-xs font-bold transition-all ${formData.items[item.id]?.status === 'not_ready' ? 'bg-white text-red-500 shadow-sm' : 'text-slate-400'}`}>ไม่พร้อม</button>
+                                                </>
                                             )}
                                         </div>
                                     </div>
-                                    {item.type !== ITEM_TYPES.STATUS_ONLY && item.type !== ITEM_TYPES.CHECK_HAVE && (
-                                        <div className="grid grid-cols-2 gap-4 mt-3">
-                                            {(item.type.includes('qty')) && (
-                                                <div><input type="number" placeholder="ระบุจำนวน" className={`bg-slate-50 border rounded-xl px-3 py-2 text-sm w-full focus:ring-2 focus:ring-teal-500 outline-none transition-all ${!formData.items[item.id]?.qty ? 'border-orange-200 bg-orange-50' : 'border-slate-200'}`} value={formData.items[item.id]?.qty || ''} onChange={e => updateItem(item.id, 'qty', e.target.value)}/></div>
-                                            )}
-                                            {item.type.includes('exp') && (
-                                                <div><label className="block text-[10px] text-slate-400 mb-1">วันหมดอายุ (ถ้ามี)</label><input type="date" className={`bg-slate-50 border rounded-xl px-3 py-2 text-sm w-full focus:ring-2 focus:ring-teal-500 outline-none transition-all ${getDaysDiff(formData.items[item.id]?.exp) < 0 ? 'border-red-500 text-red-500 bg-red-50' : 'border-slate-200'}`} value={formData.items[item.id]?.exp || ''} onChange={e => updateItem(item.id, 'exp', e.target.value)}/></div>
-                                            )}
-                                        </div>
+                                    {item.type.includes('qty') && (
+                                        <div className="mt-3"><input type="number" placeholder="ระบุจำนวน" className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2 text-sm" value={formData.items[item.id]?.qty || ''} onChange={e => updateItem(item.id, 'qty', e.target.value)}/></div>
                                     )}
-                                    {(formData.items[item.id]?.status === 'not_ready' || formData.items[item.id]?.checked === false) && (
-                                        <div className="mt-3 animate-fade-in"><input type="text" placeholder="ระบุสาเหตุที่ชำรุด/ขาด/ไม่พร้อม..." className="w-full border-b-2 border-red-100 bg-red-50/30 px-2 py-2 text-sm text-red-700 placeholder-red-300 focus:outline-none focus:border-red-300 transition-colors rounded-t-lg" value={formData.items[item.id]?.note || ''} onChange={e => updateItem(item.id, 'note', e.target.value)}/></div>
+                                    {item.type.includes('exp') && (
+                                        <div className="mt-3"><label className="block text-[10px] text-slate-400 mb-1">วันหมดอายุ</label><input type="date" className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2 text-sm" value={formData.items[item.id]?.exp || ''} onChange={e => updateItem(item.id, 'exp', e.target.value)}/></div>
                                     )}
                                 </div>
                             ))}
@@ -317,409 +242,6 @@
             );
         };
 
-        const OtherItemsSection = ({ otherItems, addOtherItem, removeOtherItem, updateOtherItem }) => {
-            const [isOpen, setIsOpen] = useState(true);
-            const hasItems = otherItems && otherItems.length > 0;
-
-            return (
-                <div className="border-t border-slate-100">
-                    <div 
-                        className="bg-slate-50 px-6 py-3 text-xs font-bold text-slate-500 uppercase tracking-wider flex items-center justify-between cursor-pointer hover:bg-slate-100"
-                        onClick={() => setIsOpen(!isOpen)}
-                    >
-                        <div className="flex items-center gap-2">
-                            <SimpleIcon name="Plus" className="w-4 h-4"/> รายการอื่นๆ (ถ้ามี)
-                            <div className={`ml-2 transition-transform duration-200 text-slate-400 ${isOpen ? 'rotate-180' : ''}`}><SimpleIcon name="ChevronDown" className="w-4 h-4"/></div>
-                        </div>
-                        <button onClick={(e) => { e.stopPropagation(); addOtherItem(); }} className="text-teal-600 hover:text-teal-700 flex items-center gap-1 text-xs bg-white px-2 py-1 rounded shadow-sm border border-teal-100 hover:bg-teal-50 transition-colors"><SimpleIcon name="Plus" className="w-3 h-3"/> เพิ่ม</button>
-                    </div>
-                    {isOpen && (
-                        <div className="divide-y divide-slate-50 animate-fade-in">
-                            {hasItems ? otherItems.map((item, idx) => (
-                                <div key={idx} className="p-6 hover:bg-slate-50 relative group">
-                                    <button onClick={() => removeOtherItem(idx)} className="absolute top-4 right-4 text-slate-300 hover:text-red-500 p-1"><SimpleIcon name="Trash" className="w-4 h-4"/></button>
-                                    <div className="mb-3 pr-8"><input type="text" placeholder="ชื่อรายการ" className="w-full font-semibold text-slate-800 text-base bg-transparent border-b border-transparent hover:border-slate-200 focus:border-teal-500 focus:outline-none placeholder-slate-300" value={item.name} onChange={e => updateOtherItem(idx, 'name', e.target.value)}/></div>
-                                    <div className="flex flex-col sm:flex-row gap-4 mb-3">
-                                        <div className="flex-1 grid grid-cols-2 gap-3">
-                                            <input type="number" placeholder="จำนวน" className="bg-slate-50 border rounded-xl px-3 py-2 text-sm w-full focus:ring-2 focus:ring-teal-500 outline-none" value={item.qty} onChange={e => updateOtherItem(idx, 'qty', e.target.value)}/>
-                                            <div><label className="block text-[10px] text-slate-400 mb-1">วันหมดอายุ (ถ้ามี)</label><input type="date" className={`bg-slate-50 border rounded-xl px-3 py-2 text-sm w-full focus:ring-2 focus:ring-teal-500 outline-none ${getDaysDiff(item.exp) < 0 ? 'border-red-500 text-red-500' : 'border-slate-200'}`} value={item.exp} onChange={e => updateOtherItem(idx, 'exp', e.target.value)}/></div>
-                                        </div>
-                                        <div className="shrink-0 flex p-1 bg-slate-100 rounded-xl h-fit">
-                                            <button onClick={() => updateOtherItem(idx, 'status', 'ready')} className={`px-3 py-2 rounded-lg text-xs font-bold transition-all ${item.status === 'ready' ? 'bg-white text-emerald-600 shadow-sm' : 'text-slate-400 hover:text-slate-600'}`}>พร้อม</button>
-                                            <button onClick={() => updateOtherItem(idx, 'status', 'not_ready')} className={`px-3 py-2 rounded-lg text-xs font-bold transition-all ${item.status === 'not_ready' ? 'bg-white text-red-500 shadow-sm' : 'text-slate-400 hover:text-slate-600'}`}>ไม่พร้อม</button>
-                                        </div>
-                                    </div>
-                                    {item.status === 'not_ready' && (<input type="text" placeholder="ระบุสาเหตุ..." className="w-full border-b-2 border-red-100 bg-red-50/30 px-2 py-2 text-sm text-red-700 placeholder-red-300 focus:outline-none focus:border-red-300 rounded-t-lg" value={item.note} onChange={e => updateOtherItem(idx, 'note', e.target.value)}/>)}
-                                </div>
-                            )) : (
-                                <div className="p-6 text-center text-sm text-slate-400 italic bg-slate-50/30">ไม่มีรายการเพิ่มเติม</div>
-                            )}
-                        </div>
-                    )}
-                </div>
-            );
-        };
-
-        const Modal = ({ isOpen, title, children, onClose }) => {
-            if (!isOpen) return null;
-            return (
-                <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-40 p-4 backdrop-blur-sm animate-fade-in">
-                    <div className="bg-white rounded-2xl shadow-2xl w-full max-w-sm overflow-hidden animate-slide-up ring-1 ring-gray-100">
-                        <div className="bg-white px-6 py-4 flex justify-between items-center border-b border-gray-100">
-                            <h3 className="text-lg font-bold text-slate-800 flex items-center gap-2">{title}</h3>
-                            <button onClick={onClose} className="text-slate-400 hover:text-slate-600 hover:bg-slate-50 rounded-full p-1 transition-colors"><SimpleIcon name="XCircle" className="w-6 h-6 stroke-2"/></button>
-                        </div>
-                        <div className="p-6 max-h-[70vh] overflow-y-auto">{children}</div>
-                    </div>
-                </div>
-            );
-        };
-
-        const StatusBadge = ({ status }) => {
-            if (status === 'ready' || status === 'พร้อมใช้' || status === true) return <span className="px-2.5 py-1 bg-green-50 text-green-700 text-xs font-semibold rounded-full border border-green-200 flex items-center gap-1.5 w-fit whitespace-nowrap"><div className="w-1.5 h-1.5 rounded-full bg-green-500"></div> พร้อมใช้</span>;
-            return <span className="px-2.5 py-1 bg-red-50 text-red-700 text-xs font-semibold rounded-full border border-red-200 flex items-center gap-1.5 w-fit whitespace-nowrap"><div className="w-1.5 h-1.5 rounded-full bg-red-500"></div> ไม่พร้อม</span>;
-        };
-
-        const IssuesList = ({ items }) => {
-            if (!items || items.length === 0) return null;
-            return (
-                <div className="mt-3 space-y-2 bg-red-50/50 rounded-xl p-3 border border-red-100">
-                    {items.map((item, idx) => (
-                        <div key={idx} className="flex items-start gap-2 text-xs text-slate-600">
-                            <span className="mt-1 w-1.5 h-1.5 rounded-full bg-red-400 shrink-0"></span>
-                            <div>
-                                <span className="font-semibold text-slate-700">{item.name}</span>
-                                <span className={`ml-1 font-bold ${item.issue === 'หมดอายุ' ? 'text-orange-600' : 'text-red-500'}`}>({item.issue})</span>
-                                {item.note && item.note !== '-' && <span className="block text-[10px] text-slate-400">หมายเหตุ: {item.note}</span>}
-                            </div>
-                        </div>
-                    ))}
-                </div>
-            );
-        };
-
-        const HistoryItem = ({ rec, itemsDef }) => {
-            const [isOpen, setIsOpen] = useState(false); // Default closed
-            const abnormalities = useMemo(() => getAbnormalities(rec, itemsDef), [rec, itemsDef]);
-
-            return (
-                <div className="bg-white rounded-2xl border border-slate-100 overflow-hidden hover:border-teal-100 transition-colors cursor-default shadow-sm">
-                    <div className="p-4 cursor-pointer" onClick={() => setIsOpen(!isOpen)}>
-                        <div className="flex justify-between items-start">
-                            <div className="flex gap-4 items-center">
-                                <div className="bg-slate-50 w-12 h-12 rounded-xl flex items-center justify-center text-slate-400">
-                                    <span className="text-xs font-bold">{rec.shift}</span>
-                                </div>
-                                <div>
-                                    <div className="font-bold text-slate-700">{formatDate(rec.date)}</div>
-                                    <div className="text-xs text-slate-400">{rec.checker}</div>
-                                </div>
-                            </div>
-                            <div className="flex items-center gap-2">
-                                <StatusBadge status={rec.generalReady} />
-                                <div className={`text-slate-300 transition-transform ${isOpen ? 'rotate-180' : ''}`}>
-                                    <SimpleIcon name="ChevronDown" className="w-5 h-5"/>
-                                </div>
-                            </div>
-                        </div>
-                        
-                        {/* Always show issue summary */}
-                        {abnormalities.length > 0 && !isOpen && (
-                             <div className="mt-2 text-[10px] text-red-500 font-medium flex items-center gap-1 pl-[4rem]">
-                                 <SimpleIcon name="AlertTriangle" className="w-3 h-3"/> พบ {abnormalities.length} รายการผิดปกติ
-                             </div>
-                        )}
-                        
-                        {/* Expanded details */}
-                        {isOpen && (
-                            <div className="mt-4 pt-4 border-t border-slate-100 animate-fade-in">
-                                {abnormalities.length > 0 ? (
-                                    <IssuesList items={abnormalities} />
-                                ) : (
-                                    <div className="text-center text-xs text-green-600 flex items-center justify-center gap-1">
-                                        <SimpleIcon name="CheckCircle" className="w-4 h-4"/> ไม่พบสิ่งผิดปกติ
-                                    </div>
-                                )}
-                            </div>
-                        )}
-                    </div>
-                </div>
-            );
-        };
-
-        // --- CALENDAR VIEW ---
-        const CalendarView = ({ records, onDateClick, onBack }) => {
-            const [currentDate, setCurrentDate] = useState(new Date());
-            
-            const daysInMonth = new Date(currentDate.getFullYear(), currentDate.getMonth() + 1, 0).getDate();
-            const firstDay = new Date(currentDate.getFullYear(), currentDate.getMonth(), 1).getDay(); // 0=Sun
-            
-            const monthRecords = useMemo(() => {
-                return records.filter(r => {
-                    const d = new Date(r.date);
-                    return d.getMonth() === currentDate.getMonth() && d.getFullYear() === currentDate.getFullYear();
-                });
-            }, [records, currentDate]);
-
-            const getDayStatus = (day) => {
-                const dayRecs = monthRecords.filter(r => new Date(r.date).getDate() === day);
-                if (dayRecs.length === 0) return 'none';
-                
-                const latest = dayRecs.reduce((prev, current) => (prev.id > current.id) ? prev : current);
-                return latest.generalReady === 'พร้อมใช้' ? 'ready' : 'not_ready';
-            };
-
-            const prevMonth = () => setCurrentDate(new Date(currentDate.getFullYear(), currentDate.getMonth() - 1, 1));
-            const nextMonth = () => setCurrentDate(new Date(currentDate.getFullYear(), currentDate.getMonth() + 1, 1));
-
-            const renderCalendarDays = () => {
-                const days = [];
-                for (let i = 0; i < firstDay; i++) {
-                    days.push(<div key={`empty-${i}`} className="calendar-day opacity-0"></div>);
-                }
-                for (let i = 1; i <= daysInMonth; i++) {
-                    const status = getDayStatus(i);
-                    let cellClasses = "calendar-day border border-slate-100 transition-colors relative overflow-hidden";
-                    let textClasses = "font-bold z-10";
-                    let statusLabel = "";
-
-                    if (status === 'ready') {
-                        cellClasses += " bg-emerald-500 hover:bg-emerald-600 border-emerald-500";
-                        textClasses += " text-white";
-                        statusLabel = "พร้อม";
-                    } else if (status === 'not_ready') {
-                        cellClasses += " bg-red-500 hover:bg-red-600 border-red-500";
-                        textClasses += " text-white";
-                        statusLabel = "ไม่พร้อม";
-                    } else {
-                        cellClasses += " bg-white hover:bg-slate-50 text-slate-700";
-                    }
-
-                    days.push(
-                        <div key={i} className={cellClasses} onClick={() => onDateClick(i, currentDate)}>
-                            <div className={textClasses}>{i}</div>
-                             {status !== 'none' && <div className="text-[8px] text-white/90 leading-none mt-1">{statusLabel}</div>}
-                        </div>
-                    );
-                }
-                return days;
-            };
-
-            return (
-                <div className="animate-slide-up">
-                    <div className="flex items-center justify-between mb-6">
-                        <button onClick={onBack} className="text-slate-500 hover:text-slate-800 flex items-center gap-2 text-sm font-semibold"><SimpleIcon name="ChevronLeft" className="w-4 h-4"/> กลับ</button>
-                        <div className="text-sm text-slate-400 font-medium">รายงานการตรวจสอบ</div>
-                    </div>
-                    
-                    <div className="bg-white rounded-3xl shadow-sm border border-slate-200 overflow-hidden p-6">
-                        <div className="flex justify-between items-center mb-6">
-                            <button onClick={prevMonth}><SimpleIcon name="ChevronLeft" className="w-5 h-5 text-slate-400"/></button>
-                            <h2 className="font-bold text-lg text-slate-800">
-                                {currentDate.toLocaleDateString('th-TH', { month: 'long', year: 'numeric' })}
-                            </h2>
-                            <button onClick={nextMonth}><SimpleIcon name="ChevronLeft" className="w-5 h-5 text-slate-400 rotate-180"/></button>
-                        </div>
-                        
-                        <div className="grid grid-cols-7 gap-2 mb-2 text-center text-xs text-slate-400">
-                            <div>อา</div><div>จ</div><div>อ</div><div>พ</div><div>พฤ</div><div>ศ</div><div>ส</div>
-                        </div>
-                        <div className="calendar-grid">
-                            {renderCalendarDays()}
-                        </div>
-                        
-                        <div className="mt-6 flex gap-4 justify-center text-xs text-slate-500">
-                            <div className="flex items-center gap-1"><div className="w-3 h-3 rounded bg-emerald-500"></div> พร้อมใช้</div>
-                            <div className="flex items-center gap-1"><div className="w-3 h-3 rounded bg-red-500"></div> ไม่พร้อม</div>
-                            <div className="flex items-center gap-1"><div className="w-3 h-3 rounded bg-white border border-slate-200"></div> ยังไม่ตรวจ</div>
-                        </div>
-                    </div>
-                </div>
-            );
-        };
-
-        // --- SETTINGS VIEW ---
-        const SettingsView = ({ itemsDef, setItemsDef, onBack, onSaveConfig }) => {
-            const [editingId, setEditingId] = useState(null);
-            const [formData, setFormData] = useState({ name: '', qty: '', type: ITEM_TYPES.QTY_EXP_STATUS, category: CATEGORY_ORDER[0] });
-
-            const handleDelete = (id) => {
-                if (confirm('ยืนยันลบรายการนี้?')) {
-                    const updated = itemsDef.filter(i => i.id !== id);
-                    setItemsDef(updated);
-                    onSaveConfig(updated);
-                }
-            };
-
-            const handleMove = (id, direction) => {
-                const index = itemsDef.findIndex(item => item.id === id);
-                if (index < 0) return;
-
-                const currentItem = itemsDef[index];
-                const categoryItems = itemsDef.filter(i => i.category === currentItem.category);
-                const localIndex = categoryItems.findIndex(i => i.id === id);
-
-                if (direction === 'up' && localIndex > 0) {
-                    const swapItem = categoryItems[localIndex - 1];
-                    const swapIndex = itemsDef.findIndex(i => i.id === swapItem.id);
-                    const newItems = [...itemsDef];
-                    [newItems[index], newItems[swapIndex]] = [newItems[swapIndex], newItems[index]];
-                    setItemsDef(newItems);
-                    onSaveConfig(newItems);
-                } else if (direction === 'down' && localIndex < categoryItems.length - 1) {
-                    const swapItem = categoryItems[localIndex + 1];
-                    const swapIndex = itemsDef.findIndex(i => i.id === swapItem.id);
-                    const newItems = [...itemsDef];
-                    [newItems[index], newItems[swapIndex]] = [newItems[swapIndex], newItems[index]];
-                    setItemsDef(newItems);
-                    onSaveConfig(newItems);
-                }
-            };
-
-            const handleEdit = (item) => {
-                setEditingId(item.id);
-                setFormData({
-                    name: item.name,
-                    qty: item.required || '',
-                    type: item.type,
-                    category: item.category
-                });
-                window.scrollTo(0,0);
-            };
-
-            const handleCancelEdit = () => {
-                setEditingId(null);
-                setFormData({ name: '', qty: '', type: ITEM_TYPES.QTY_EXP_STATUS, category: CATEGORY_ORDER[0] });
-            };
-
-            const handleSave = () => {
-                if (!formData.name) return alert('กรุณาระบุชื่อรายการ');
-                
-                let updated;
-                if (editingId) {
-                    // Update existing
-                    updated = itemsDef.map(item => {
-                        if (item.id === editingId) {
-                            return {
-                                ...item,
-                                name: formData.name,
-                                required: formData.qty || null,
-                                type: formData.type,
-                                category: formData.category
-                            };
-                        }
-                        return item;
-                    });
-                } else {
-                    // Add new
-                    const newId = 'custom_' + Date.now();
-                    const itemToAdd = {
-                        id: newId,
-                        name: formData.name,
-                        required: formData.qty || null,
-                        type: formData.type,
-                        category: formData.category
-                    };
-                    updated = [...itemsDef, itemToAdd];
-                }
-
-                setItemsDef(updated);
-                onSaveConfig(updated);
-                handleCancelEdit();
-                alert(editingId ? 'อัปเดตรายการเรียบร้อย' : 'เพิ่มรายการเรียบร้อย');
-            };
-
-            return (
-                <div className="animate-slide-up pb-20">
-                     <div className="flex items-center justify-between mb-6">
-                        <button onClick={onBack} className="text-slate-500 hover:text-slate-800 flex items-center gap-2 text-sm font-semibold"><SimpleIcon name="ChevronLeft" className="w-4 h-4"/> กลับ</button>
-                        <div className="text-sm text-slate-400 font-medium">ตั้งค่ารายการ (Sync)</div>
-                    </div>
-                    
-                    <div className="bg-white rounded-3xl shadow-sm border border-slate-200 overflow-hidden mb-6 p-6 sticky top-0 z-20">
-                        <h3 className="font-bold text-slate-800 mb-4 flex items-center gap-2">
-                            {editingId ? <><SimpleIcon name="Edit" className="w-5 h-5 text-orange-500"/> แก้ไขรายการ</> : <><SimpleIcon name="Plus" className="w-5 h-5 text-teal-600"/> เพิ่มรายการใหม่</>}
-                        </h3>
-                        <div className="grid gap-3">
-                            <select className="bg-slate-50 border rounded-lg p-2 text-sm" value={formData.category} onChange={e => setFormData({...formData, category: e.target.value})}>
-                                {CATEGORY_ORDER.map(c => <option key={c} value={c}>{c}</option>)}
-                            </select>
-                            <input type="text" placeholder="ชื่อรายการ" className="bg-slate-50 border rounded-lg p-2 text-sm" value={formData.name} onChange={e => setFormData({...formData, name: e.target.value})} />
-                            <div className="grid grid-cols-2 gap-3">
-                                <select className="bg-slate-50 border rounded-lg p-2 text-sm" value={formData.type} onChange={e => setFormData({...formData, type: e.target.value})}>
-                                    <option value={ITEM_TYPES.QTY_EXP_STATUS}>จำนวน+วันหมดอายุ</option>
-                                    <option value={ITEM_TYPES.QTY_STATUS}>จำนวน+สถานะ</option>
-                                    <option value={ITEM_TYPES.CHECK_HAVE}>มี/ไม่มี</option>
-                                </select>
-                                <input type="number" placeholder="จำนวนที่ควรมี (ถ้ามี)" className="bg-slate-50 border rounded-lg p-2 text-sm" value={formData.qty} onChange={e => setFormData({...formData, qty: e.target.value})} />
-                            </div>
-                            <div className="flex gap-2 mt-2">
-                                <button onClick={handleSave} className={`flex-1 text-white rounded-lg p-2 text-sm font-bold ${editingId ? 'bg-orange-500' : 'bg-teal-600'}`}>{editingId ? 'อัปเดต' : 'บันทึก'}</button>
-                                {editingId && <button onClick={handleCancelEdit} className="flex-1 bg-slate-200 text-slate-600 rounded-lg p-2 text-sm font-bold">ยกเลิก</button>}
-                            </div>
-                        </div>
-                    </div>
-
-                    <div className="space-y-4">
-                        {CATEGORY_ORDER.map(cat => {
-                            const catItems = itemsDef.filter(i => i.category === cat);
-                            if (catItems.length === 0) return null;
-                            return (
-                                <div key={cat} className="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden">
-                                    <div className="bg-slate-50 px-4 py-2 text-xs font-bold text-slate-500 uppercase">{cat}</div>
-                                    <div className="divide-y divide-slate-100">
-                                        {catItems.map((item, index) => (
-                                            <div key={item.id} className={`p-3 flex justify-between items-center hover:bg-slate-50 ${editingId === item.id ? 'bg-orange-50 border-l-4 border-orange-500' : ''}`}>
-                                                <div className="text-sm font-medium text-slate-700">{item.name}</div>
-                                                <div className="flex gap-1 items-center">
-                                                    <div className="flex flex-col gap-0.5 mr-2">
-                                                        <button onClick={() => handleMove(item.id, 'up')} disabled={index === 0} className="text-slate-300 hover:text-slate-600 disabled:opacity-30"><SimpleIcon name="ArrowUp" className="w-3 h-3"/></button>
-                                                        <button onClick={() => handleMove(item.id, 'down')} disabled={index === catItems.length - 1} className="text-slate-300 hover:text-slate-600 disabled:opacity-30"><SimpleIcon name="ArrowDown" className="w-3 h-3"/></button>
-                                                    </div>
-                                                    <button onClick={() => handleEdit(item)} className="text-slate-300 hover:text-orange-500 p-1"><SimpleIcon name="Edit" className="w-4 h-4"/></button>
-                                                    <button onClick={() => handleDelete(item.id)} className="text-slate-300 hover:text-red-500 p-1"><SimpleIcon name="Trash" className="w-4 h-4"/></button>
-                                                </div>
-                                            </div>
-                                        ))}
-                                    </div>
-                                </div>
-                            )
-                        })}
-                    </div>
-                </div>
-            );
-        };
-        // --- NEW COMPONENT FOR GROUPED HISTORY ---
-            const MonthGroupHistory = ({ monthLabel, records, itemsDef }) => {
-                const [isExpanded, setIsExpanded] = useState(true); // ขยายไว้เป็นค่าเริ่มต้นสำหรับเดือนล่าสุด
-            
-                return (
-                    <div className="mb-4">
-                        <button 
-                            onClick={() => setIsExpanded(!isExpanded)}
-                            className="w-full flex items-center justify-between p-3 bg-slate-200/50 hover:bg-slate-200 rounded-xl transition-colors mb-2"
-                        >
-                            <div className="flex items-center gap-2">
-                                <SimpleIcon name="Calendar" className="w-4 h-4 text-slate-500"/>
-                                <span className="font-bold text-slate-700">{monthLabel}</span>
-                                <span className="text-xs bg-white px-2 py-0.5 rounded-full text-slate-500 border border-slate-100">{records.length} รายการ</span>
-                            </div>
-                            <div className={`transition-transform duration-300 ${isExpanded ? 'rotate-180' : ''}`}>
-                                <SimpleIcon name="ChevronDown" className="w-5 h-5 text-slate-400"/>
-                            </div>
-                        </button>
-                        
-                        {isExpanded && (
-                            <div className="space-y-3 pl-2 border-l-2 border-slate-200 ml-4 animate-fade-in">
-                                {records.map((rec) => (
-                                    <HistoryItem key={rec.id} rec={rec} itemsDef={itemsDef} />
-                                ))}
-                            </div>
-                        )}
-                    </div>
-                );
-            };
-
         // --- MAIN APP ---
         function App() {
             const [view, setView] = useState('dashboard');
@@ -727,595 +249,197 @@
             const [records, setRecords] = useState([]);
             const [formData, setFormData] = useState({});
             const [lastStockCheck, setLastStockCheck] = useState(null);
-            
             const [isLoading, setIsLoading] = useState(false);
             
             const [showTypeModal, setShowTypeModal] = useState(false);
-            const [showStockAlert, setShowStockAlert] = useState(false);
             const [showCopyWarning, setShowCopyWarning] = useState(false);
-            const [showSaveConfirmModal, setShowSaveConfirmModal] = useState(false);
-            const [expiryList, setExpiryList] = useState([]);
-            
-            const [summaryData, setSummaryData] = useState(null);
-            
-            // เพิ่ม Logic การจัดกลุ่มเดือน
-            const groupedRecords = useMemo(() => {
-                const groups = {};
-                records.forEach(rec => {
-                    const d = new Date(rec.date);
-                    const label = d.toLocaleDateString('th-TH', { month: 'long', year: 'numeric' });
-                    if (!groups[label]) groups[label] = [];
-                    groups[label].push(rec);
-                });
-                return groups;
-            }, [records]);
+            const [showSaveConfirm, setShowSaveConfirm] = useState(false);
 
-            // Calculate Expiration Alerts for Dashboard
+            useEffect(() => { fetchData(); }, []);
+
+            const fetchData = async () => {
+                setIsLoading(true);
+                try {
+                    const res = await fetch(GAS_API_URL + '?action=read');
+                    const json = await res.json();
+                    if(json.status === 'success') {
+                         setRecords((json.data || []).map(r => {
+                             if (r.items && typeof r.items === 'string') {
+                                 try { r.items = JSON.parse(r.items); } catch(e) { r.items = {}; }
+                             }
+                             return r;
+                         }));
+                    }
+                    const resStock = await fetch(GAS_API_URL + '?action=getLastStockCheck');
+                    const dataStock = await resStock.json();
+                    if(dataStock.status === 'success' && dataStock.date) setLastStockCheck(new Date(dataStock.date));
+                } catch (e) {
+                    setRecords([{ id: 'mock', date: new Date().toISOString(), generalReady: 'พร้อมใช้', shift: 'เช้า', checker: 'Demo', items: {} }]);
+                } finally { setIsLoading(false); }
+            };
+
+            const initForm = (prevData = null) => {
+                const today = new Date().toISOString().split('T')[0];
+                const savedChecker = localStorage.getItem('last_checker') || '';
+                let initialItems = {};
+                itemsDef.forEach(i => initialItems[i.id] = { qty: '', exp: '', status: null, checked: null, note: '' });
+
+                if (prevData) {
+                    Object.entries(prevData.items || {}).forEach(([k, v]) => {
+                        if (initialItems[k]) initialItems[k] = { ...v };
+                    });
+                }
+
+                setFormData({ date: today, shift: 'เช้า', checker: savedChecker, items: initialItems, otherItems: [] });
+            };
+
+            const submitData = async () => {
+                setIsLoading(true);
+                const isReady = formData.items['general_readiness']?.status === 'ready';
+                const statusStr = isReady ? 'พร้อมใช้' : 'ไม่พร้อมใช้';
+                localStorage.setItem('last_checker', formData.checker);
+                
+                try {
+                    await fetch(GAS_API_URL, {
+                        method: 'POST', mode: 'no-cors', headers: { 'Content-Type': 'text/plain' },
+                        body: JSON.stringify({ ...formData, generalReady: statusStr, id: Date.now() })
+                    });
+                    setTimeout(() => { setIsLoading(false); setView('dashboard'); fetchData(); }, 1500);
+                } catch (e) { setIsLoading(false); }
+            };
+
             const expirationAlerts = useMemo(() => {
                 if (records.length === 0) return [];
                 const latest = records[0];
                 const alerts = [];
-
-                const addAlert = (name, exp) => {
-                    if (!exp) return;
-                    const days = getDaysDiff(exp);
-                    if (days <= 7) {
-                        let status = 'soon';
-                        if (days < 0) status = 'expired';
-                        else if (days === 0) status = 'today';
-                        alerts.push({ name, days, status, date: exp });
-                    }
-                };
-
-                if (latest.items) {
-                    Object.entries(latest.items).forEach(([key, val]) => {
-                        const def = itemsDef.find(i => i.id === key);
-                        if (def) {
-                            addAlert(def.name, val.exp);
-                        }
-                    });
-                }
-
-                if (latest.otherItems && Array.isArray(latest.otherItems)) {
-                    latest.otherItems.forEach(item => {
-                        addAlert(item.name || 'รายการเพิ่มเติม', item.exp);
-                    });
-                }
-
-                return alerts.sort((a, b) => a.days - b.days);
-            }, [records, itemsDef]);
-
-            useEffect(() => { 
-                fetchData(); 
-                fetchConfig();
-            }, []);
-
-            const fetchData = async () => {
-                if(GAS_API_URL.includes("YOUR_GAS")) {
-                    setIsLoading(false);
-                    return;
-                }
-                setIsLoading(true);
-                try {
-                    const resRec = await fetch(GAS_API_URL + '?action=read');
-                    const dataRec = await resRec.json();
-                    if(dataRec.status === 'success') {
-                         const cleanRecords = (dataRec.data || []).map(r => {
-                             if (r.items && typeof r.items === 'string') {
-                                 try { r.items = JSON.parse(r.items); } catch(e) { r.items = {}; }
-                             }
-                             if (r.items && r.items['__other_items__']) {
-                                 delete r.items['__other_items__'];
-                             }
-                             return r;
-                         });
-                         setRecords(cleanRecords);
-                    }
-                    const resStock = await fetch(GAS_API_URL + '?action=getLastStockCheck');
-                    const dataStock = await resStock.json();
-                    if(dataStock.status === 'success' && dataStock.date) {
-                        setLastStockCheck(new Date(dataStock.date));
-                    }
-                } catch (error) {
-                    console.warn("Connection failed, switching to offline mode:", error);
-                    const mockRecords = [
-                        {
-                            id: 'mock_1',
-                            date: new Date().toISOString(),
-                            shift: 'เช้า',
-                            checker: 'Demo User',
-                            generalReady: 'พร้อมใช้',
-                            items: {},
-                            otherItems: []
-                        }
-                    ];
-                    setRecords(mockRecords);
-                } finally {
-                    setIsLoading(false);
-                }
-            };
-
-            const fetchConfig = async () => {
-                if(GAS_API_URL.includes("YOUR_GAS")) return;
-                try {
-                    const res = await fetch(GAS_API_URL + '?action=getConfig').catch(() => null);
-                    if (!res) return;
-                    const json = await res.json();
-                    if (json.status === 'success' && json.data) {
-                        setItemsDef(json.data);
-                    }
-                } catch (e) { console.error("Config fetch error", e); }
-            };
-
-            const saveRemoteConfig = async (newConfig) => {
-                try {
-                    await fetch(GAS_API_URL, {
-                        method: 'POST',
-                        mode: 'no-cors',
-                        headers: { 'Content-Type': 'text/plain' },
-                        body: JSON.stringify({ action: 'saveConfig', config: newConfig })
-                    });
-                } catch (e) {
-                    alert("บันทึกการตั้งค่าไม่สำเร็จ: " + e);
-                }
-            };
-
-            const checkExpirations = (items) => {
-                const alerts = [];
-                if (!items) return alerts;
-                Object.entries(items).forEach(([key, val]) => {
-                    if (val && val.exp) {
+                Object.entries(latest.items || {}).forEach(([key, val]) => {
+                    if (val.exp) {
                         const days = getDaysDiff(val.exp);
-                        const itemDef = itemsDef.find(i => i.id === key);
-                        if (!itemDef) return; 
-                        if (days < 0) alerts.push({ name: itemDef.name, status: 'expired', days });
-                        else if (days <= 7) alerts.push({ name: itemDef.name, status: 'warning', days });
+                        if (days <= 7) alerts.push({ name: itemsDef.find(i => i.id === key)?.name, date: val.exp, status: days < 0 ? 'expired' : 'soon' });
                     }
                 });
                 return alerts;
-            };
-
-            const initForm = (prevData = null, isNew = false) => {
-                const today = new Date().toISOString().split('T')[0];
-                const savedChecker = localStorage.getItem('last_checker_name') || '';
-
-                let initialData = { date: today, shift: 'เช้า', checker: savedChecker, items: {}, otherItems: [], isReCheckStock: false, isFixMode: false, fixItemIds: [] };
-                
-                if (prevData && (prevData.items || prevData.otherItems) && !isNew) {
-                    const safeItems = {};
-                    itemsDef.forEach(item => {
-                        if (prevData.items && prevData.items[item.id]) {
-                            safeItems[item.id] = JSON.parse(JSON.stringify(prevData.items[item.id]));
-                        } else {
-                            safeItems[item.id] = { qty: '', exp: '', status: null, note: '', checked: null };
-                        }
-                    });
-                    initialData = { ...initialData, items: safeItems };
-                    
-                    if (prevData.otherItems && Array.isArray(prevData.otherItems) && prevData.otherItems.length > 0) {
-                        initialData.otherItems = prevData.otherItems.map(item => ({...item}));
-                    }
-                    
-                    if (prevData.isFixMode) initialData.isFixMode = true;
-                    if (prevData.fixItemIds) initialData.fixItemIds = prevData.fixItemIds;
-                    if (savedChecker) initialData.checker = savedChecker;
-
-                } else {
-                    itemsDef.forEach(item => {
-                        initialData.items[item.id] = { qty: '', exp: '', status: null, note: '', checked: null };
-                    });
-                }
-                setFormData(initialData);
-            };
-
-            const selectCheckType = (type) => {
-                setShowTypeModal(false);
-                if (type === 'new') {
-                    initForm(null, true);
-                    if(lastStockCheck) {
-                        const daysSince = Math.floor((new Date() - lastStockCheck) / (1000*60*60*24));
-                        if(daysSince >= 14) setShowStockAlert({ overdue: daysSince - 14 });
-                    }
-                    setView('form');
-                } else {
-                    if (records.length > 0) {
-                        initForm(records[0], false);
-                        setShowCopyWarning(true);
-                    } else {
-                        alert("ไม่พบประวัติการบันทึกก่อนหน้า");
-                        initForm(null, true);
-                        setView('form');
-                    }
-                }
-            };
-
-            const handleFixNow = () => {
-                if (records.length > 0) {
-                    const latest = records[0];
-                    const fixIds = [];
-                    
-                    if (latest.items) {
-                        Object.entries(latest.items).forEach(([key, val]) => {
-                            const def = itemsDef.find(i => i.id === key);
-                            if (!def) return;
-
-                            let isProblem = false;
-                            if (def.type === ITEM_TYPES.CHECK_HAVE) {
-                                if (!val.checked) isProblem = true;
-                            } else {
-                                if (val.status === 'not_ready') isProblem = true;
-                            }
-                            if (val.exp && getDaysDiff(val.exp) < 0) isProblem = true;
-                            if (isProblem) fixIds.push(key);
-                        });
-                    }
-
-                    if (!fixIds.includes('general_readiness')) fixIds.push('general_readiness');
-
-                    const problemData = {
-                        items: latest.items, 
-                        isFixMode: true,
-                        fixItemIds: fixIds
-                    };
-
-                    initForm(problemData, false); 
-                    setView('form'); 
-                    window.scrollTo(0, 0);
-                } else {
-                    alert("ไม่พบประวัติเพื่อแก้ไข");
-                }
-            };
-
-            const onSaveClick = () => {
-                if (!formData.checker) return alert("กรุณาระบุชื่อผู้ตรวจสอบ");
-                
-                for (let item of itemsDef) {
-                    if (formData.isFixMode && !formData.fixItemIds.includes(item.id)) continue;
-                    const val = formData.items[item.id];
-                    if (item.type === ITEM_TYPES.CHECK_HAVE) {
-                        if (val?.checked === null || val?.checked === undefined) return alert(`กรุณาระบุ "มี/ไม่มี" ของรายการ: ${item.name}`);
-                    } else if (item.type === ITEM_TYPES.STATUS_ONLY) {
-                         if (!val?.status) return alert(`กรุณาระบุ "สถานะ" ของรายการ: ${item.name}`);
-                    } else {
-                        if (!val?.status) return alert(`กรุณาระบุ "สถานะ" ของรายการ: ${item.name}`);
-                        if (item.required && (val?.qty === '' || val?.qty === undefined)) return alert(`กรุณาระบุ "จำนวน" ของรายการ: ${item.name}`);
-                    }
-                }
-
-                const expAlerts = checkExpirations(formData.items);
-                if (expAlerts.some(a => a.status === 'expired')) {
-                    setExpiryList(expAlerts);
-                    setShowSaveConfirmModal(true);
-                } else {
-                    submitData();
-                }
-            };
-
-            const submitData = async () => {
-                setShowSaveConfirmModal(false);
-                setIsLoading(true);
-
-                localStorage.setItem('last_checker_name', formData.checker);
-                
-                const generalItem = formData.items['general_readiness'];
-                const isGeneralReady = generalItem && generalItem.status === 'ready';
-                const generalReadyStatus = isGeneralReady ? 'พร้อมใช้' : 'ไม่พร้อมใช้';
-                
-                const itemsToSend = { ...formData.items };
-                if (formData.otherItems.length > 0) {
-                    itemsToSend['__other_items__'] = { 
-                        status: 'ready', 
-                        data: formData.otherItems 
-                    };
-                }
-
-                const payload = {
-                    id: Date.now(),
-                    ...formData,
-                    items: itemsToSend, 
-                    generalReady: generalReadyStatus
-                };
-
-                const missing = [];
-                const broken = [];
-                Object.entries(formData.items).forEach(([key, val]) => {
-                    const def = itemsDef.find(i => i.id === key);
-                    if (!def) return; 
-                    if (def.type === ITEM_TYPES.CHECK_HAVE && !val.checked) missing.push(def.name);
-                    if ((def.type === ITEM_TYPES.QTY_STATUS || def.type === ITEM_TYPES.QTY_EXP_STATUS || def.type === ITEM_TYPES.STATUS_ONLY) && val.status === 'not_ready') {
-                         broken.push(`${def.name} (${val.note || 'ไม่ระบุสาเหตุ'})`);
-                    }
-                });
-                
-                setSummaryData({ missing, broken, status: generalReadyStatus });
-
-                try {
-                    await fetch(GAS_API_URL, {
-                        method: 'POST',
-                        mode: 'no-cors',
-                        headers: { 'Content-Type': 'text/plain' },
-                        body: JSON.stringify(payload)
-                    });
-                    setTimeout(() => {
-                        setIsLoading(false);
-                        setView('summary');
-                        fetchData(); 
-                    }, 1500);
-                } catch (error) {
-                    alert("เกิดข้อผิดพลาดในการส่งข้อมูล (แต่อาจจะบันทึกสำเร็จใน Offline Mode)");
-                    setIsLoading(false);
-                }
-            };
-
-            const updateItem = (id, field, value) => {
-                setFormData(prev => ({ ...prev, items: { ...prev.items, [id]: { ...prev.items[id], [field]: value } } }));
-            };
-            const addOtherItem = () => {
-                setFormData(prev => ({ ...prev, otherItems: [...prev.otherItems, { id: Date.now(), name: '', qty: '', exp: '', status: 'ready', note: '' }] }));
-            };
-            const removeOtherItem = (index) => {
-                const newItems = [...formData.otherItems];
-                newItems.splice(index, 1);
-                setFormData(prev => ({ ...prev, otherItems: newItems }));
-            };
-            const updateOtherItem = (index, field, value) => {
-                const newItems = [...formData.otherItems];
-                newItems[index][field] = value;
-                setFormData(prev => ({ ...prev, otherItems: newItems }));
-            };
-
-            const onCalendarDateClick = (day, currentMonthDate) => {
-                const targetDateStr = new Date(currentMonthDate.getFullYear(), currentMonthDate.getMonth(), day).toISOString().split('T')[0];
-                const dayRecs = records.filter(r => r.date.split('T')[0] === targetDateStr);
-                
-                if (dayRecs.length > 0) {
-                     alert(`ประวัติวันที่ ${day}: มีการตรวจ ${dayRecs.length} ครั้ง\nล่าสุดโดย: ${dayRecs[0].checker}\nสถานะ: ${dayRecs[0].generalReady}`);
-                } else {
-                    alert(`วันที่ ${day}: ยังไม่มีการตรวจสอบ`);
-                }
-            };
+            }, [records, itemsDef]);
 
             if (isLoading) return (
-                <div className="min-h-screen bg-[#F0F4F9] flex flex-col items-center justify-center">
-                    <div className="w-12 h-12 border-4 border-teal-200 border-t-teal-600 rounded-full animate-spin-slow"></div>
-                    <p className="mt-4 text-slate-500 font-medium animate-pulse text-sm">กำลังประมวลผล...</p>
+                <div className="min-h-screen flex flex-col items-center justify-center bg-white">
+                    <div className="w-12 h-12 border-4 border-teal-100 border-t-teal-600 rounded-full animate-spin"></div>
+                    <p className="mt-4 text-slate-400 font-medium">กำลังดำเนินการ...</p>
                 </div>
             );
 
-            const latestRecord = records[0];
-            const latestIssues = latestRecord ? getAbnormalities(latestRecord, itemsDef) : [];
-
             return (
-                <div className="pb-24 max-w-2xl mx-auto bg-[#F0F4F9] min-h-screen shadow-2xl shadow-slate-200">
-                    <header className="bg-white/80 backdrop-blur-md sticky top-0 z-40 border-b border-slate-200">
-                        <div className="px-6 py-4 flex items-center justify-between">
-                            <div className="flex items-center gap-4">
-                                <img src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRYfBIvo5I6imKO2PO2Q685aje7a48lvI5rrQ&s" alt="Medical Bag" className="w-12 h-12 rounded-xl object-cover shadow-lg shadow-red-100" />
-                                <div className="flex-1 min-w-0">
-                                    <h1 className="text-lg font-bold text-slate-800 leading-tight">Emergency Cart Smart Check</h1>
-                                    <p className="text-slate-500 text-xs">หอผู้ป่วยสงฆ์อาพาธ</p>
-                                </div>
-                            </div>
-                            <div className="flex gap-2">
-                                <button onClick={() => setView('report')} className="p-2 text-slate-400 hover:text-teal-600 bg-white rounded-lg border border-slate-100 shadow-sm"><SimpleIcon name="Calendar"/></button>
-                                <button onClick={() => setView('settings')} className="p-2 text-slate-400 hover:text-teal-600 bg-white rounded-lg border border-slate-100 shadow-sm"><SimpleIcon name="Settings"/></button>
-                            </div>
+                <div className="max-w-md mx-auto min-h-screen bg-[#F8FAFC] pb-20 shadow-xl shadow-slate-200">
+                    <header className="bg-white px-6 py-6 border-b border-slate-100 flex items-center justify-between sticky top-0 z-30">
+                        <div className="flex items-center gap-3">
+                            <img 
+                                src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRYfBIvo5I6imKO2PO2Q685aje7a48lvI5rrQ&s" 
+                                alt="Logo" 
+                                className="w-10 h-10 rounded-xl object-cover shadow-sm"
+                            />
+                            <h1 className="text-lg font-extrabold text-slate-800 leading-tight">Emergency Cart Check</h1>
                         </div>
+                        <button onClick={() => setView('report')} className="p-2 text-slate-400 hover:bg-slate-50 rounded-xl"><SimpleIcon name="Calendar" /></button>
                     </header>
 
                     <main className="p-4">
-                        {/* VIEW: DASHBOARD */}
                         {view === 'dashboard' && (
                             <div className="space-y-6 animate-fade-in">
-                                <div className="bg-white rounded-3xl p-6 shadow-sm border border-slate-100 text-center relative overflow-hidden group hover:shadow-md transition-shadow">
-                                    <h2 className="text-slate-400 text-xs font-bold uppercase tracking-widest mb-3">ความพร้อมทั่วไปรถ Emergency</h2>
-                                    {records.length > 0 ? (
-                                        <>
-                                            <div className={`text-5xl font-bold mb-4 tracking-tight ${records[0].generalReady === 'พร้อมใช้' ? 'text-emerald-600' : 'text-red-500'}`}>
-                                                {records[0].generalReady}
-                                            </div>
-                                            {latestIssues.length > 0 && (
-                                                <div className="mb-6 text-left bg-red-50 p-4 rounded-xl border border-red-100">
-                                                    <div className="flex justify-between items-start mb-2">
-                                                        <div className="text-red-600 font-bold text-sm flex items-center gap-2">
-                                                            <SimpleIcon name="AlertTriangle" className="w-4 h-4"/> 
-                                                            รายการที่ต้องแก้ไข ({latestIssues.length})
-                                                        </div>
-                                                        <button 
-                                                            onClick={handleFixNow}
-                                                            className="text-xs bg-red-600 text-white px-3 py-1.5 rounded-lg hover:bg-red-700 transition-colors shadow-sm flex items-center gap-1"
-                                                        >
-                                                            <SimpleIcon name="Wrench" className="w-3 h-3"/> แก้ไขตอนนี้
-                                                        </button>
-                                                    </div>
-                                                    <IssuesList items={latestIssues} />
-                                                </div>
-                                            )}
-                                        </>
-                                    ) : <div className="text-slate-300 text-xl mb-4 font-light">ยังไม่มีข้อมูล</div>}
-                                    
-                                    <div className="inline-flex items-center gap-2 bg-slate-50 px-4 py-2 rounded-xl text-sm text-slate-600 mb-8 border border-slate-100">
-                                        <SimpleIcon name="RotateCcw" className="w-4 h-4 text-slate-400"/>
-                                        <span>กำหนด ReCheck Stock ครั้งถัดไป: วันที่ <span className="font-semibold text-slate-800">{lastStockCheck ? formatDate(new Date(lastStockCheck.getTime() + 14 * 24 * 60 * 60 * 1000)) : '-'}</span></span>
+                                {/* CARD STATUS (Image 3) */}
+                                <div className="bg-white rounded-[40px] p-8 shadow-sm border border-slate-100 text-center relative overflow-hidden">
+                                    <h2 className="text-slate-400 text-[10px] font-bold uppercase tracking-[2px] mb-4">ความพร้อมทั่วไปรถ EMERGENCY</h2>
+                                    <div className={`text-6xl font-black mb-6 ${records[0]?.generalReady === 'พร้อมใช้' ? 'text-[#10B981]' : 'text-red-500'}`}>
+                                        {records[0]?.generalReady || 'ยังไม่ระบุ'}
                                     </div>
                                     
-                                    <ExpirationAlerts alerts={expirationAlerts} />
+                                    <div className="inline-flex items-center gap-2 bg-slate-50 px-5 py-2.5 rounded-2xl text-[13px] text-slate-600 mb-8 border border-slate-100 shadow-inner">
+                                        <SimpleIcon name="RotateCcw" className="w-4 h-4 text-slate-300" />
+                                        <span>กำหนด ReCheck Stock ครั้งถัดไป: วันที่ <span className="font-bold text-slate-800">{lastStockCheck ? formatDate(new Date(lastStockCheck.getTime() + 14 * 86400000)) : '12 ก.พ. 2569'}</span></span>
+                                    </div>
 
-                                    <button onClick={() => setShowTypeModal(true)} className="w-full bg-slate-900 hover:bg-slate-800 text-white py-4 rounded-2xl shadow-xl shadow-slate-200 flex items-center justify-center gap-3 text-lg font-semibold transition-all active:scale-[0.98]">
-                                        <SimpleIcon name="Plus" className="w-5 h-5"/> ตรวจสอบรถ
+                                    <button onClick={() => setShowTypeModal(true)} className="w-full bg-[#0F172A] hover:bg-slate-800 text-white py-4.5 rounded-[24px] shadow-xl shadow-slate-200 flex items-center justify-center gap-3 text-lg font-bold transition-transform active:scale-95">
+                                        <SimpleIcon name="Plus" className="w-5 h-5 text-white" />
+                                        <span>ตรวจสอบรถ</span>
                                     </button>
+
+                                    <ExpirationAlerts alerts={expirationAlerts} />
                                 </div>
 
-                                <div>
-                                    <h3 className="text-lg font-bold text-slate-800 mb-4 flex items-center gap-2 px-2">
-                                        <span className="bg-teal-100 text-teal-700 p-1.5 rounded-lg"><SimpleIcon name="History" className="w-4 h-4"/></span> 
-                                        ประวัติย้อนหลัง
-                                    </h3>
-                                    <div className="space-y-2">
-                                        {Object.keys(groupedRecords).length > 0 ? (
-                                            Object.entries(groupedRecords).map(([month, recs]) => (
-                                                <MonthGroupHistory 
-                                                    key={month} 
-                                                    monthLabel={month} 
-                                                    records={recs} 
-                                                    itemsDef={itemsDef} 
-                                                />
-                                            ))
-                                        ) : (
-                                            <div className="text-center py-10 text-slate-400 italic bg-white rounded-2xl border border-dashed">
-                                                ไม่มีประวัติการบันทึก
+                                <div className="space-y-3">
+                                    <h3 className="text-sm font-bold text-slate-400 uppercase tracking-widest px-2">ประวัติย้อนหลัง</h3>
+                                    {records.slice(0, 10).map(rec => (
+                                        <div key={rec.id} className="bg-white p-4 rounded-[24px] border border-slate-100 flex items-center justify-between shadow-sm">
+                                            <div className="flex items-center gap-4">
+                                                <div className="w-12 h-12 bg-slate-50 rounded-2xl flex items-center justify-center text-slate-400 text-xs font-bold uppercase">{rec.shift}</div>
+                                                <div>
+                                                    <div className="font-bold text-slate-800">{formatDate(rec.date)}</div>
+                                                    <div className="text-[11px] text-slate-400 font-medium">โดย: {rec.checker}</div>
+                                                </div>
                                             </div>
-                                        )}
-                                    </div>
+                                            <div className={`text-xs font-bold px-3 py-1.5 rounded-full ${rec.generalReady === 'พร้อมใช้' ? 'bg-emerald-50 text-emerald-600 border border-emerald-100' : 'bg-red-50 text-red-600 border border-red-100'}`}>{rec.generalReady}</div>
+                                        </div>
+                                    ))}
                                 </div>
                             </div>
                         )}
 
-                        {/* VIEW: SETTINGS */}
-                        {view === 'settings' && (
-                            <SettingsView itemsDef={itemsDef} setItemsDef={setItemsDef} onBack={() => setView('dashboard')} onSaveConfig={saveRemoteConfig} />
-                        )}
-
-                        {/* VIEW: REPORT */}
-                        {view === 'report' && (
-                            <CalendarView records={records} onDateClick={onCalendarDateClick} onBack={() => setView('dashboard')} />
-                        )}
-
-                        {/* VIEW: FORM */}
                         {view === 'form' && (
-                            <div className="animate-slide-up pb-20">
+                            <div className="animate-slide-up pb-10">
                                 <div className="flex items-center justify-between mb-6">
-                                    <button onClick={() => setView('dashboard')} className="text-slate-500 hover:text-slate-800 flex items-center gap-2 text-sm font-semibold transition-colors bg-white px-3 py-2 rounded-xl border border-slate-200 shadow-sm"><SimpleIcon name="ChevronLeft" className="w-4 h-4"/> กลับ</button>
-                                    <div className="text-sm text-slate-400 font-medium">แบบฟอร์มตรวจสอบ</div>
+                                    <button onClick={() => setView('dashboard')} className="text-slate-500 hover:bg-white p-2 rounded-xl transition-colors"><SimpleIcon name="ChevronLeft" /></button>
+                                    <div className="font-bold text-slate-800">แบบฟอร์มตรวจสอบ</div>
+                                    <div className="w-8"></div>
                                 </div>
-                                <div className="bg-white rounded-3xl shadow-sm border border-slate-200 overflow-hidden mb-6">
-                                    <div className="p-6 grid grid-cols-2 gap-6 bg-slate-50/50 border-b border-slate-100">
-                                        <div><label className="block text-xs font-bold text-slate-400 uppercase mb-2">วันที่</label><input type="date" className="w-full bg-white border border-slate-200 rounded-xl px-3 py-2.5 text-sm focus:ring-2 focus:ring-teal-500 outline-none transition-shadow" value={formData.date} onChange={e => setFormData({...formData, date: e.target.value})}/></div>
-                                        <div><label className="block text-xs font-bold text-slate-400 uppercase mb-2">เวร</label><select className="w-full bg-white border border-slate-200 rounded-xl px-3 py-2.5 text-sm focus:ring-2 focus:ring-teal-500 outline-none transition-shadow appearance-none" value={formData.shift} onChange={e => setFormData({...formData, shift: e.target.value})}><option>ดึก</option><option>เช้า</option><option>บ่าย</option></select></div>
-                                    </div>
-                                    {CATEGORY_ORDER.map(cat => {
-                                        const items = itemsDef.filter(i => i.category === cat);
-                                        const visibleItems = formData.isFixMode 
-                                            ? items.filter(i => formData.fixItemIds.includes(i.id))
-                                            : items;
-
-                                        if(visibleItems.length === 0) return null;
-
-                                        return (
-                                            <CategorySection 
-                                                key={cat}
-                                                category={cat} 
-                                                items={visibleItems} 
-                                                formData={formData} 
-                                                updateItem={updateItem} 
-                                                ITEM_TYPES={ITEM_TYPES} 
-                                            />
-                                        );
-                                    })}
-                                    
-                                    {(!formData.isFixMode || formData.otherItems.length > 0) && (
-                                        <OtherItemsSection 
-                                            otherItems={formData.otherItems} 
-                                            addOtherItem={addOtherItem} 
-                                            removeOtherItem={removeOtherItem} 
-                                            updateOtherItem={updateOtherItem} 
-                                        />
-                                    )}
-
-                                    <div className="p-6 bg-teal-50/30 border-t border-teal-100">
-                                        <label className="flex items-center gap-4 cursor-pointer p-4 bg-white border border-teal-100 rounded-2xl hover:border-teal-300 transition-colors shadow-sm">
-                                            <input type="checkbox" className="w-5 h-5 accent-teal-600 rounded-md" checked={formData.isReCheckStock || false} onChange={e => setFormData({...formData, isReCheckStock: e.target.checked})}/>
-                                            <div><div className="text-slate-800 font-bold text-sm">บันทึกว่าเป็น ReCheck Stock</div><div className="text-slate-400 text-xs">สำหรับการตรวจสอบสต๊อกใหญ่ทุก 2 สัปดาห์</div></div>
-                                        </label>
-                                    </div>
-                                    <div className="p-6 bg-slate-50 border-t border-slate-200">
-                                        <label className="block text-xs font-bold text-slate-500 uppercase mb-2">ลงชื่อผู้ตรวจสอบ <span className="text-red-500">*</span></label>
-                                        <input type="text" placeholder="พิมพ์ชื่อ-นามสกุลของคุณ" className="w-full bg-white border border-slate-300 rounded-xl p-3.5 text-sm focus:ring-2 focus:ring-slate-800 outline-none shadow-sm transition-all" value={formData.checker || ''} onChange={e => setFormData({...formData, checker: e.target.value})}/>
-                                    </div>
-                                </div>
-                                <div className="mt-6 w-full flex justify-center"><button onClick={onSaveClick} className="w-full max-w-2xl bg-slate-900 hover:bg-slate-800 text-white font-bold py-4 rounded-2xl shadow-xl shadow-slate-200 flex items-center justify-center gap-2 transition-all active:scale-[0.98]"><SimpleIcon name="Save" className="w-5 h-5"/> บันทึกข้อมูล</button></div>
-                            </div>
-                        )}
-
-                        {/* SUMMARY VIEW */}
-                        {view === 'summary' && (
-                            <div className="animate-scale-up text-center pt-20 px-4 min-h-[80vh] flex flex-col items-center justify-center">
-                                <div className={`w-24 h-24 rounded-full flex items-center justify-center mx-auto mb-6 shadow-sm animate-fade-in ${summaryData?.status === 'พร้อมใช้' ? 'bg-emerald-100 text-emerald-600' : 'bg-red-100 text-red-600'}`}>
-                                    {summaryData?.status === 'พร้อมใช้' ? <SimpleIcon name="CheckCircle" className="w-12 h-12"/> : <SimpleIcon name="XCircle" className="w-12 h-12"/>}
-                                </div>
-                                <h2 className="text-3xl font-bold text-slate-800 mb-2">บันทึกเรียบร้อย!</h2>
-                                <p className={`text-lg font-bold mb-8 ${summaryData?.status === 'พร้อมใช้' ? 'text-emerald-600' : 'text-red-600'}`}>สถานะรถ: {summaryData?.status || '-'}</p>
                                 
-                                {formData.isReCheckStock && (
-                                    <div className="bg-blue-50 text-blue-700 p-3 rounded-xl mb-6 text-sm border border-blue-100 w-full max-w-xs mx-auto">
-                                        <div className="font-bold flex items-center gap-2 justify-center">
-                                            <SimpleIcon name="Calendar" className="w-4 h-4"/>
-                                            กำหนด ReCheck Stock ครั้งถัดไป
-                                        </div>
-                                        <div className="text-xl font-bold mt-1">
-                                            {formatDate(new Date(Date.now() + 14 * 24 * 60 * 60 * 1000))}
-                                        </div>
+                                <div className="bg-white rounded-[32px] overflow-hidden border border-slate-100 shadow-sm mb-6">
+                                    <div className="p-6 grid grid-cols-2 gap-4 bg-slate-50/50">
+                                        <div><label className="text-[10px] font-bold text-slate-400 uppercase mb-1 block">วันที่</label><input type="date" className="w-full bg-white border border-slate-200 rounded-xl px-3 py-2.5 text-sm" value={formData.date} onChange={e => setFormData({...formData, date: e.target.value})}/></div>
+                                        <div><label className="text-[10px] font-bold text-slate-400 uppercase mb-1 block">เวร</label><select className="w-full bg-white border border-slate-200 rounded-xl px-3 py-2.5 text-sm" value={formData.shift} onChange={e => setFormData({...formData, shift: e.target.value})}><option>ดึก</option><option>เช้า</option><option>บ่าย</option></select></div>
                                     </div>
-                                )}
-
-                                {(summaryData?.missing?.length > 0 || summaryData?.broken?.length > 0) && (
-                                    <div className="bg-white text-left rounded-2xl shadow-xl border border-red-100 p-6 mb-10 max-w-sm w-full mx-auto relative overflow-hidden">
-                                        <div className="absolute top-0 left-0 w-1 h-full bg-red-500"></div>
-                                        <h3 className="font-bold text-red-600 mb-4 border-b border-red-50 pb-2 flex items-center gap-2"><SimpleIcon name="AlertTriangle" className="w-5 h-5"/> รายการที่ต้องแก้ไข</h3>
-                                        <ul className="space-y-2">
-                                            {summaryData.missing.map((m, i) => <li key={i} className="text-red-500 text-sm flex gap-3 items-center bg-red-50 p-2 rounded-lg"><div className="w-1.5 h-1.5 bg-red-400 rounded-full"></div> ขาด: <span className="font-semibold">{m}</span></li>)}
-                                            {summaryData.broken.map((m, i) => <li key={i} className="text-orange-500 text-sm flex gap-3 items-center bg-orange-50 p-2 rounded-lg"><div className="w-1.5 h-1.5 bg-orange-400 rounded-full"></div> ไม่พร้อม: <span className="font-semibold">{m}</span></li>)}
-                                        </ul>
-                                    </div>
-                                )}
-                                <button onClick={() => setView('dashboard')} className="bg-white border border-slate-200 text-slate-700 hover:bg-slate-50 px-10 py-3 rounded-xl font-bold shadow-sm transition-colors">กลับหน้าหลัก</button>
+                                    {CATEGORY_ORDER.map(cat => <CategorySection key={cat} category={cat} items={itemsDef.filter(i => i.category === cat)} formData={formData} updateItem={updateItem} ITEM_TYPES={ITEM_TYPES} />)}
+                                    <div className="p-6 bg-slate-50"><label className="text-xs font-bold text-slate-400 mb-2 block">ชื่อผู้ตรวจสอบ</label><input type="text" placeholder="พิมพ์ชื่อ-นามสกุล" className="w-full border border-slate-200 rounded-xl p-3 text-sm focus:ring-2 focus:ring-slate-800 transition-all outline-none" value={formData.checker} onChange={e => setFormData({...formData, checker: e.target.value})}/></div>
+                                </div>
+                                <button onClick={submitData} className="w-full bg-slate-900 text-white py-4.5 rounded-[24px] font-bold shadow-xl active:scale-95 transition-transform">บันทึกข้อมูล</button>
                             </div>
                         )}
                     </main>
 
-                    {/* MODALS (showTypeModal, showSaveConfirmModal, showStockAlert, showCopyWarning) */}
+                    {/* START CHECK MODAL (Image 1) */}
                     <Modal isOpen={showTypeModal} title="เริ่มการตรวจสอบ" onClose={() => setShowTypeModal(false)}>
                         <div className="grid gap-4">
-                            <button onClick={() => selectCheckType('new')} className="p-5 bg-teal-50 rounded-2xl text-left hover:bg-teal-100 border border-teal-100 transition-colors group relative overflow-hidden">
-                                <div className="absolute right-0 bottom-0 opacity-10 -mr-4 -mb-4"><SimpleIcon name="Plus" className="w-24 h-24 text-teal-600"/></div>
-                                <div className="font-bold text-teal-900 text-lg group-hover:text-teal-700 relative z-10">ตรวจสอบใหม่</div>
-                                <div className="text-teal-600 text-sm mt-1 relative z-10 font-medium">สำหรับ Re-Check Stock กรอกใหม่ทั้งหมด</div>
+                            <button onClick={() => { setShowTypeModal(false); initForm(); setView('form'); }} className="p-6 bg-[#F0FDF4] rounded-[24px] text-left hover:bg-emerald-100 transition-colors border border-emerald-50 group relative overflow-hidden">
+                                <div className="absolute right-0 bottom-0 opacity-10 translate-x-1/4 translate-y-1/4 group-hover:scale-110 transition-transform">
+                                    <SimpleIcon name="Plus" className="w-24 h-24 text-emerald-600" />
+                                </div>
+                                <div className="font-bold text-[#065F46] text-xl mb-1">ตรวจสอบใหม่</div>
+                                <div className="text-[#059669] text-xs font-medium">สำหรับ Re-Check Stock กรอกใหม่ทั้งหมด</div>
                             </button>
-                            <button onClick={() => selectCheckType('copy')} className="p-5 bg-white rounded-2xl text-left hover:bg-slate-50 border border-slate-200 transition-colors group shadow-sm relative overflow-hidden">
-                                <div className="font-bold text-slate-900 text-lg group-hover:text-slate-700">ดึงรายการล่าสุด</div>
-                                <div className="text-slate-500 text-sm mt-1">คัดลอกข้อมูลเดิม (แก้ไขเฉพาะจุด)</div>
+                            <button onClick={() => { setShowTypeModal(false); initForm(records[0]); setShowCopyWarning(true); }} className="p-6 bg-white rounded-[24px] text-left hover:bg-slate-50 transition-colors border border-slate-200 shadow-sm">
+                                <div className="font-bold text-slate-800 text-xl mb-1">ดึงรายการล่าสุด</div>
+                                <div className="text-slate-500 text-xs font-medium">คัดลอกข้อมูลเดิม (แก้ไขเฉพาะจุด)</div>
                             </button>
                         </div>
                     </Modal>
 
-                    <Modal isOpen={showSaveConfirmModal} title="⚠️ ยืนยันการบันทึก" onClose={() => setShowSaveConfirmModal(false)}>
-                        <div className="text-center">
-                            <div className="text-orange-500 mb-4 flex justify-center"><div className="p-4 bg-orange-50 rounded-full"><SimpleIcon name="AlertTriangle" className="w-8 h-8"/></div></div>
-                            <h3 className="font-bold text-lg mb-2 text-slate-800">พบรายการยา/เวชภัณฑ์หมดอายุ</h3>
-                            <div className="bg-orange-50 p-3 rounded-xl border border-orange-100 mb-4 text-left max-h-40 overflow-y-auto">{expiryList.map((item, idx) => (<div key={idx} className="text-sm text-orange-800 border-b border-orange-200/50 last:border-0 py-1">• {item.name} (หมดอายุ)</div>))}</div>
-                            <p className="text-slate-500 mb-6 text-sm">ต้องการบันทึกข้อมูลหรือไม่? <br/>(ระบบจะแจ้งเตือนให้เวรต่อไปทราบ)</p>
-                            <div className="flex gap-3"><button onClick={submitData} className="flex-1 bg-red-600 text-white py-3 rounded-xl font-bold shadow-lg hover:bg-red-700">ยืนยันบันทึก</button><button onClick={() => setShowSaveConfirmModal(false)} className="flex-1 bg-slate-100 text-slate-700 py-3 rounded-xl font-bold hover:bg-slate-200">กลับไปแก้ไข</button></div>
-                        </div>
-                    </Modal>
-
-                    <Modal isOpen={showStockAlert} title="แจ้งเตือน Stock" onClose={() => setShowStockAlert(false)}>
-                        <div className="text-center py-4">
-                            <div className="text-orange-500 mb-4 flex justify-center"><div className="p-4 bg-orange-50 rounded-full"><SimpleIcon name="AlertTriangle" className="w-8 h-8"/></div></div>
-                            <h3 className="font-bold text-xl mb-2 text-slate-800">ครบกำหนดเช็คสต๊อก</h3>
-                            <p className="text-slate-500 mb-8 text-sm leading-relaxed">ไม่ได้ทำการ ReCheck Stock มานานกว่า <span className="font-bold text-orange-600">{showStockAlert?.overdue}</span> วันแล้ว</p>
-                            <div className="flex gap-3"><button onClick={() => {setFormData(p => ({...p, isReCheckStock: true})); setShowStockAlert(false);}} className="flex-1 bg-slate-900 text-white py-3 rounded-xl font-bold shadow-lg shadow-slate-200">เช็คตอนนี้</button><button onClick={() => {setFormData(p => ({...p, isReCheckStock: false})); setShowStockAlert(false);}} className="flex-1 bg-white border border-slate-200 text-slate-600 py-3 rounded-xl font-bold">ไว้ทีหลัง</button></div>
-                        </div>
-                    </Modal>
-
+                    {/* FOCUS POINTS MODAL (Image 2) */}
                     <Modal isOpen={showCopyWarning} title="จุดเน้นย้ำ!" onClose={() => setShowCopyWarning(false)}>
-                        <div className="bg-yellow-50 p-5 rounded-2xl border border-yellow-100 mb-6">
-                            <ul className="space-y-4 text-sm text-yellow-800">
-                                <li className="flex items-start gap-3"><span className="bg-yellow-200 text-yellow-800 font-bold text-xs rounded-full w-5 h-5 flex items-center justify-center mt-0.5 shrink-0">1</span> <span>Sticker Visual Control ต้องสมบูรณ์ ห้ามฉีกขาด</span></li>
-                                <li className="flex items-start gap-3"><span className="bg-yellow-200 text-yellow-800 font-bold text-xs rounded-full w-5 h-5 flex items-center justify-center mt-0.5 shrink-0">2</span> <span>ตรวจสอบวันหมดอายุยาและเวชภัณฑ์อย่างละเอียด</span></li>
-                                <li className="flex items-start gap-3"><span className="bg-yellow-200 text-yellow-800 font-bold text-xs rounded-full w-5 h-5 flex items-center justify-center mt-0.5 shrink-0">3</span> <span>Laryngoscope ไฟต้องสว่างพร้อมใช้</span></li>
-                            </ul>
+                        <div className="bg-[#FFFBEB] p-6 rounded-[24px] border border-amber-100 mb-6 space-y-5">
+                            <div className="flex items-start gap-4">
+                                <div className="w-6 h-6 bg-[#FEF3C7] text-amber-800 rounded-full flex items-center justify-center font-bold text-xs shrink-0">1</div>
+                                <div className="text-[13px] text-amber-900 leading-relaxed font-medium">Sticker Visual Control ต้องสมบูรณ์ ห้ามฉีกขาด</div>
+                            </div>
+                            <div className="flex items-start gap-4">
+                                <div className="w-6 h-6 bg-[#FEF3C7] text-amber-800 rounded-full flex items-center justify-center font-bold text-xs shrink-0">2</div>
+                                <div className="text-[13px] text-amber-900 leading-relaxed font-medium">ตรวจสอบวันหมดอายุยาและเวชภัณฑ์อย่างละเอียด</div>
+                            </div>
+                            <div className="flex items-start gap-4">
+                                <div className="w-6 h-6 bg-[#FEF3C7] text-amber-800 rounded-full flex items-center justify-center font-bold text-xs shrink-0">3</div>
+                                <div className="text-[13px] text-amber-900 leading-relaxed font-medium">Laryngoscope ไฟต้องสว่างพร้อมใช้</div>
+                            </div>
                         </div>
-                        <button onClick={() => {setShowCopyWarning(false); setView('form');}} className="w-full bg-slate-900 hover:bg-slate-800 text-white py-3.5 rounded-xl font-bold shadow-lg">รับทราบและดำเนินการต่อ</button>
+                        <button onClick={() => { setShowCopyWarning(false); setView('form'); }} className="w-full bg-[#0F172A] text-white py-4 rounded-[20px] font-bold shadow-lg transition-transform active:scale-95">
+                            รับทราบและดำเนินการต่อ
+                        </button>
                     </Modal>
                 </div>
             );
