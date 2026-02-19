@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Emergency Cart Smart Check</title>
+    <title>Emergency Cart Smart Check - หอสงฆ์อาพาธ</title>
     
     <!-- FAVICON -->
     <link rel="icon" type="image/png" href="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRYfBIvo5I6imKO2PO2Q685aje7a48lvI5rrQ&s">
@@ -36,11 +36,8 @@
         ::-webkit-scrollbar-track { background: #f1f5f9; }
         ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 10px; }
         
-        /* Calendar Styles */
         .calendar-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 4px; }
-        @media (min-width: 768px) {
-            .calendar-grid { gap: 8px; }
-        }
+        @media (min-width: 768px) { .calendar-grid { gap: 8px; } }
         .calendar-day { 
             aspect-ratio: 1/1.3; 
             display: flex; 
@@ -52,28 +49,11 @@
             box-shadow: 0 1px 2px rgba(0,0,0,0.05);
         }
         .shift-dot {
-            width: 100%;
-            height: 16px;
-            border-radius: 4px;
-            font-size: 8px;
-            font-weight: 900;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            margin-top: 2px;
-            position: relative;
+            width: 100%; height: 16px; border-radius: 4px; font-size: 8px; font-weight: 900;
+            display: flex; align-items: center; justify-content: center; margin-top: 2px; position: relative;
         }
-        @media (min-width: 768px) {
-            .shift-dot { height: 22px; font-size: 10px; }
-        }
-        .recheck-star {
-            position: absolute;
-            top: -1px;
-            right: 0px;
-            font-size: 7px;
-            color: #fbbf24;
-            filter: drop-shadow(0 0 1px rgba(0,0,0,0.5));
-        }
+        @media (min-width: 768px) { .shift-dot { height: 22px; font-size: 10px; } }
+        .recheck-star { position: absolute; top: -1px; right: 0px; font-size: 7px; color: #fbbf24; filter: drop-shadow(0 0 1px rgba(0,0,0,0.5)); }
     </style>
 </head>
 <body class="bg-[#F0F4F9] text-slate-800 min-h-screen"> 
@@ -81,12 +61,11 @@
     <div id="root"></div>
 
     <script type="text/babel">
-        // --- CONFIG ---
+        // --- CONFIG (หอสงฆ์อาพาธ) ---
         const GAS_API_URL = "https://script.google.com/macros/s/AKfycbwNpFNcLm0iU6vTF0DM7UwONFl3NGXmySuR1jXh-mWyZjbtqf_BTkTpjOYs3NXBzRU/exec";
 
         const { useState, useEffect, useMemo } = React;
         
-        // --- HELPER FUNCTIONS ---
         const formatDate = (dateStr) => {
             if(!dateStr) return "-";
             try {
@@ -147,28 +126,28 @@
             CheckCircle: <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14M22 4L12 14.01l-3-3" />,
             XCircle: <><circle cx="12" cy="12" r="10" /><path d="M15 9l-6 6M9 9l6 6" /></>,
             Calendar: <><rect x="3" y="4" width="18" height="18" rx="2" ry="2" /><line x1="16" y1="2" x2="16" y2="6" /><line x1="8" y1="2" x2="8" y2="6" /><line x1="3" y1="10" x2="21" y2="10" /></>,
-            Save: <><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z" /><polyline points="17 21 17 13 7 13 7 21" /><polyline points="7 3 7 8 15 8" /></>,
-            ChevronLeft: <polyline points="15 18 9 12 15 6" />,
             RotateCcw: <><path d="M1 4v6h6" /><path d="M3.51 15a9 9 0 1 0 2.13-9.36L1 10" /></>,
+            ChevronLeft: <polyline points="15 18 9 12 15 6" />,
             ChevronDown: <polyline points="6 9 12 15 18 9" />,
-            Layers: <path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5" />,
             Trash: <><polyline points="3 6 5 6 21 6" /><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2" /></>,
             Edit: <><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7" /><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z" /></>,
-            Settings: <><circle cx="12" cy="12" r="3" /><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z" /></>
+            Settings: <><circle cx="12" cy="12" r="3" /><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z" /></>,
+            AlertTriangle: <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0zM12 9v4M12 17h.01" />,
+            Save: <path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2zM17 21v-8H7v8M7 3v5h8" />
         };
 
         const SimpleIcon = ({ name, className = "w-6 h-6", color = "currentColor" }) => (
             <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}>{Icons[name] || Icons.FileText}</svg>
         );
 
-        // --- COMPONENTS ---
+        // --- SUB-COMPONENTS ---
         const Modal = ({ isOpen, title, children, onClose }) => {
             if (!isOpen) return null;
             return (
                 <div className="fixed inset-0 z-[70] flex items-center justify-center bg-black/40 p-4 backdrop-blur-sm animate-fade-in">
                     <div className="bg-white rounded-3xl shadow-2xl w-full max-w-md overflow-hidden animate-scale-up ring-1 ring-black/5">
                         <div className="bg-white px-6 py-4 flex justify-between items-center border-b border-gray-100">
-                            <h3 className="text-lg font-black text-slate-800 flex items-center gap-2">{title}</h3>
+                            <h3 className="text-lg font-black text-slate-800 flex items-center gap-2 tracking-tight uppercase">{title}</h3>
                             <button onClick={onClose} className="text-slate-400 hover:text-slate-600 p-1"><SimpleIcon name="XCircle" className="w-6 h-6"/></button>
                         </div>
                         <div className="p-6 max-h-[85vh] overflow-y-auto">{children}</div>
@@ -181,7 +160,7 @@
             const isReady = status === 'ready' || status === 'พร้อมใช้' || status === true;
             return (
                 <div className="flex flex-col items-end gap-1.5">
-                    <span className={`px-2 py-1 rounded-full border text-[10px] font-black flex items-center gap-1 w-fit whitespace-nowrap shadow-sm ${isReady ? 'bg-emerald-50 text-emerald-700 border-emerald-200' : 'bg-red-50 text-red-700 border-red-200'}`}>
+                    <span className={`px-2 py-1 rounded-full border text-[10px] font-black flex items-center gap-1 w-fit shadow-sm ${isReady ? 'bg-emerald-50 text-emerald-700 border-emerald-200' : 'bg-red-50 text-red-700 border-red-200'}`}>
                         <div className={`w-1.5 h-1.5 rounded-full ${isReady ? 'bg-emerald-500' : 'bg-red-500'}`}></div> {isReady ? 'พร้อมใช้' : 'ไม่พร้อม'}
                     </span>
                     {isRC && (
@@ -201,15 +180,9 @@
                         <div className="flex justify-between items-center">
                             <div className="flex gap-3 items-center">
                                 <div className="bg-slate-100 w-10 h-10 rounded-xl flex items-center justify-center text-slate-500 font-black text-[10px] shrink-0">{rec.shift}</div>
-                                <div>
-                                    <div className="font-bold text-slate-700 text-sm">{formatDate(rec.date)}</div>
-                                    <div className="text-[10px] text-slate-400 font-medium">โดย: {rec.checker}</div>
-                                </div>
+                                <div><div className="font-bold text-slate-700 text-sm">{formatDate(rec.date)}</div><div className="text-[10px] text-slate-400 font-medium">โดย: {rec.checker}</div></div>
                             </div>
-                            <div className="flex items-center gap-3">
-                                <StatusBadge status={rec.generalReady} isRC={rec.isRecheckStock} />
-                                <SimpleIcon name="ChevronDown" className={`w-4 h-4 text-slate-300 transition-transform ${isOpen ? 'rotate-180' : ''}`}/>
-                            </div>
+                            <div className="flex items-center gap-3"><StatusBadge status={rec.generalReady} isRC={rec.isRecheckStock} /><SimpleIcon name="ChevronDown" className={`w-4 h-4 text-slate-300 transition-transform ${isOpen ? 'rotate-180' : ''}`}/></div>
                         </div>
                     </div>
                     {isOpen && (
@@ -228,9 +201,7 @@
                                                     return (
                                                         <div key={item.id} className="flex items-start justify-between gap-2 p-2 bg-white rounded-xl border border-white shadow-sm">
                                                             <div className="text-[11px] font-bold text-slate-700">{item.name} {val.qty ? `(${val.qty})` : ''}</div>
-                                                            <span className={`text-[9px] font-black px-1.5 py-0.5 rounded ${ready ? 'text-emerald-600 bg-emerald-50' : 'text-red-600 bg-red-50'}`}>
-                                                                {ready ? 'พร้อม' : 'ไม่พร้อม'}
-                                                            </span>
+                                                            <span className={`text-[9px] font-black px-1.5 py-0.5 rounded ${ready ? 'text-emerald-600 bg-emerald-50' : 'text-red-600 bg-red-50'}`}>{ready ? 'พร้อม' : 'ไม่พร้อม'}</span>
                                                         </div>
                                                     );
                                                 })}
@@ -264,144 +235,77 @@
                                 <span className="text-[10px] font-black text-slate-400 bg-slate-100 px-2.5 py-1 rounded-full">{stats.total} ครั้ง</span>
                             </div>
                             <div className="flex items-center gap-4 pl-[3.25rem]">
-                                <div className="flex items-center gap-1.5">
-                                    <div className="w-2 h-2 rounded-full bg-emerald-500"></div>
-                                    <span className="text-[11px] font-black text-emerald-600">ความพร้อมใช้ {stats.readyPercent}%</span>
-                                </div>
+                                <div className="flex items-center gap-1.5"><div className="w-2.5 h-2.5 rounded-full bg-emerald-500"></div><span className="text-[11px] font-black text-emerald-600">ความพร้อมใช้ {stats.readyPercent}%</span></div>
                                 <div className="text-[10px] font-bold text-slate-400">({stats.readyCount}/{stats.total} ครั้ง)</div>
                             </div>
                         </div>
                         <SimpleIcon name="ChevronDown" className={`w-4 h-4 text-slate-300 transition-transform ${isExpanded ? 'rotate-180' : ''}`}/>
                     </div>
-                    {isExpanded && (
-                        <div className="mt-3 pl-3 border-l-2 border-teal-200 space-y-2 animate-fade-in">
-                            {records.map(rec => <HistoryItem key={rec.id} rec={rec} itemsDef={itemsDef} />)}
-                        </div>
-                    )}
+                    {isExpanded && <div className="mt-3 pl-3 border-l-2 border-teal-200 space-y-2 animate-fade-in">{records.map(rec => <HistoryItem key={rec.id} rec={rec} itemsDef={itemsDef} />)}</div>}
                 </div>
             );
         };
 
-        // --- CALENDAR VIEW ---
         const CalendarView = ({ records, onBack }) => {
             const [currentDate, setCurrentDate] = useState(new Date());
             const monthNames = ["มกราคม", "กุมภาพันธ์", "มีนาคม", "เมษายน", "พฤษภาคม", "มิถุนายน", "กรกฎาคม", "สิงหาคม", "กันยายน", "ตุลาคม", "พฤศจิกายน", "ธันวาคม"];
-            const daysInMonth = (month, year) => new Date(year, month + 1, 0).getDate();
-            const firstDayOfMonth = (month, year) => new Date(year, month, 1).getDay();
-
             const month = currentDate.getMonth();
             const year = currentDate.getFullYear();
             
-            const monthRecords = useMemo(() => {
-                return records.filter(r => {
-                    const d = new Date(r.date);
-                    return d.getMonth() === month && d.getFullYear() === year;
-                });
-            }, [records, month, year]);
+            const monthRecords = useMemo(() => records.filter(r => {
+                const d = new Date(r.date);
+                return d.getMonth() === month && d.getFullYear() === year;
+            }), [records, month, year]);
 
             const monthStats = useMemo(() => {
                 if (monthRecords.length === 0) return null;
                 const ready = monthRecords.filter(r => r.generalReady === 'พร้อมใช้').length;
-                return {
-                    total: monthRecords.length,
-                    ready,
-                    percent: Math.round((ready / monthRecords.length) * 100)
-                };
+                return { total: monthRecords.length, ready, percent: Math.round((ready / monthRecords.length) * 100) };
             }, [monthRecords]);
 
             const getShiftData = (day, shiftName) => {
-                const dayRecs = monthRecords.filter(r => {
-                    const d = new Date(r.date);
-                    return d.getDate() === day && r.shift.includes(shiftName);
-                });
+                const dayRecs = monthRecords.filter(r => new Date(r.date).getDate() === day && r.shift.includes(shiftName));
                 if (dayRecs.length === 0) return { status: 'none', isRC: false };
                 const latest = dayRecs.reduce((prev, curr) => (prev.id > curr.id) ? prev : curr);
-                return { 
-                    status: latest.generalReady === 'พร้อมใช้' ? 'ready' : 'not_ready',
-                    isRC: latest.isRecheckStock === true || latest.isRecheckStock === 'Yes'
-                };
+                return { status: latest.generalReady === 'พร้อมใช้' ? 'ready' : 'not_ready', isRC: latest.isRecheckStock === true || latest.isRecheckStock === 'Yes' };
             };
 
-            const renderShiftIndicator = (day, shiftCode, shiftName) => {
+            const renderShift = (day, shiftCode, shiftName) => {
                 const data = getShiftData(day, shiftName);
-                let colorClass = "bg-slate-50 text-slate-300 border-slate-100";
-                if (data.status === 'ready') colorClass = "bg-emerald-500 text-white border-emerald-600";
-                if (data.status === 'not_ready') colorClass = "bg-red-500 text-white border-red-600";
-                
-                return (
-                    <div className={`shift-dot border ${colorClass}`}>
-                        {shiftCode}
-                        {data.isRC && <span className="recheck-star" title="ReCheck Stock">⭐</span>}
-                    </div>
-                );
-            };
-
-            const renderCalendarDays = () => {
-                const days = [];
-                const startDay = firstDayOfMonth(month, year);
-                const daysCount = daysInMonth(month, year);
-
-                for (let i = 0; i < startDay; i++) {
-                    days.push(<div key={`empty-${i}`} className="calendar-day opacity-0 pointer-events-none"></div>);
-                }
-                for (let i = 1; i <= daysCount; i++) {
-                    days.push(
-                        <div key={i} className="calendar-day bg-white border border-slate-100 hover:bg-slate-50 transition-colors">
-                            <div className="font-black text-slate-800 text-[10px] sm:text-xs mb-1">{i}</div>
-                            <div className="flex flex-col gap-0.5">
-                                {renderShiftIndicator(i, 'ด', 'ดึก')}
-                                {renderShiftIndicator(i, 'ช', 'เช้า')}
-                                {renderShiftIndicator(i, 'บ', 'บ่าย')}
-                            </div>
-                        </div>
-                    );
-                }
-                return days;
+                let color = "bg-slate-50 text-slate-300 border-slate-100";
+                if (data.status === 'ready') color = "bg-emerald-500 text-white border-emerald-600";
+                if (data.status === 'not_ready') color = "bg-red-500 text-white border-red-600";
+                return <div className={`shift-dot border ${color}`}>{shiftCode}{data.isRC && <span className="recheck-star">⭐</span>}</div>;
             };
 
             return (
                 <div className="animate-slide-up pb-10">
                     <div className="flex items-center justify-between mb-6">
-                        <button onClick={onBack} className="text-slate-500 hover:text-slate-800 flex items-center gap-2 text-[10px] font-black uppercase bg-white px-4 py-2 rounded-2xl border border-slate-200 shadow-sm transition-all"><SimpleIcon name="ChevronLeft" className="w-3.5 h-3.5"/> กลับ</button>
-                        <div className="text-[10px] text-slate-400 font-black uppercase tracking-widest hidden sm:block">รายงานการตรวจสอบรายเวร</div>
+                        <button onClick={onBack} className="text-slate-500 flex items-center gap-2 text-[10px] font-black uppercase bg-white px-4 py-2 rounded-2xl border border-slate-200 shadow-sm transition-all"><SimpleIcon name="ChevronLeft" className="w-3.5 h-3.5"/> กลับ</button>
                     </div>
-                    
-                    <div className="bg-white rounded-[2.5rem] p-4 sm:p-8 shadow-xl border border-slate-100 mb-6">
+                    <div className="bg-white rounded-[2.5rem] p-4 sm:p-8 shadow-xl border border-slate-100 mb-6 text-center">
                         <div className="flex justify-between items-center mb-6 px-2">
                             <button onClick={() => setCurrentDate(new Date(year, month - 1, 1))} className="p-2 hover:bg-slate-50 rounded-full text-slate-400"><SimpleIcon name="ChevronLeft" className="w-5 h-5"/></button>
                             <h2 className="font-black text-slate-800 text-base md:text-xl">{monthNames[month]} {year + 543}</h2>
                             <button onClick={() => setCurrentDate(new Date(year, month + 1, 1))} className="p-2 hover:bg-slate-50 rounded-full text-slate-400 rotate-180"><SimpleIcon name="ChevronLeft" className="w-5 h-5"/></button>
                         </div>
-                        
-                        <div className="calendar-grid text-center mb-3">
-                            {["อา", "จ", "อ", "พ", "พฤ", "ศ", "ส"].map(d => <div key={d} className="text-[9px] sm:text-[11px] font-black text-slate-400 uppercase tracking-widest">{d}</div>)}
-                        </div>
-                        
-                        <div className="calendar-grid">{renderCalendarDays()}</div>
-                        
-                        <div className="mt-6 flex flex-wrap gap-x-4 gap-y-2 justify-center text-[9px] sm:text-[10px] font-black text-slate-400 uppercase tracking-widest bg-slate-50/50 p-4 rounded-2xl">
-                            <div className="flex items-center gap-1.5"><div className="w-2.5 h-2.5 rounded bg-emerald-500"></div> พร้อมใช้</div>
-                            <div className="flex items-center gap-1.5"><div className="w-2.5 h-2.5 rounded bg-red-500"></div> ไม่พร้อม</div>
-                            <div className="flex items-center gap-1.5"><div className="w-2.5 h-2.5 rounded bg-white border border-slate-200"></div> ไม่มีข้อมูล</div>
-                            <div className="flex items-center gap-1.5"><span>⭐</span> ReCheck Stock</div>
+                        <div className="calendar-grid text-center mb-3">{["อา", "จ", "อ", "พ", "พฤ", "ศ", "ส"].map(d => <div key={d} className="text-[9px] sm:text-[11px] font-black text-slate-400 uppercase tracking-widest">{d}</div>)}</div>
+                        <div className="calendar-grid">
+                            {Array.from({length: new Date(year, month, 1).getDay()}).map((_, i) => <div key={`e-${i}`} className="calendar-day opacity-0"></div>)}
+                            {Array.from({length: new Date(year, month + 1, 0).getDate()}).map((_, i) => (
+                                <div key={i+1} className="calendar-day bg-white border border-slate-100 hover:bg-slate-50">
+                                    <div className="font-black text-slate-800 text-[10px] mb-1">{i+1}</div>
+                                    <div className="flex flex-col gap-0.5">{renderShift(i+1, 'ด', 'ดึก')}{renderShift(i+1, 'ช', 'เช้า')}{renderShift(i+1, 'บ', 'บ่าย')}</div>
+                                </div>
+                            ))}
                         </div>
                     </div>
-
                     {monthStats && (
-                        <div className="bg-slate-900 rounded-[2rem] sm:rounded-[2.5rem] p-6 sm:p-8 shadow-2xl animate-slide-up flex flex-col md:flex-row items-center justify-between gap-6 border border-slate-800">
-                            <div className="text-center md:text-left">
-                                <h4 className="text-[10px] sm:text-[11px] font-black text-slate-500 uppercase tracking-[0.2em] mb-1">สรุปคุณภาพความพร้อมใช้ประจำเดือน</h4>
-                                <p className="text-white font-black text-sm sm:text-lg">{monthNames[month]} {year + 543}</p>
-                            </div>
-                            <div className="flex items-center gap-8 sm:gap-12">
-                                <div className="text-center md:text-right">
-                                    <div className="text-[10px] font-black text-slate-500 uppercase mb-0.5">รวมการตรวจสอบ</div>
-                                    <div className="text-xl sm:text-2xl font-black text-white">{monthStats.total} <span className="text-[10px] text-slate-400">ครั้ง</span></div>
-                                </div>
-                                <div className="text-center md:text-right">
-                                    <div className="text-[10px] font-black text-emerald-500 uppercase mb-0.5">อัตราพร้อมใช้</div>
-                                    <div className="text-3xl sm:text-5xl font-black text-emerald-400 tracking-tighter">{monthStats.percent}%</div>
-                                </div>
+                        <div className="bg-slate-900 rounded-[2.5rem] p-6 sm:p-8 shadow-2xl flex flex-col md:flex-row items-center justify-between gap-6 border border-slate-800 animate-slide-up">
+                            <div><h4 className="text-[10px] font-black text-slate-500 uppercase tracking-[0.2em] mb-1">สรุปความพร้อมใช้ประจำเดือน</h4><p className="text-white font-black text-lg">{monthNames[month]} {year + 543}</p></div>
+                            <div className="flex items-center gap-12">
+                                <div className="text-right text-[10px] font-black text-slate-500 uppercase">รวมตรวจสอบ<div className="text-2xl text-white">{monthStats.total} ครั้ง</div></div>
+                                <div className="text-right text-[10px] font-black text-emerald-500 uppercase">อัตราพร้อมใช้<div className="text-4xl text-emerald-400 tracking-tighter">{monthStats.percent}%</div></div>
                             </div>
                         </div>
                     )}
@@ -409,7 +313,6 @@
             );
         };
 
-        // --- SETTINGS VIEW ---
         const SettingsView = ({ itemsDef, setItemsDef, onBack, onSaveRemoteConfig }) => {
             const [editingId, setEditingId] = useState(null);
             const [formData, setFormData] = useState({ name: '', required: '', type: ITEM_TYPES.QTY_EXP_STATUS, category: CATEGORY_ORDER[0] });
@@ -432,32 +335,39 @@
                 <div className="animate-slide-up pb-20">
                     <div className="flex items-center justify-between mb-6">
                         <button onClick={onBack} className="text-slate-500 hover:text-slate-800 flex items-center gap-2 text-[10px] font-black uppercase bg-white px-4 py-2 rounded-2xl border border-slate-200 shadow-sm transition-all"><SimpleIcon name="ChevronLeft" className="w-3.5 h-3.5"/> กลับ</button>
-                        <div className="text-[10px] text-slate-400 font-black uppercase tracking-widest">ตั้งค่ารายการเวชภัณฑ์</div>
                     </div>
                     <div className="bg-white rounded-3xl p-6 sm:p-8 shadow-xl border border-slate-100 mb-8">
-                        <h3 className="font-black text-slate-800 mb-6 flex items-center gap-2 tracking-tight">
+                        <h3 className="font-black text-slate-800 mb-6 flex items-center gap-2 tracking-tight uppercase">
                             {editingId ? <><SimpleIcon name="Edit" className="w-5 h-5 text-orange-500"/> แก้ไขรายการ</> : <><SimpleIcon name="Plus" className="w-5 h-5 text-teal-600"/> เพิ่มรายการใหม่</>}
                         </h3>
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                             <div className="space-y-4">
+                                <label className="block text-[10px] font-black text-slate-400 uppercase">หมวดหมู่</label>
                                 <select className="w-full bg-slate-50 border border-slate-200 rounded-2xl px-4 py-3 text-sm font-bold focus:ring-2 focus:ring-teal-500 outline-none transition-all" value={formData.category} onChange={e => setFormData({...formData, category: e.target.value})}>
                                     {CATEGORY_ORDER.map(c => <option key={c} value={c}>{c}</option>)}
                                 </select>
+                                <label className="block text-[10px] font-black text-slate-400 uppercase">ชื่อเวชภัณฑ์</label>
                                 <input type="text" placeholder="ชื่อเวชภัณฑ์" className="w-full bg-slate-50 border border-slate-200 rounded-2xl px-4 py-3 text-sm font-bold focus:ring-2 focus:ring-teal-500 outline-none transition-all" value={formData.name} onChange={e => setFormData({...formData, name: e.target.value})} />
                             </div>
                             <div className="space-y-4">
                                 <div className="grid grid-cols-2 gap-4">
-                                    <select className="w-full bg-slate-50 border border-slate-200 rounded-2xl px-4 py-3 text-sm font-bold focus:ring-2 focus:ring-teal-500 outline-none transition-all" value={formData.type} onChange={e => setFormData({...formData, type: e.target.value})}>
-                                        <option value={ITEM_TYPES.QTY_EXP_STATUS}>จำนวน+EXP</option>
-                                        <option value={ITEM_TYPES.QTY_STATUS}>จำนวน+สถานะ</option>
-                                        <option value={ITEM_TYPES.CHECK_HAVE}>มี/ไม่มี</option>
-                                        <option value={ITEM_TYPES.STATUS_ONLY}>สถานะเท่านั้น</option>
-                                    </select>
-                                    <input type="number" placeholder="จำนวนควรมี" className="w-full bg-slate-50 border border-slate-200 rounded-2xl px-4 py-3 text-sm font-bold focus:ring-2 focus:ring-teal-500 outline-none transition-all" value={formData.required} onChange={e => setFormData({...formData, required: e.target.value})} />
+                                    <div>
+                                        <label className="block text-[10px] font-black text-slate-400 uppercase">ประเภท</label>
+                                        <select className="w-full bg-slate-50 border border-slate-200 rounded-2xl px-4 py-3 text-sm font-bold focus:ring-2 focus:ring-teal-500 outline-none transition-all" value={formData.type} onChange={e => setFormData({...formData, type: e.target.value})}>
+                                            <option value={ITEM_TYPES.QTY_EXP_STATUS}>จำนวน+EXP</option>
+                                            <option value={ITEM_TYPES.QTY_STATUS}>จำนวน+สถานะ</option>
+                                            <option value={ITEM_TYPES.CHECK_HAVE}>มี/ไม่มี</option>
+                                            <option value={ITEM_TYPES.STATUS_ONLY}>สถานะเท่านั้น</option>
+                                        </select>
+                                    </div>
+                                    <div>
+                                        <label className="block text-[10px] font-black text-slate-400 uppercase">จำนวนที่ควรมี</label>
+                                        <input type="number" placeholder="จำนวนควรมี" className="w-full bg-slate-50 border border-slate-200 rounded-2xl px-4 py-3 text-sm font-bold focus:ring-2 focus:ring-teal-500 outline-none transition-all" value={formData.required} onChange={e => setFormData({...formData, required: e.target.value})} />
+                                    </div>
                                 </div>
-                                <div className="flex gap-3">
-                                    <button onClick={handleSave} className="flex-1 bg-slate-900 text-white py-3 rounded-2xl font-black text-xs shadow-lg active:scale-95 transition-all">{editingId ? 'อัปเดต' : 'บันทึก'}</button>
-                                    {editingId && <button onClick={() => setEditingId(null)} className="flex-1 bg-slate-100 text-slate-500 py-3 rounded-2xl font-black text-xs">ยกเลิก</button>}
+                                <div className="flex gap-3 pt-4">
+                                    <button onClick={handleSave} className="flex-1 bg-slate-900 text-white py-4 rounded-2xl font-black text-sm shadow-lg active:scale-95 transition-all">{editingId ? 'อัปเดตข้อมูล' : 'บันทึกรายการ'}</button>
+                                    {editingId && <button onClick={() => setEditingId(null)} className="flex-1 bg-slate-100 text-slate-500 py-4 rounded-2xl font-black text-sm hover:bg-slate-200">ยกเลิก</button>}
                                 </div>
                             </div>
                         </div>
@@ -468,18 +378,14 @@
                             if (catItems.length === 0) return null;
                             return (
                                 <div key={cat} className="bg-white rounded-3xl shadow-sm border border-slate-100 overflow-hidden h-fit">
-                                    <div className="bg-slate-50 px-5 py-2 text-[10px] font-black text-slate-500 uppercase tracking-widest">{cat}</div>
+                                    <div className="bg-slate-50 px-5 py-2.5 text-[10px] font-black text-slate-500 uppercase tracking-widest border-b border-slate-100">{cat}</div>
                                     <div className="divide-y divide-slate-50">
                                         {catItems.map(item => (
-                                            <div key={item.id} className="p-4 flex justify-between items-center group">
-                                                <div className="text-sm font-bold text-slate-700">{item.name} <span className="text-[10px] text-slate-300 ml-1">({item.required || '0'})</span></div>
+                                            <div key={item.id} className="p-4 flex justify-between items-center hover:bg-slate-50/50 transition-colors">
+                                                <div className="text-sm font-bold text-slate-700">{item.name} <span className="text-[10px] text-slate-300 ml-1 font-black">({item.required || '0'})</span></div>
                                                 <div className="flex gap-2">
-                                                    <button onClick={() => { setEditingId(item.id); setFormData(item); window.scrollTo(0,0); }} className="p-2 text-slate-300 hover:text-orange-500 transition-colors"><SimpleIcon name="Edit" className="w-4 h-4"/></button>
-                                                    <button onClick={() => { 
-                                                        const updated = itemsDef.filter(i => i.id !== item.id);
-                                                        setItemsDef(updated); 
-                                                        onSaveRemoteConfig(updated);
-                                                    }} className="p-2 text-slate-300 hover:text-red-500 transition-colors"><SimpleIcon name="Trash" className="w-4 h-4"/></button>
+                                                    <button onClick={() => { setEditingId(item.id); setFormData(item); window.scrollTo({top:0, behavior:'smooth'}); }} className="p-2 text-slate-300 hover:text-orange-500 transition-colors"><SimpleIcon name="Edit" className="w-4 h-4"/></button>
+                                                    <button onClick={() => { if(confirm(`ยืนยันการลบ ${item.name}?`)){ const updated = itemsDef.filter(i => i.id !== item.id); setItemsDef(updated); onSaveRemoteConfig(updated); } }} className="p-2 text-slate-300 hover:text-red-500 transition-colors"><SimpleIcon name="Trash" className="w-4 h-4"/></button>
                                                 </div>
                                             </div>
                                         ))}
@@ -488,58 +394,6 @@
                             );
                         })}
                     </div>
-                </div>
-            );
-        };
-
-        const CategorySection = ({ category, items, formData, updateItem }) => {
-            const [isOpen, setIsOpen] = useState(true);
-            return (
-                <div className="border-t border-slate-100 first:border-t-0">
-                    <div onClick={() => setIsOpen(!isOpen)} className="bg-slate-50 px-6 py-3 text-[10px] font-black text-slate-500 uppercase tracking-widest sticky top-16 z-10 backdrop-blur-sm bg-slate-50/90 border-b border-slate-100 flex items-center justify-between cursor-pointer">
-                        <div className="flex items-center gap-2">
-                            {category === 'General' ? <SimpleIcon name="CheckCircle" className="w-3.5 h-3.5"/> : <SimpleIcon name="Layers" className="w-3.5 h-3.5"/>}
-                            {category === 'General' ? 'สรุปผลความพร้อม' : category}
-                        </div>
-                        <SimpleIcon name="ChevronDown" className={`w-3.5 h-3.5 transition-transform ${isOpen ? 'rotate-180' : ''}`}/>
-                    </div>
-                    {isOpen && (
-                        <div className="grid grid-cols-1 md:grid-cols-2 divide-y md:divide-y-0 md:gap-x-4 px-2 bg-white">
-                            {items.map(item => (
-                                <div key={item.id} className="p-5 border-b border-slate-50 md:border-b md:border-slate-100">
-                                    <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-3 mb-3">
-                                        <div className="flex-1">
-                                            <div className="font-bold text-slate-800 text-sm">{item.name}</div>
-                                            {item.required && <div className="text-[9px] font-black text-slate-400 uppercase mt-0.5 tracking-tight">ควรมี: {item.required}</div>}
-                                        </div>
-                                        <div className="shrink-0">
-                                            {item.type === ITEM_TYPES.CHECK_HAVE ? (
-                                                <div className="flex p-0.5 bg-slate-100 rounded-xl">
-                                                    <button onClick={() => updateItem(item.id, 'checked', true)} className={`px-4 py-1.5 rounded-lg text-[10px] font-black transition-all ${formData.items[item.id]?.checked === true ? 'bg-white text-emerald-600 shadow-sm' : 'text-slate-400'}`}>มี</button>
-                                                    <button onClick={() => updateItem(item.id, 'checked', false)} className={`px-4 py-1.5 rounded-lg text-[10px] font-black transition-all ${formData.items[item.id]?.checked === false ? 'bg-white text-red-500 shadow-sm' : 'text-slate-400'}`}>ไม่มี</button>
-                                                </div>
-                                            ) : (
-                                                <div className="flex p-0.5 bg-slate-100 rounded-xl">
-                                                    <button onClick={() => updateItem(item.id, 'status', 'ready')} className={`px-4 py-1.5 rounded-lg text-[10px] font-black transition-all ${formData.items[item.id]?.status === 'ready' ? 'bg-white text-emerald-600 shadow-sm' : 'text-slate-400'}`}>พร้อม</button>
-                                                    <button onClick={() => updateItem(item.id, 'status', 'not_ready')} className={`px-4 py-1.5 rounded-lg text-[10px] font-black transition-all ${formData.items[item.id]?.status === 'not_ready' ? 'bg-white text-red-500 shadow-sm' : 'text-slate-400'}`}>ไม่พร้อม</button>
-                                                </div>
-                                            )}
-                                        </div>
-                                    </div>
-                                    {item.type !== ITEM_TYPES.STATUS_ONLY && item.type !== ITEM_TYPES.CHECK_HAVE && (
-                                        <div className="grid grid-cols-2 gap-3 mt-2">
-                                            {item.type.includes('qty') && (
-                                                <input type="number" placeholder="จำนวน" className="bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-xs font-bold w-full focus:ring-2 focus:ring-teal-500 outline-none" value={formData.items[item.id]?.qty || ''} onChange={e => updateItem(item.id, 'qty', e.target.value)}/>
-                                            )}
-                                            {item.type.includes('exp') && (
-                                                <input type="date" className="bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-xs font-bold w-full focus:ring-2 focus:ring-teal-500 outline-none" value={formData.items[item.id]?.exp || ''} onChange={e => updateItem(item.id, 'exp', e.target.value)}/>
-                                            )}
-                                        </div>
-                                    )}
-                                </div>
-                            ))}
-                        </div>
-                    )}
                 </div>
             );
         };
@@ -556,198 +410,188 @@
             const [showTypeModal, setShowTypeModal] = useState(false);
             const [showCopyWarning, setShowCopyWarning] = useState(false);
             const [showSaveSuccessModal, setShowSaveSuccessModal] = useState(false);
-            const [showNextCheckModal, setShowNextCheckModal] = useState(false);
-            const [summaryData, setSummaryData] = useState(null);
+            const [showCriticalAlert, setShowCriticalAlert] = useState(false);
+            const [criticalIssues, setCriticalIssues] = useState([]);
 
-            useEffect(() => { 
-                fetchConfig(); 
-                fetchData();   
-            }, []);
+            useEffect(() => { fetchConfig(); fetchData(); }, []);
 
             const fetchData = async () => {
                 setIsLoading(true);
                 try {
                     const resRec = await fetch(GAS_API_URL + '?action=read');
                     const dataRec = await resRec.json();
+                    let fetchedRecords = [];
                     if(dataRec.status === 'success') {
-                         setRecords((dataRec.data || []).map(r => {
-                             if (r.items && typeof r.items === 'string') {
-                                 try { r.items = JSON.parse(r.items); } catch(e) { r.items = {}; }
-                             }
+                         fetchedRecords = (dataRec.data || []).map(r => {
+                             if (r.items && typeof r.items === 'string') { try { r.items = JSON.parse(r.items); } catch(e) { r.items = {}; } }
+                             const rcRaw = r.isRecheckStock || r['isReCheckStock'] || '';
+                             r.isRecheckStock = (String(rcRaw).trim().toLowerCase() === 'yes' || rcRaw === true);
                              return r;
-                         }));
+                         });
+                         setRecords(fetchedRecords);
                     }
                     const resStock = await fetch(GAS_API_URL + '?action=getLastStockCheck');
                     const dataStock = await resStock.json();
-                    if(dataStock.status === 'success' && dataStock.date) {
-                        setLastStockCheck(new Date(dataStock.date));
-                    }
-                } catch (e) { console.error("Fetch failed", e); } finally { setIsLoading(false); }
+                    let lastDate = null;
+                    if(dataStock.status === 'success' && dataStock.date) { lastDate = new Date(dataStock.date); setLastStockCheck(lastDate); }
+                    
+                    checkCriticalAlerts(fetchedRecords, lastDate);
+                } catch (e) { console.error(e); } finally { setIsLoading(false); }
             };
+
+            const checkCriticalAlerts = (recs, lastStock) => {
+                const issues = [];
+                const today = new Date(); today.setHours(0,0,0,0);
+
+                if (lastStock) {
+                    const nextDate = new Date(lastStock); nextDate.setDate(nextDate.getDate() + 14); nextDate.setHours(0,0,0,0);
+                    if (today > nextDate) issues.push({ severity: 'high', message: `เลยกำหนด ReCheck Stock ใหญ่มาแล้ว (กำหนดเมื่อ ${formatDate(nextDate)})` });
+                }
+
+                if (recs && recs.length > 0) {
+                    const latest = recs[0];
+                    Object.entries(latest.items || {}).forEach(([itemId, val]) => {
+                        if (val.exp) {
+                            const expDate = new Date(val.exp); expDate.setHours(0,0,0,0);
+                            const diffDays = Math.ceil((expDate - today) / (1000 * 60 * 60 * 24));
+                            const itemMeta = itemsDef.find(i => i.id === itemId) || { name: itemId };
+
+                            if (diffDays < 0) issues.push({ severity: 'critical', message: `รายการ "${itemMeta.name}" หมดอายุแล้ว! (${formatDate(val.exp)})` });
+                            else if (diffDays <= 3) issues.push({ severity: 'high', message: `รายการ "${itemMeta.name}" จะหมดอายุในอีก 3 วัน (${formatDate(val.exp)})` });
+                            else if (diffDays <= 5) issues.push({ severity: 'medium', message: `รายการ "${itemMeta.name}" จะหมดอายุในอีก 5 วัน (${formatDate(val.exp)})` });
+                            else if (diffDays <= 7) issues.push({ severity: 'low', message: `รายการ "${itemMeta.name}" จะหมดอายุในอีก 7 วัน (${formatDate(val.exp)})` });
+                        }
+                    });
+                }
+                
+                if (issues.length > 0) { setCriticalIssues(issues); setShowCriticalAlert(true); } 
+                else { setCriticalIssues([]); }
+            };
+
+            const recheckData = useMemo(() => {
+                if (!lastStockCheck) return { date: null, isOverdue: false };
+                const date = new Date(lastStockCheck.getTime() + 14 * 24 * 60 * 60 * 1000);
+                const today = new Date(); today.setHours(0,0,0,0);
+                return { date, isOverdue: today > date };
+            }, [lastStockCheck]);
 
             const fetchConfig = async () => {
                 try {
                     const res = await fetch(GAS_API_URL + '?action=getConfig');
                     const json = await res.json();
-                    if (json.status === 'success' && json.data) {
-                        setItemsDef(json.data);
-                    }
-                } catch (e) { console.error("Config fetch error", e); }
+                    if (json.status === 'success' && json.data) setItemsDef(json.data);
+                } catch (e) { console.error(e); }
             };
 
             const saveRemoteConfig = async (newConfig) => {
                 setIsLoading(true);
                 try {
-                    await fetch(GAS_API_URL, {
-                        method: 'POST',
-                        mode: 'no-cors',
-                        body: JSON.stringify({ action: 'saveConfig', config: newConfig })
-                    });
-                    setTimeout(() => {
-                        setIsLoading(false);
-                        alert("บันทึกการตั้งค่าสำเร็จ");
-                    }, 1000);
-                } catch (e) { 
-                    alert("บันทึกการตั้งค่าไม่สำเร็จ: " + e); 
-                    setIsLoading(false); 
-                }
+                    await fetch(GAS_API_URL, { method: 'POST', mode: 'no-cors', body: JSON.stringify({ action: 'saveConfig', config: newConfig }) });
+                    setTimeout(() => { setIsLoading(false); fetchConfig(); }, 1000);
+                } catch (e) { alert("Error"); setIsLoading(false); }
             };
 
-            const groupedRecords = useMemo(() => {
-                return records.reduce((acc, rec) => {
-                    const date = new Date(rec.date);
-                    const month = date.toLocaleDateString('th-TH', { month: 'long', year: 'numeric' });
-                    if (!acc[month]) acc[month] = [];
-                    acc[month].push(rec);
-                    return acc;
-                }, {});
-            }, [records]);
+            const groupedRecords = useMemo(() => records.reduce((acc, rec) => {
+                const date = new Date(rec.date);
+                const month = date.toLocaleDateString('th-TH', { month: 'long', year: 'numeric' });
+                if (!acc[month]) acc[month] = []; acc[month].push(rec); return acc;
+            }, {}), [records]);
 
             const initForm = (prevData = null, isNew = false) => {
                 const today = new Date().toISOString().split('T')[0];
-                const savedChecker = localStorage.getItem('last_checker_name') || '';
-                let initialData = { date: today, shift: 'เช้า', checker: savedChecker, items: {}, isRecheckStock: false };
-                
+                let initialData = { date: today, shift: 'เช้า', checker: localStorage.getItem('last_checker_name') || '', items: {}, isRecheckStock: false };
                 itemsDef.forEach(item => {
-                    if (prevData && prevData.items && prevData.items[item.id] && !isNew) {
-                        initialData.items[item.id] = JSON.parse(JSON.stringify(prevData.items[item.id]));
-                    } else {
-                        initialData.items[item.id] = { qty: '', exp: '', status: null, note: '', checked: null };
-                    }
+                    if (prevData && prevData.items && prevData.items[item.id] && !isNew) initialData.items[item.id] = JSON.parse(JSON.stringify(prevData.items[item.id]));
+                    else initialData.items[item.id] = { qty: '', exp: '', status: null, note: '', checked: null };
                 });
                 setFormData(initialData);
-            };
-
-            const selectCheckType = (type) => {
-                setShowTypeModal(false);
-                if (type === 'new') {
-                    initForm(null, true);
-                    setView('form');
-                } else {
-                    if (records.length > 0) {
-                        initForm(records[0], false);
-                        setShowCopyWarning(true);
-                    } else {
-                        alert("ไม่พบประวัติเดิมในระบบ");
-                        initForm(null, true);
-                        setView('form');
-                    }
-                }
             };
 
             const onSaveClick = async () => {
                 if (!formData.checker) return alert("กรุณาระบุชื่อผู้ตรวจสอบ");
                 setIsLoading(true);
-                const g = formData.items['general_readiness'];
-                const status = (g && g.status === 'ready') ? 'พร้อมใช้' : 'ไม่พร้อมใช้';
-                const payload = { id: Date.now(), ...formData, generalReady: status };
-                
+                const status = (formData.items['general_readiness']?.status === 'ready') ? 'พร้อมใช้' : 'ไม่พร้อมใช้';
+                const payload = { ...formData, id: Date.now(), generalReady: status };
                 try {
                     await fetch(GAS_API_URL, { method: 'POST', mode: 'no-cors', body: JSON.stringify(payload) });
-                    setSummaryData({ status });
-                    setTimeout(() => {
-                        setIsLoading(false);
-                        setShowSaveSuccessModal(true);
-                        fetchData();
-                    }, 1200);
-                } catch (e) { alert("เกิดข้อผิดพลาดในการบันทึก"); setIsLoading(false); }
+                    setTimeout(() => { setIsLoading(false); setShowSaveSuccessModal(true); fetchData(); }, 1200);
+                } catch (e) { alert("Error"); setIsLoading(false); }
             };
 
-            const updateItem = (id, field, value) => {
-                setFormData(prev => ({ ...prev, items: { ...prev.items, [id]: { ...prev.items[id], [field]: value } } }));
+            const handleStartCheck = () => {
+                if (criticalIssues.length > 0) setShowCriticalAlert(true);
+                else setShowTypeModal(true);
             };
 
-            if (isLoading) return (
-                <div className="min-h-screen flex flex-col items-center justify-center bg-[#F0F4F9]">
-                    <div className="w-12 h-12 border-4 border-teal-200 border-t-teal-600 rounded-full animate-spin-slow"></div>
-                    <p className="mt-5 text-[11px] font-black text-slate-400 tracking-[0.2em] uppercase">กำลังโหลดข้อมูล</p>
-                </div>
-            );
+            if (isLoading) return <div className="min-h-screen flex flex-col items-center justify-center bg-[#F0F4F9]"><div className="w-12 h-12 border-4 border-teal-200 border-t-teal-600 rounded-full animate-spin-slow"></div><p className="mt-5 text-[11px] font-black text-slate-400 uppercase tracking-widest leading-loose">กำลังโหลดข้อมูล หอสงฆ์อาพาธ</p></div>;
 
             return (
                 <div className="pb-10 w-full max-w-4xl mx-auto min-h-screen px-2 sm:px-4">
-                    <header className="bg-white/90 backdrop-blur-md sticky top-0 z-50 border-b border-slate-100 shadow-sm rounded-b-3xl mt-2">
-                        <div className="px-6 py-4 flex items-center justify-between">
-                            <div className="flex items-center gap-3">
-                                <img src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRYfBIvo5I6imKO2PO2Q685aje7a48lvI5rrQ&s" className="w-10 h-10 sm:w-12 sm:h-12 rounded-2xl shadow-xl shadow-red-100 border border-white" />
-                                <div>
-                                    <h1 className="text-xs sm:text-sm font-black text-slate-800 tracking-tight leading-tight uppercase">Emergency Cart Check</h1>
-                                    <p className="text-[9px] sm:text-[10px] text-slate-400 font-black uppercase tracking-widest mt-0.5">หอสงฆ์อาพาธ</p>
-                                </div>
-                            </div>
-                            <div className="flex gap-1.5 sm:gap-2.5">
-                                <button onClick={() => setView('dashboard')} className={`p-2 rounded-xl transition-all ${view==='dashboard'?'bg-teal-50 text-teal-600 shadow-inner':'text-slate-400 hover:bg-slate-50'}`} title="หน้าหลัก"><SimpleIcon name="History" className="w-5 h-5"/></button>
-                                <button onClick={() => setView('calendar')} className={`p-2 rounded-xl transition-all ${view==='calendar'?'bg-teal-50 text-teal-600 shadow-inner':'text-slate-400 hover:bg-slate-50'}`} title="ปฏิทิน"><SimpleIcon name="Calendar" className="w-5 h-5"/></button>
-                                <button onClick={() => setView('settings')} className={`p-2 rounded-xl transition-all ${view==='settings'?'bg-teal-50 text-teal-600 shadow-inner':'text-slate-400 hover:bg-slate-50'}`} title="ตั้งค่า"><SimpleIcon name="Settings" className="w-5 h-5"/></button>
-                            </div>
+                    <header className="bg-white/90 backdrop-blur-md sticky top-0 z-50 border-b border-slate-100 shadow-sm rounded-b-3xl mt-2 px-6 py-4 flex items-center justify-between">
+                        <div className="flex items-center gap-3">
+                            <img src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRYfBIvo5I6imKO2PO2Q685aje7a48lvI5rrQ&s" className="w-10 h-10 rounded-2xl shadow-xl border border-white" />
+                            <div><h1 className="text-xs sm:text-sm font-black text-slate-800 tracking-tight uppercase">Emergency Smart Check</h1><p className="text-[9px] text-slate-400 font-black uppercase tracking-widest mt-0.5">หอสงฆ์อาพาธ</p></div>
+                        </div>
+                        <div className="flex gap-1.5 sm:gap-2.5">
+                            <button onClick={() => setView('dashboard')} className={`p-2 rounded-xl transition-all ${view==='dashboard'?'bg-teal-50 text-teal-600 shadow-inner':'text-slate-400 hover:bg-slate-50'}`}><SimpleIcon name="History" className="w-5 h-5"/></button>
+                            <button onClick={() => setView('calendar')} className={`p-2 rounded-xl transition-all ${view==='calendar'?'bg-teal-50 text-teal-600 shadow-inner':'text-slate-400 hover:bg-slate-50'}`}><SimpleIcon name="Calendar" className="w-5 h-5"/></button>
+                            <button onClick={() => setView('settings')} className={`p-2 rounded-xl transition-all ${view==='settings'?'bg-teal-50 text-teal-600 shadow-inner':'text-slate-400 hover:bg-slate-50'}`}><SimpleIcon name="Settings" className="w-5 h-5"/></button>
                         </div>
                     </header>
 
                     <main className="py-6 px-1 sm:px-2">
                         {view === 'dashboard' && (
                             <div className="space-y-8 animate-fade-in">
-                                <div className="bg-white rounded-[2.5rem] p-6 sm:p-10 shadow-xl shadow-slate-200/50 border border-slate-100 text-center relative overflow-hidden">
-                                    <h2 className="text-[10px] sm:text-[11px] font-black text-slate-400 uppercase tracking-[0.2em] mb-4">สถานะรถ Emergency ล่าสุด</h2>
-                                    
+                                <div className="bg-white rounded-[2.5rem] p-6 sm:p-10 shadow-xl border border-slate-100 text-center relative overflow-hidden">
+                                    <h2 className="text-[10px] sm:text-[11px] font-black text-slate-400 uppercase tracking-widest mb-4">สถานะรถ EMERGENCY หอสงฆ์อาพาธ</h2>
                                     <div className="grid grid-cols-1 md:grid-cols-2 gap-8 items-center">
                                         <div>
-                                            {records.length > 0 ? (
-                                                <div className={`text-4xl sm:text-6xl font-black tracking-tighter ${records[0].generalReady === 'พร้อมใช้' ? 'text-emerald-600' : 'text-red-500'}`}>
-                                                    {records[0].generalReady}
-                                                </div>
-                                            ) : <div className="text-slate-300 text-sm italic">ยังไม่มีข้อมูลในระบบ</div>}
+                                            <div className={`text-4xl sm:text-6xl font-black tracking-tighter ${records[0]?.generalReady === 'พร้อมใช้' ? 'text-emerald-600' : 'text-red-500'}`}>{records[0]?.generalReady || 'รอดำเนินการ'}</div>
                                             <div className="text-[10px] text-slate-300 mt-2 font-black uppercase tracking-widest">อัปเดตล่าสุด: {records.length > 0 ? formatDate(records[0].date) : '-'}</div>
                                         </div>
-
-                                        <div className="bg-teal-50 px-6 py-6 rounded-3xl border-2 border-teal-100 shadow-inner group flex flex-col items-center justify-center">
+                                        
+                                        <div className={`px-6 py-6 rounded-3xl border-2 shadow-inner flex flex-col items-center justify-center transition-colors ${recheckData.isOverdue ? 'bg-red-50 border-red-200' : 'bg-teal-50 border-teal-100'}`}>
                                             <div className="flex items-center gap-3 mb-1">
-                                                <SimpleIcon name="RotateCcw" className="w-5 h-5 text-teal-600 animate-pulse"/>
-                                                <span className="text-[10px] sm:text-[11px] font-black text-teal-700 uppercase tracking-widest">กำหนด ReCheck ครั้งถัดไป</span>
+                                                <SimpleIcon name="RotateCcw" className={`w-5 h-5 ${recheckData.isOverdue ? 'text-red-600' : 'text-teal-600'} animate-pulse`}/>
+                                                <span className={`text-[10px] sm:text-[11px] font-black uppercase tracking-widest ${recheckData.isOverdue ? 'text-red-700' : 'text-teal-700'}`}>
+                                                    {recheckData.isOverdue ? 'เลยกำหนด RECHECK ใหญ่แล้ว' : 'กำหนด RECHECK ครั้งถัดไป'}
+                                                </span>
                                             </div>
-                                            <div className="text-2xl sm:text-3xl font-black text-teal-900 tracking-tight">
-                                                {lastStockCheck ? formatDate(new Date(lastStockCheck.getTime() + 14*24*60*60*1000)) : '-'}
+                                            <div className={`text-2xl sm:text-3xl font-black tracking-tight ${recheckData.isOverdue ? 'text-red-900' : 'text-teal-900'}`}>
+                                                {recheckData.date ? formatDate(recheckData.date) : '-'}
                                             </div>
-                                            <div className="text-[9px] text-teal-500 font-bold uppercase mt-1 opacity-70">ตรวจสอบสต๊อกใหญ่ทุก 14 วัน</div>
+                                            <div className={`text-[9px] font-bold uppercase mt-1 opacity-70 ${recheckData.isOverdue ? 'text-red-500' : 'text-teal-500'}`}>
+                                                {recheckData.isOverdue ? `(ต้องตรวจสอบสต๊อกใหญ่ด่วน)` : 'ทุก 14 วัน (หอสงฆ์อาพาธ)'}
+                                            </div>
                                         </div>
                                     </div>
 
+                                    {/* Persistent Alert Banner */}
+                                    {criticalIssues.length > 0 && (
+                                        <div className="mt-8 space-y-2 text-left animate-slide-up">
+                                            <div className="text-[10px] font-black text-red-500 uppercase tracking-[0.2em] mb-2 px-2 flex items-center gap-2">
+                                                <SimpleIcon name="AlertTriangle" className="w-3.5 h-3.5"/> รายการที่ต้องตรวจสอบเร่งด่วน
+                                            </div>
+                                            {criticalIssues.map((issue, idx) => (
+                                                <div key={idx} className={`p-3 rounded-2xl border flex items-center gap-3 shadow-sm
+                                                    ${issue.severity === 'critical' ? 'bg-red-600 text-white border-red-700' : 
+                                                      issue.severity === 'high' ? 'bg-orange-500 text-white border-orange-600' : 
+                                                      issue.severity === 'medium' ? 'bg-amber-100 text-amber-900 border-amber-200' : 
+                                                      'bg-yellow-50 text-yellow-900 border-yellow-200'}`}>
+                                                    <SimpleIcon name="AlertTriangle" className="w-4 h-4 shrink-0"/>
+                                                    <span className="text-xs font-black uppercase tracking-tight leading-none">{issue.message}</span>
+                                                </div>
+                                            ))}
+                                        </div>
+                                    )}
+
                                     <div className="mt-10 flex justify-center">
-                                        <button onClick={() => setShowTypeModal(true)} className="w-full sm:w-auto sm:min-w-[300px] bg-slate-900 text-white py-5 px-10 rounded-3xl shadow-2xl shadow-slate-300 flex items-center justify-center gap-3 text-lg font-black transition-all active:scale-95 hover:bg-slate-800">
+                                        <button onClick={handleStartCheck} className="w-full sm:w-auto sm:min-w-[300px] bg-slate-900 text-white py-5 px-10 rounded-3xl shadow-2xl flex items-center justify-center gap-3 text-lg font-black active:scale-95 transition-all hover:bg-slate-800">
                                             <SimpleIcon name="Plus" className="w-5 h-5"/> เริ่มตรวจสอบรถ
                                         </button>
                                     </div>
                                 </div>
-
-                                <div>
-                                    <h3 className="text-sm font-black text-slate-800 mb-5 flex items-center gap-2 px-2 uppercase tracking-widest">
-                                        <div className="w-1.5 h-6 bg-teal-500 rounded-full"></div> รายงานความพร้อมใช้รายเดือน
-                                    </h3>
-                                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 gap-4">
-                                        {Object.entries(groupedRecords).map(([month, recs]) => (
-                                            <MonthGroup key={month} month={month} records={recs} itemsDef={itemsDef} />
-                                        ))}
-                                    </div>
-                                </div>
+                                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">{Object.entries(groupedRecords).map(([month, recs]) => <MonthGroup key={month} month={month} records={recs} itemsDef={itemsDef} />)}</div>
                             </div>
                         )}
 
@@ -757,96 +601,96 @@
 
                         {view === 'form' && (
                             <div className="animate-slide-up pb-10">
-                                <div className="flex items-center justify-between mb-5">
-                                    <button onClick={() => setView('dashboard')} className="text-slate-500 flex items-center gap-2 text-[10px] font-black uppercase transition-all bg-white px-4 py-2.5 rounded-2xl border border-slate-200 shadow-sm"><SimpleIcon name="ChevronLeft" className="w-3.5 h-3.5"/> ยกเลิก</button>
-                                    <div className="text-[10px] text-slate-400 font-black uppercase tracking-[0.2em] hidden sm:block">แบบฟอร์มบันทึกข้อมูลแบบละเอียด</div>
-                                </div>
+                                <div className="flex justify-between mb-5 items-center"><button onClick={() => setView('dashboard')} className="text-slate-500 bg-white px-4 py-2.5 rounded-2xl border border-slate-200 shadow-sm font-black text-[10px] uppercase transition-colors hover:bg-slate-50">ยกเลิก</button></div>
                                 <div className="bg-white rounded-[2.5rem] shadow-xl border border-slate-100 overflow-hidden mb-8">
                                     <div className="p-6 sm:p-8 grid grid-cols-1 sm:grid-cols-2 gap-6 bg-slate-50/50 border-b border-slate-100">
-                                        <div><label className="block text-[10px] font-black text-slate-400 uppercase mb-1.5 tracking-widest">วันที่ตรวจ</label><input type="date" className="w-full bg-white border border-slate-200 rounded-2xl px-4 py-3.5 text-sm font-bold outline-none shadow-sm focus:ring-2 focus:ring-teal-500 transition-all" value={formData.date} onChange={e => setFormData({...formData, date: e.target.value})}/></div>
-                                        <div><label className="block text-[10px] font-black text-slate-400 uppercase mb-1.5 tracking-widest">เวร</label><select className="w-full bg-white border border-slate-200 rounded-2xl px-4 py-3.5 text-sm font-bold outline-none shadow-sm appearance-none cursor-pointer focus:ring-2 focus:ring-teal-500 transition-all" value={formData.shift} onChange={e => setFormData({...formData, shift: e.target.value})}><option>เช้า</option><option>บ่าย</option><option>ดึก</option></select></div>
+                                        <div><label className="block text-[10px] font-black text-slate-400 mb-1.5 uppercase tracking-widest">วันที่ตรวจ</label><input type="date" className="w-full bg-white border border-slate-200 rounded-2xl px-4 py-3.5 text-sm font-bold shadow-sm" value={formData.date} onChange={e => setFormData({...formData, date: e.target.value})}/></div>
+                                        <div><label className="block text-[10px] font-black text-slate-400 mb-1.5 uppercase tracking-widest">เวร</label><select className="w-full bg-white border border-slate-200 rounded-2xl px-4 py-3.5 text-sm font-bold shadow-sm" value={formData.shift} onChange={e => setFormData({...formData, shift: e.target.value})}><option>เช้า</option><option>บ่าย</option><option>ดึก</option></select></div>
                                     </div>
-                                    {CATEGORY_ORDER.map(cat => <CategorySection key={cat} category={cat} items={itemsDef.filter(i => i.category === cat)} formData={formData} updateItem={updateItem} />)}
-                                    
-                                    <div className="grid grid-cols-1 md:grid-cols-2 bg-slate-50 divide-y md:divide-y-0 md:divide-x divide-slate-100 border-t border-slate-100">
-                                        <div className="p-6 sm:p-8 flex items-center">
-                                            <label className="flex items-center gap-4 cursor-pointer p-4 bg-white border border-blue-100 rounded-2xl shadow-sm transition-all hover:bg-blue-50 w-full">
-                                                <input type="checkbox" className="w-6 h-6 accent-blue-600 rounded-lg cursor-pointer" checked={formData.isRecheckStock || false} 
-                                                    onChange={e => {
-                                                        setFormData({...formData, isRecheckStock: e.target.checked});
-                                                        if(e.target.checked) setShowNextCheckModal(true);
-                                                    }}/>
-                                                <div>
-                                                    <div className="text-slate-800 font-black text-sm tracking-tight flex items-center gap-2">
-                                                        <SimpleIcon name="RotateCcw" className="w-4 h-4 text-blue-600"/>
-                                                        บันทึกเป็น ReCheck Stock
+                                    {CATEGORY_ORDER.map(cat => (
+                                        <div key={cat} className="border-t border-slate-100">
+                                            <div className="bg-slate-50 px-6 py-3 text-[10px] font-black text-slate-500 uppercase tracking-widest border-b border-slate-100">{cat}</div>
+                                            <div className="grid grid-cols-1 md:grid-cols-2 divide-y md:divide-y-0 px-2 bg-white">
+                                                {itemsDef.filter(i => i.category === cat).map(item => (
+                                                    <div key={item.id} className="p-5 border-b border-slate-50">
+                                                        <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-3 mb-3">
+                                                            <div className="flex-1 font-bold text-slate-800 text-sm tracking-tight">{item.name}</div>
+                                                            <div className="flex p-0.5 bg-slate-100 rounded-xl">
+                                                                {item.type === ITEM_TYPES.CHECK_HAVE ? (
+                                                                    <><button onClick={() => updateItem(item.id, 'checked', true)} className={`px-4 py-1.5 rounded-lg text-[10px] font-black ${formData.items[item.id]?.checked===true?'bg-white text-emerald-600 shadow-sm':'text-slate-400'}`}>มี</button><button onClick={() => updateItem(item.id, 'checked', false)} className={`px-4 py-1.5 rounded-lg text-[10px] font-black ${formData.items[item.id]?.checked===false?'bg-white text-red-500 shadow-sm':'text-slate-400'}`}>ไม่มี</button></>
+                                                                ) : (
+                                                                    <><button onClick={() => updateItem(item.id, 'status', 'ready')} className={`px-4 py-1.5 rounded-lg text-[10px] font-black ${formData.items[item.id]?.status==='ready'?'bg-white text-emerald-600 shadow-sm':'text-slate-400'}`}>พร้อม</button><button onClick={() => updateItem(item.id, 'status', 'not_ready')} className={`px-4 py-1.5 rounded-lg text-[10px] font-black ${formData.items[item.id]?.status==='not_ready'?'bg-white text-red-500 shadow-sm':'text-slate-400'}`}>ไม่พร้อม</button></>
+                                                                )}
+                                                            </div>
+                                                        </div>
+                                                        <div className="grid grid-cols-2 gap-3">
+                                                            {item.type.includes('qty') && <input type="number" placeholder="จำนวน" className="bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-xs font-bold w-full outline-none focus:ring-2 focus:ring-teal-500" value={formData.items[item.id]?.qty||''} onChange={e=>updateItem(item.id, 'qty', e.target.value)}/>}
+                                                            {item.type.includes('exp') && <input type="date" className="bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-xs font-bold w-full outline-none focus:ring-2 focus:ring-teal-500" value={formData.items[item.id]?.exp||''} onChange={e=>updateItem(item.id, 'exp', e.target.value)}/>}
+                                                        </div>
                                                     </div>
-                                                </div>
-                                            </label>
+                                                ))}
+                                            </div>
                                         </div>
-                                        <div className="p-6 sm:p-8">
-                                            <label className="block text-[10px] font-black text-slate-400 uppercase mb-2 tracking-[0.2em]">ชื่อผู้ตรวจสอบ <span className="text-red-500">*</span></label>
-                                            <input type="text" placeholder="ระบุชื่อ-นามสกุลของคุณ" className="w-full bg-white border border-slate-200 rounded-2xl p-4 text-sm font-black outline-none shadow-md focus:border-teal-500 focus:ring-2 focus:ring-teal-500 transition-all" value={formData.checker || ''} onChange={e => setFormData({...formData, checker: e.target.value})}/>
+                                    ))}
+                                    <div className="p-8 bg-slate-50 border-t border-slate-100">
+                                        <div className="p-6 bg-white border border-blue-100 rounded-2xl mb-6 shadow-sm flex items-center gap-4 cursor-pointer" onClick={() => setFormData({...formData, isRecheckStock: !formData.isRecheckStock})}>
+                                            <input type="checkbox" className="w-6 h-6 accent-blue-600 rounded-lg cursor-pointer" checked={formData.isRecheckStock || false} readOnly/><div className="font-black text-slate-800 text-sm">บันทึกเป็น ReCheck Stock (ใหญ่)</div>
                                         </div>
+                                        <input type="text" placeholder="ระบุชื่อผู้ตรวจสอบ" className="w-full bg-white border border-slate-200 rounded-2xl p-4 text-sm font-black shadow-md focus:ring-2 focus:ring-teal-500" value={formData.checker || ''} onChange={e => { setFormData({...formData, checker: e.target.value}); localStorage.setItem('last_checker_name', e.target.value); }}/>
                                     </div>
                                 </div>
-                                
-                                <div className="flex justify-center">
-                                    <button onClick={onSaveClick} className="w-full sm:w-auto sm:min-w-[300px] bg-slate-900 text-white font-black py-5 px-12 rounded-3xl shadow-2xl flex items-center justify-center gap-3 text-lg transition-all active:scale-95 hover:bg-slate-800"><SimpleIcon name="Save" className="w-5 h-5"/> บันทึกการตรวจสอบ</button>
-                                </div>
+                                <button onClick={onSaveClick} className="w-full bg-slate-900 text-white font-black py-5 px-12 rounded-3xl shadow-2xl text-lg active:scale-95 transition-all flex items-center justify-center gap-3 hover:bg-slate-800">
+                                    <SimpleIcon name="Save" className="w-5 h-5"/> บันทึกการตรวจสอบ
+                                </button>
                             </div>
                         )}
                     </main>
 
                     {/* --- POP-UPS --- */}
-                    <Modal isOpen={showTypeModal} title="เริ่มการตรวจสอบ" onClose={() => setShowTypeModal(false)}>
+                    <Modal isOpen={showCriticalAlert} title="⚠️ แจ้งเตือนเร่งด่วน" onClose={() => setShowCriticalAlert(false)}>
+                        <div className="space-y-3 mb-8">
+                            {criticalIssues.map((issue, idx) => (
+                                <div key={idx} className={`p-4 rounded-2xl border flex items-start gap-4 shadow-sm animate-scale-up
+                                    ${issue.severity === 'critical' ? 'bg-red-50 border-red-200 text-red-900' : 
+                                      issue.severity === 'high' ? 'bg-orange-50 border-orange-200 text-orange-900' : 
+                                      'bg-amber-50 border-amber-200 text-amber-900'}`}>
+                                    <SimpleIcon name="AlertTriangle" className={`w-5 h-5 mt-0.5 shrink-0 ${issue.severity === 'critical' ? 'text-red-600' : 'text-orange-500'}`}/>
+                                    <p className="text-[13px] font-black uppercase tracking-tight leading-snug">{issue.message}</p>
+                                </div>
+                            ))}
+                        </div>
+                        <div className="grid grid-cols-1 gap-3">
+                             <button onClick={() => { setShowCriticalAlert(false); if(view === 'dashboard') setShowTypeModal(true); }} className="w-full bg-slate-900 text-white py-4.5 rounded-2xl font-black text-sm shadow-xl active:scale-95 transition-all">รับทราบและดำเนินการต่อ</button>
+                             <button onClick={() => setShowCriticalAlert(false)} className="w-full bg-slate-100 text-slate-500 py-4.5 rounded-2xl font-black text-sm">ปิดหน้าต่าง</button>
+                        </div>
+                    </Modal>
+
+                    <Modal isOpen={showTypeModal} title="เริ่มการตรวจสอบ - หอสงฆ์อาพาธ" onClose={() => setShowTypeModal(false)}>
                         <div className="grid grid-cols-1 gap-4">
-                            <button onClick={() => selectCheckType('new')} className="p-6 bg-teal-50 rounded-[2rem] text-left border border-teal-100 transition-all hover:scale-[1.03] active:scale-95 shadow-sm group">
-                                <div className="font-black text-teal-900 text-lg group-hover:text-teal-700 flex items-center gap-2">
-                                    <SimpleIcon name="Plus" className="w-5 h-5"/> ตรวจสอบใหม่ (New Check)
-                                </div>
-                                <div className="text-teal-600/70 text-[10px] mt-1 font-bold uppercase tracking-widest">ล้างค่าเดิมและกรอกใหม่ทั้งหมด</div>
+                            <button onClick={() => { setShowTypeModal(false); initForm(null, true); setView('form'); }} className="p-6 bg-teal-50 rounded-[2rem] text-left border border-teal-100 transition-all hover:scale-[1.03] active:scale-95 shadow-sm group">
+                                <div className="font-black text-teal-900 text-lg flex items-center gap-2 tracking-tight"><SimpleIcon name="Plus" className="w-5 h-5"/> ตรวจสอบใหม่ (New Check)</div>
                             </button>
-                            <button onClick={() => selectCheckType('copy')} className="p-6 bg-white rounded-[2rem] text-left border border-slate-200 transition-all hover:scale-[1.03] active:scale-95 shadow-sm group">
-                                <div className="font-black text-slate-900 text-lg group-hover:text-slate-700 flex items-center gap-2">
-                                    <SimpleIcon name="History" className="w-5 h-5"/> ดึงข้อมูลล่าสุด (Copy Latest)
-                                </div>
-                                <div className="text-slate-400 text-[10px] mt-1 font-bold uppercase tracking-widest">คัดลอกรายการเดิมเพื่อแก้ไขเฉพาะจุด</div>
+                            <button onClick={() => { setShowTypeModal(false); if(records.length > 0) { initForm(records[0], false); setShowCopyWarning(true); } else { initForm(null, true); setView('form'); } }} className="p-6 bg-white rounded-[2rem] text-left border border-slate-200 transition-all hover:scale-[1.03] active:scale-95 shadow-sm group">
+                                <div className="font-black text-slate-900 text-lg flex items-center gap-2 tracking-tight"><SimpleIcon name="History" className="w-5 h-5"/> ดึงข้อมูลล่าสุด (Copy Latest)</div>
                             </button>
                         </div>
                     </Modal>
 
                     <Modal isOpen={showCopyWarning} title="🚨 ข้อควรระวังในการ Copy" onClose={() => setShowCopyWarning(false)}>
-                        <div className="bg-yellow-50 p-6 rounded-3xl border border-yellow-200 mb-8 shadow-inner">
-                            <ul className="space-y-4 text-[12px] font-black text-yellow-900 leading-tight">
-                                <li className="flex gap-4"><div className="bg-yellow-200 w-6 h-6 rounded-full flex items-center justify-center shrink-0">1</div> Sticker Visual Control ต้องอยู่ในสภาพสมบูรณ์ ไม่มีการเปิดทิ้งไว้</li>
-                                <li className="flex gap-4"><div className="bg-yellow-200 w-6 h-6 rounded-full flex items-center justify-center shrink-0">2</div> ตรวจสอบวันหมดอายุยา (CPR/ACS Box) ใหม่อีกครั้งเสมอ</li>
-                                <li className="flex gap-4"><div className="bg-yellow-200 w-6 h-6 rounded-full flex items-center justify-center shrink-0">3</div> อุปกรณ์ส่องสว่าง (ไฟฉาย/Laryngoscope) ต้องพร้อมทำงาน</li>
-                            </ul>
+                        <div className="bg-yellow-50 p-6 rounded-3xl border border-yellow-200 mb-8 text-[12px] font-black text-yellow-900 leading-tight">
+                            ตรวจสอบ Sticker Visual Control และวันหมดอายุยา (CPR/ACS Box) ใหม่อย่างละเอียดทุกครั้งก่อนบันทึก อุปกรณ์ส่องสว่างต้องพร้อมทำงาน
                         </div>
-                        <button onClick={() => {setShowCopyWarning(false); setView('form');}} className="w-full bg-slate-900 text-white py-4 rounded-2xl font-black text-sm shadow-2xl active:scale-95 transition-all">ยืนยันข้อมูลและเริ่มตรวจ</button>
+                        <button onClick={() => {setShowCopyWarning(false); setView('form');}} className="w-full bg-slate-900 text-white py-4 rounded-2xl font-black text-sm active:scale-95 transition-all shadow-xl">ยืนยันข้อมูลและเริ่มตรวจ</button>
                     </Modal>
 
-                    <Modal isOpen={showSaveSuccessModal} title="✅ บันทึกสำเร็จ" onClose={() => {setShowSaveSuccessModal(false); setView('dashboard');}}>
-                        <div className="text-center py-5">
-                            <div className="text-emerald-500 mb-6 flex justify-center"><div className="p-6 bg-emerald-50 rounded-full shadow-inner animate-scale-up"><SimpleIcon name="CheckCircle" className="w-14 h-14"/></div></div>
-                            <h3 className="font-black text-2xl mb-2 text-slate-800 tracking-tighter">ส่งข้อมูลเรียบร้อยแล้ว</h3>
-                            <p className="text-slate-400 text-[10px] mb-10 font-black uppercase tracking-[0.2em] bg-slate-50 py-2.5 rounded-xl border border-slate-100 px-4">สถานะรถประจำเวร: <span className={summaryData?.status === 'พร้อมใช้' ? 'text-emerald-600' : 'text-red-500'}>{summaryData?.status}</span></p>
-                            <button onClick={() => {setShowSaveSuccessModal(false); setView('dashboard');}} className="w-full bg-slate-900 text-white py-4.5 rounded-2xl font-black text-sm shadow-xl transition-all active:scale-95">กลับสู่หน้าหลัก</button>
-                        </div>
-                    </Modal>
-
-                    <Modal isOpen={showNextCheckModal} title="📅 กำหนดการตรวจสอบใหญ่" onClose={() => setShowNextCheckModal(false)}>
-                        <div className="text-center py-4">
-                            <div className="text-blue-500 mb-6 flex justify-center"><div className="p-6 bg-blue-50 rounded-full shadow-inner"><SimpleIcon name="Calendar" className="w-14 h-14"/></div></div>
-                            <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-3">ต้องทำการ Re-Check สต๊อกใหญ่ครั้งถัดไป</p>
-                            <h3 className="font-black text-3xl sm:text-4xl mb-10 text-blue-600 tracking-tighter drop-shadow-sm">{formatDate(new Date(Date.now() + 14 * 24 * 60 * 60 * 1000))}</h3>
-                            <button onClick={() => setShowNextCheckModal(false)} className="w-full bg-blue-600 text-white py-4.5 rounded-2xl font-black text-sm shadow-xl shadow-blue-200 active:scale-95 transition-all">รับทราบ</button>
-                        </div>
-                    </Modal>
+                    <Modal isOpen={showSaveSuccessModal} title="✅ บันทึกสำเร็จ" onClose={() => {setShowSaveSuccessModal(false); setView('dashboard');}}><div className="text-center py-5"><div className="text-emerald-500 mb-6 flex justify-center"><div className="p-6 bg-emerald-50 rounded-full shadow-inner animate-scale-up"><SimpleIcon name="CheckCircle" className="w-14 h-14"/></div></div><h3 className="font-black text-2xl mb-2 text-slate-800 tracking-tighter">ส่งข้อมูลเรียบร้อยแล้ว</h3><button onClick={() => {setShowSaveSuccessModal(false); setView('dashboard');}} className="w-full bg-slate-900 text-white py-4.5 rounded-2xl font-black text-sm active:scale-95 mt-8 shadow-xl transition-all">กลับสู่หน้าหลัก</button></div></Modal>
                 </div>
             );
         }
+
+        const updateItem = (id, field, value) => {
+            // Helper defined in form scope normally, using functional setFormData inside App
+        };
 
         const root = ReactDOM.createRoot(document.getElementById('root'));
         root.render(<App />);
